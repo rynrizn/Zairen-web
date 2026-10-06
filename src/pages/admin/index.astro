@@ -1,0 +1,69 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { siteConfig } from '../../config/site';
+---
+
+<AdminLayout title={`Panel // ${siteConfig.name}`} activePath="panel">
+  <div class="max-w-[1440px] mx-auto px-4 md:px-12 flex flex-col gap-8">
+    <!-- Encabezado de Bienvenida -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
+          <span class="text-xs font-mono text-[#ffb3b3] uppercase tracking-wider">
+            NODO ACTIVO // V2.4 OS
+          </span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-bold font-headline uppercase text-[#e5e2e1]">
+          PANEL DE CONTROL <span class="text-[#dc143c] text-xl font-normal font-mono">// ADMIN CORE</span>
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a
+          href="/admin/inventario"
+          class="px-5 py-2.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono uppercase tracking-wider font-bold shadow-[0_4px_20px_rgba(220,20,60,0.35)] transition-all flex items-center gap-2"
+        >
+          <span class="material-symbols-outlined text-[16px]">add</span>
+          <span>Gestionar Stock</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 4 KPI Cards Preview -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="p-6 rounded-2xl bg-[#201f1f]/80 border border-white/[0.08] backdrop-blur-md">
+        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Ventas del Mes</div>
+        <div class="text-2xl md:text-3xl font-bold font-price text-[#e5e2e1]">Bs 18,450.00</div>
+        <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
+          <span>↑ +14.2%</span>
+          <span class="text-[#ac8888]">vs mes anterior</span>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-[#201f1f]/80 border border-white/[0.08] backdrop-blur-md">
+        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Pedidos Pendientes</div>
+        <div class="text-2xl md:text-3xl font-bold font-price text-[#ffb3b3]">3 Órdenes</div>
+        <div class="text-xs font-mono text-amber-400 mt-2">
+          <span>Requieren atención inmediata</span>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-[#201f1f]/80 border border-white/[0.08] backdrop-blur-md">
+        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Prendas en Stock</div>
+        <div class="text-2xl md:text-3xl font-bold font-price text-[#e5e2e1]">340 uds</div>
+        <div class="text-xs font-mono text-[#ac8888] mt-2">
+          <span>8 SKUs activos en catálogo</span>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-[#201f1f]/80 border border-white/[0.08] backdrop-blur-md">
+        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Bajo Stock Crítico</div>
+        <div class="text-2xl md:text-3xl font-bold font-price text-[#f87171]">2 Variantes</div>
+        <div class="text-xs font-mono text-[#f87171] mt-2">
+          <span>Alerta: Tallas S y XL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

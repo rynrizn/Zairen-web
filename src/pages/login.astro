@@ -1,0 +1,132 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { siteConfig } from '../config/site';
+
+const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
+---
+
+<Layout title={`Acceso Admin // ${siteConfig.name}`}>
+  <main class="flex-1 flex items-center justify-center min-h-screen px-4 py-12 relative overflow-hidden">
+    <!-- Halo carmesí de fondo -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#dc143c]/15 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+
+    <div class="w-full max-w-md bg-[#201f1f]/80 backdrop-blur-2xl p-8 rounded-2xl border border-white/[0.08] shadow-[0_16px_48px_rgba(0,0,0,0.8)] relative overflow-hidden">
+      <!-- Barra decorativa carmesí superior -->
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#dc143c] via-[#de0541] to-[#dc143c]"></div>
+
+      <!-- Cabecera -->
+      <div class="flex flex-col items-center text-center mb-8">
+        <div class="w-12 h-12 rounded-xl bg-[#0e0e0e] border border-white/[0.08] flex items-center justify-center text-[#dc143c] mb-3 shadow-[0_0_16px_rgba(220,20,60,0.3)]">
+          <svg class="w-6 h-6" viewBox="0 0 64 64" fill="none">
+            <path d="M14 20H50M20 20V48M44 20V48M14 28H50M24 38H40" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold font-display uppercase tracking-tight text-[#e5e2e1]">
+          {siteConfig.name} <span class="text-[#dc143c] font-mono text-sm">// CORE</span>
+        </h1>
+        <p class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mt-1">
+          Panel de Control & Inventario
+        </p>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div id="login-error" class="hidden mb-5 p-3 rounded-xl bg-[#93000a]/20 border border-[#93000a]/40 text-[#ffb4ab] text-xs font-mono"></div>
+
+      <!-- Formulario -->
+      <form id="login-form" class="space-y-4">
+        <input type="hidden" id="redirect-url" value={redirectUrl} />
+
+        <div>
+          <label for="email" class="block text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-1.5">
+            Correo Electrónico
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="admin@zairenlab.com"
+            class="w-full bg-[#0e0e0e] border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-[#e5e2e1] font-mono placeholder:text-white/20 focus:outline-none focus:border-[#dc143c] focus:ring-1 focus:ring-[#dc143c] transition-all shadow-inner"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-1.5">
+            Contraseña
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="••••••••••••"
+            class="w-full bg-[#0e0e0e] border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-[#e5e2e1] font-mono placeholder:text-white/20 focus:outline-none focus:border-[#dc143c] focus:ring-1 focus:ring-[#dc143c] transition-all shadow-inner"
+          />
+        </div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full py-3 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-sm uppercase tracking-wider font-bold shadow-[0_4px_20px_rgba(220,20,60,0.4)] transition-all cursor-pointer mt-2"
+        >
+          Iniciar Sesión // Acceder
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-white/[0.06] text-center">
+        <a href="/" class="text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors">
+          ← Volver al Catálogo Público
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const errorBox = document.getElementById('login-error') as HTMLDivElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const redirectInput = document.getElementById('redirect-url') as HTMLInputElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Autenticando...';
+
+    const email = (document.getElementById('email') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        errorBox.textContent = error.message || 'Credenciales incorrectas';
+        errorBox.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Iniciar Sesión // Acceder';
+        return;
+      }
+
+      if (data.session) {
+        // Guardar tokens en cookies para que el middleware de SSR los reconozca
+        document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
+
+        window.location.href = redirectInput.value || '/admin';
+      }
+    } catch (err: any) {
+      errorBox.textContent = err.message || 'Error inesperado de autenticación';
+      errorBox.classList.remove('hidden');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Iniciar Sesión // Acceder';
+    }
+  });
+</script>
