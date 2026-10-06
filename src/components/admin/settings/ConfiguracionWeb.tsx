@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { siteConfig, type SocialNetwork } from '../../config/site';
+import { siteConfig, type SocialNetwork } from '../../../config/site';
 
 export function ConfiguracionWeb() {
   const [brandName, setBrandName] = useState(siteConfig.name);
