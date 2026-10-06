@@ -1,70 +1,283 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { siteConfig, getActiveSocialNetworks } from '../config/site';
+import Navbar from '../components/common/Navbar.astro';
+import Footer from '../components/common/Footer.astro';
+import SplashLoader from '../components/common/SplashLoader.astro';
+import { CatalogoGrid } from '../components/catalogo/CatalogoGrid';
+import { CarritoDrawer } from '../components/catalogo/CarritoDrawer';
+import { siteConfig } from '../config/site';
+import { supabase } from '../lib/supabase';
+import { mockProducts, mockCollections } from '../data/mockProducts';
 
-const activeSocials = getActiveSocialNetworks();
+// Carga de productos desde Supabase (o mock de respaldo si no está conectado aún)
+let products = mockProducts;
+let collections = mockCollections;
+
+try {
+  const { data: dbProducts, error: pError } = await supabase
+    .from('vw_catalogo_publico')
+    .select('*')
+    .limit(20);
+
+  if (!pError && dbProducts && dbProducts.length > 0) {
+    products = dbProducts.map((p) => ({
+      id: p.id_producto,
+      slug: p.slug,
+      nombre: p.nombre,
+      precio: Number(p.precio_venta),
+      coleccion: p.coleccion || 'DROP 01',
+      subtitulo: p.descripcion || 'Confección pesada 280 GSM',
+      imagen: p.imagen_portada || mockProducts[0].imagen,
+      imagenDorsal: p.imagen_dorsal,
+      tallas: p.tallas && p.tallas.length > 0 ? p.tallas : ['S', 'M', 'L', 'XL'],
+      stockDisponible: Number(p.stock_disponible || 0),
+      esPrioritario: Boolean(p.es_prioritario),
+    }));
+  }
+
+  const { data: dbCols, error: cError } = await supabase
+    .from('coleccion')
+    .select('id, nombre, slug')
+    .eq('activa', true)
+    .order('orden', { ascending: true });
+
+  if (!cError && dbCols && dbCols.length > 0) {
+    collections = dbCols;
+  }
+} catch (e) {
+  // Uso de mock de respaldo transparente
+}
 ---
 
 <Layout title={`${siteConfig.name} // Neo-Tokyo Zen Streetwear`}>
-  <main class="flex-1 flex flex-col items-center justify-center min-h-screen px-6 py-12 relative overflow-hidden text-center">
-    <!-- Luces volumétricas carmesí de fondo -->
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#dc143c]/15 rounded-full blur-[140px] pointer-events-none -z-10"></div>
-    <div class="absolute bottom-10 right-10 w-80 h-80 bg-[#de0541]/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+  <!-- Splash Ambiental Inicial -->
+  <SplashLoader />
 
-    <!-- Badge Protocol -->
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#201f1f] border border-white/[0.08] text-xs font-mono text-[#ffb3b3] uppercase tracking-widest mb-6">
-      <span class="w-2 h-2 rounded-full bg-[#dc143c] animate-pulse shadow-[0_0_8px_#dc143c]"></span>
-      <span>ZRN // PROTOCOL 2026 ACTIVE</span>
-    </div>
+  <!-- Navbar Glassmorphic Fijo -->
+  <Navbar />
 
-    <!-- Título Principal -->
-    <h1 class="text-4xl md:text-6xl font-bold font-display uppercase tracking-tight text-[#e5e2e1] max-w-3xl leading-tight mb-4">
-      {siteConfig.name}
-      <span class="block text-xl md:text-2xl font-normal text-[#dc143c] tracking-widest mt-2 font-mono">
-        // {siteConfig.slogan}
-      </span>
-    </h1>
+  <!-- HERO SECTION LOOKBOOK // 01 -->
+  <section class="relative min-h-[92vh] flex items-center justify-center pt-24 pb-16 px-4 md:px-12 overflow-hidden">
+    <!-- Luces Volumétricas Carmesí -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#dc143c]/15 rounded-full blur-[160px] pointer-events-none -z-10"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-[#de0541]/10 rounded-full blur-[140px] pointer-events-none -z-10"></div>
 
-    <p class="text-[#ac8888] text-base md:text-lg max-w-xl mb-8 font-body leading-relaxed">
-      {siteConfig.description}
-    </p>
+    <div class="w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <!-- Texto Hero (Izquierda 7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-start text-left z-10">
+        <!-- Badge Protocolo -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#201f1f] border border-white/[0.08] text-xs font-mono text-[#ffb3b3] uppercase tracking-widest mb-6 shadow-md">
+          <span class="w-2 h-2 rounded-full bg-[#dc143c] animate-pulse shadow-[0_0_8px_#dc143c]"></span>
+          <span>DROP 01 // TOKYO TEXTILE ARCHITECTURE</span>
+        </div>
 
-    <!-- Botones de Acción -->
-    <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
-      <a
-        href="/#catalogo"
-        class="px-8 py-3.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white text-sm font-mono uppercase tracking-wider font-bold shadow-[0_4px_24px_rgba(220,20,60,0.4)] transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-      >
-        Explorar Catálogo
-      </a>
-      <a
-        href={`https://wa.me/${siteConfig.whatsapp.number}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="px-6 py-3.5 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] border border-white/[0.1] text-sm font-mono uppercase tracking-wider transition-all flex items-center gap-2"
-      >
-        <span>WhatsApp</span>
-        <span class="text-[#ffb3b3] text-xs font-mono">({siteConfig.whatsapp.displayNumber})</span>
-      </a>
-    </div>
+        <!-- Título de Impacto -->
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-bold font-display uppercase tracking-tight text-[#e5e2e1] leading-[0.95] mb-6">
+          NEO-TOKYO ZEN
+          <span class="block text-[#dc143c] text-3xl sm:text-5xl md:text-6xl mt-2 tracking-normal font-mono">
+            // OVERSIZED CUT
+          </span>
+        </h1>
 
-    <!-- Redes Sociales Dinámicas -->
-    {activeSocials.length > 0 && (
-      <div class="flex items-center gap-4 pt-6 border-t border-white/[0.06]">
-        <span class="text-xs font-mono text-[#ac8888] uppercase tracking-wider">Redes Oficiales:</span>
-        <div class="flex items-center gap-3">
-          {activeSocials.map((social) => (
-            <a
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="px-3 py-1 rounded-full bg-[#201f1f]/80 hover:bg-[#dc143c] text-xs font-mono text-[#e5e2e1] hover:text-white transition-colors border border-white/[0.05]"
-            >
-              {social.name}
-            </a>
-          ))}
+        <!-- Párrafo Descriptivo -->
+        <p class="text-[#ac8888] font-body text-base md:text-lg max-w-xl mb-8 leading-relaxed">
+          Piezas experimentales con gramaje pesado de 280 a 420 GSM. Serigrafía al agua tacto cero, cuello ribete 3.5cm y caída arquitectónica inspirada en Shinjuku.
+        </p>
+
+        <!-- CTAs Principales -->
+        <div class="flex flex-wrap items-center gap-4 mb-10">
+          <a
+            href="#catalogo"
+            class="px-8 py-4 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono uppercase tracking-widest font-bold shadow-[0_4px_24px_rgba(220,20,60,0.45)] hover:shadow-[0_6px_30px_rgba(222,5,65,0.6)] hover:scale-105 active:scale-95 transition-all"
+          >
+            Explorar Catálogo ({products.length} Prendas)
+          </a>
+          <a
+            href={`https://wa.me/${siteConfig.whatsapp.number}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-6 py-4 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] hover:text-white border border-white/[0.1] text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 group"
+          >
+            <span>WhatsApp Concierge</span>
+            <span class="text-[#dc143c] group-hover:translate-x-1 transition-transform">→</span>
+          </a>
+        </div>
+
+        <!-- Métricas de Taller Textil -->
+        <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/[0.06] w-full max-w-lg">
+          <div>
+            <span class="block text-xl md:text-2xl font-bold font-price text-[#e5e2e1]">280-420</span>
+            <span class="text-[11px] font-mono text-[#ac8888] uppercase tracking-wider">Gramos / M²</span>
+          </div>
+          <div>
+            <span class="block text-xl md:text-2xl font-bold font-price text-[#dc143c]">100%</span>
+            <span class="text-[11px] font-mono text-[#ac8888] uppercase tracking-wider">Algodón Peinado</span>
+          </div>
+          <div>
+            <span class="block text-xl md:text-2xl font-bold font-price text-[#e5e2e1]">&lt; 24H</span>
+            <span class="text-[11px] font-mono text-[#ac8888] uppercase tracking-wider">Despacho Express</span>
+          </div>
         </div>
       </div>
-    )}
-  </main>
+
+      <!-- Imagen Lookbook Editorial Hero (Derecha 5 cols) -->
+      <div class="lg:col-span-5 relative mt-6 lg:mt-0">
+        <div class="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-[#201f1f] border border-white/[0.1] shadow-[0_24px_64px_rgba(0,0,0,0.8)] group">
+          <img
+            src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1000&auto=format&fit=crop"
+            alt="Lookbook Editorial Zairen Lab"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/20 to-transparent"></div>
+
+          <!-- Badge Flotante en Foto -->
+          <div class="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-[#1c1b1b]/80 backdrop-blur-xl border border-white/[0.08] flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono text-[#dc143c] uppercase tracking-widest font-bold block">
+                FLAGSHIP PIECE
+              </span>
+              <h3 class="font-display text-sm font-bold uppercase text-[#e5e2e1]">
+                Samurai Mecha Kanji Tee
+              </h3>
+            </div>
+            <span class="font-mono text-base font-bold text-white bg-[#dc143c] px-3 py-1 rounded-full shadow-[0_0_12px_rgba(220,20,60,0.5)]">
+              Bs 145
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO OFICIAL INTERACTIVO (Isla React) -->
+  <CatalogoGrid
+    client:load
+    initialProducts={products}
+    collections={collections}
+  />
+
+  <!-- SECCIÓN LOOKBOOK EDITORIAL // 01 & ESPECIFICACIONES TEXTILES -->
+  <section id="especificaciones" class="w-full bg-[#0e0e0e] py-20 border-t border-white/[0.06] relative overflow-hidden">
+    <div class="max-w-[1440px] mx-auto px-4 md:px-12">
+      <!-- Encabezado Lookbook -->
+      <div class="flex flex-col gap-2 mb-12">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span class="text-xs font-mono text-[#dc143c] bg-[#dc143c]/15 px-3 py-1 rounded-full uppercase tracking-wider font-bold">
+              02 // BLUEPRINT TEXTIL
+            </span>
+            <h2 class="text-2xl md:text-4xl font-bold font-display uppercase tracking-tight text-[#e5e2e1] mt-2">
+              LOOKBOOK EDITORIAL & CRAFTSMANSHIP
+            </h2>
+          </div>
+          <p class="text-sm font-body text-[#ac8888] max-w-md">
+            Diálogo textil entre la ingeniería de armaduras mecha y la sobriedad del minimalismo japonés.
+          </p>
+        </div>
+        <div class="w-full h-[1px] bg-gradient-to-r from-[#dc143c] via-white/10 to-transparent mt-3"></div>
+      </div>
+
+      <!-- Grid Lookbook (Bento 8 + 4 cols) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Banner Editorial Grande (8 cols) -->
+        <div class="lg:col-span-8 relative rounded-2xl overflow-hidden bg-[#1c1b1b] min-h-[420px] flex flex-col justify-end p-8 group border border-white/[0.08]">
+          <img
+            src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop"
+            alt="Detalle de confección Zairen Lab"
+            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/50 to-transparent"></div>
+
+          <div class="relative z-10 max-w-xl">
+            <span class="text-xs font-mono text-[#dc143c] uppercase tracking-widest font-bold block mb-2">
+              ALTA DENSIDAD // 規格仕様
+            </span>
+            <h3 class="text-2xl md:text-3xl font-bold font-display uppercase text-[#e5e2e1] mb-3">
+              ALGODÓN PEINADO TUBULAR
+            </h3>
+            <p class="text-sm font-body text-[#ac8888] mb-6 leading-relaxed">
+              Construcción sin costuras laterales para eliminar fricción. Malla hilada en anillo que previene deformaciones tras el lavado y conserva la silueta boxy recta.
+            </p>
+            <div class="flex flex-wrap items-center gap-3">
+              <a
+                href={`https://wa.me/${siteConfig.whatsapp.number}?text=${encodeURIComponent('Hola, me interesa conocer detalles del stock y pedidos en Zairen Lab.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-5 py-2.5 rounded-full bg-[#dc143c] text-white text-xs font-mono uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.3)] hover:bg-[#ff2d55] transition-all"
+              >
+                Consultar por WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Especificaciones Técnicas (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col justify-between rounded-2xl bg-[#201f1f]/80 backdrop-blur-md p-6 md:p-8 border border-white/[0.08] shadow-xl">
+          <div>
+            <div class="flex items-center justify-between pb-4 border-b border-white/[0.06] mb-6">
+              <span class="text-xs font-mono text-[#e5e2e1] uppercase tracking-wider font-bold">
+                FICHA DE TALLER
+              </span>
+              <span class="text-[10px] font-mono text-[#dc143c] bg-[#dc143c]/15 px-2 py-0.5 rounded-full uppercase">
+                SPEC // 2026
+              </span>
+            </div>
+
+            <!-- Medidor de Gramaje SVG -->
+            <div class="flex items-center gap-4 bg-[#141416] p-4 rounded-xl border border-white/[0.06] mb-6">
+              <svg class="w-14 h-14 shrink-0 text-[#dc143c]" viewBox="0 0 36 36">
+                <path class="text-white/[0.08]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+                <path class="text-[#dc143c]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="92, 100" stroke-linecap="round" stroke-width="3.5"></path>
+                <text class="fill-white text-[8px] font-bold font-mono" text-anchor="middle" x="18" y="20.5">280g</text>
+              </svg>
+              <div>
+                <span class="text-xs font-mono font-bold text-white block uppercase">
+                  HEAVYWEIGHT COTTON
+                </span>
+                <span class="text-[11px] font-body text-[#ac8888] leading-tight block mt-0.5">
+                  Máxima densidad superficial y cuerpo estructurado.
+                </span>
+              </div>
+            </div>
+
+            <!-- Lista de Especificaciones -->
+            <ul class="space-y-4 text-xs">
+              <li class="flex items-start gap-3">
+                <span class="w-4 h-4 rounded-full bg-[#dc143c]/20 text-[#dc143c] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">✓</span>
+                <div>
+                  <strong class="font-mono text-[#e5e2e1] uppercase block">Serigrafía al agua tacto cero</strong>
+                  <span class="text-[#ac8888] font-body text-[11px]">Pigmentos transpirables fusionados con la fibra.</span>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="w-4 h-4 rounded-full bg-[#dc143c]/20 text-[#dc143c] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">✓</span>
+                <div>
+                  <strong class="font-mono text-[#e5e2e1] uppercase block">Cuello acanalado 3.5 cm</strong>
+                  <span class="text-[#ac8888] font-body text-[11px]">Rib reforzado con spandex para retención permanente.</span>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="w-4 h-4 rounded-full bg-[#dc143c]/20 text-[#dc143c] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">✓</span>
+                <div>
+                  <strong class="font-mono text-[#e5e2e1] uppercase block">Corte Boxy Oversized</strong>
+                  <span class="text-[#ac8888] font-body text-[11px]">Hombro caído y manga ancha inspirada en Tokyo.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-[#ac8888]">
+            <span>ORIGEN // TOKYO & BOLIVIA</span>
+            <span class="text-[#dc143c] font-bold">DESPACHO INMEDIATO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Carrito Drawer Flotante (Isla React) -->
+  <CarritoDrawer client:load />
+
+  <!-- Footer Corporativo -->
+  <Footer />
 </Layout>
