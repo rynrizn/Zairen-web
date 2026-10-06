@@ -1,0 +1,11 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { siteConfig } from '../../config/site';
+import { InventarioManager } from '../../components/admin/inventario/InventarioManager';
+---
+
+<AdminLayout title={`Inventario // ${siteConfig.name}`} activePath="inventario">
+  <div class="max-w-[1440px] mx-auto px-4 md:px-12 flex flex-col gap-8 pb-16">
+    <InventarioManager client:load />
+  </div>
+</AdminLayout>
