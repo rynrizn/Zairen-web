@@ -12,26 +12,63 @@ El proyecto sigue una metodología estricta de branches y commits atómicos:
 | Rama / PR | Estado | Descripción |
 |:---|:---:|:---|
 | `main` | 🛡️ Base | Código estable listo para despliegue |
-| `feature/fase-1-scaffolding-db-auth` | 🔨 En curso | Fase 1: Arquitectura base, scripts SQL de Supabase, Auth RBAC y componentes UI |
-| `feature/fase-2-catalogo-publico` | ⏳ Pendiente | Fase 2: Catálogo web, Bento grid, Carrito Drawer y Checkout WhatsApp |
-| `feature/fase-3-admin-dashboard-inventario` | ⏳ Pendiente | Fase 3: Dashboard con KPIs, Matriz de stock por tallas y Pedidos |
-| `feature/fase-4-pos-usuarios-clientes-extras` | ⏳ Pendiente | Fase 4: Terminal POS con QR Bolivia, Usuarios, Clientes y CMS de tienda |
+| `feature/fase-1-scaffolding-db-auth` | ✅ Fusionada (PR #1) | Fase 1: Arquitectura base, scripts SQL de Supabase, Auth RBAC y componentes UI |
+| `feature/fase-2-catalogo-publico` | ✅ Fusionada (PR #2) | Fase 2: Catálogo web, Bento grid, Carrito Drawer y Checkout WhatsApp |
+| `feature/fase-3-admin-dashboard-inventario` | ✅ Fusionada (PR #3) | Fase 3: Dashboard con KPIs, Matriz de stock por tallas y Pedidos |
+| `feature/fase-4-pos-usuarios-clientes-extras` | ✅ Fusionada (PR #4) | Fase 4: Terminal POS con QR Bolivia, Usuarios, Clientes y CMS de tienda |
 
 ---
 
 ## ⚙️ Guía de Configuración Rápida (Variables de Contacto y Redes)
 
-Las variables de marca, número de WhatsApp y redes sociales dinámicas se configuran en:
+Las variables de la marca, el número de celular para WhatsApp y las redes sociales dinámicas se pueden configurar desde tres lugares:
 
-1. **Archivo de Configuración Central**: [`src/config/site.ts`](file:///c:/Users/Ryan/Pictures/WEBZAIREN/Zairen-web/src/config/site.ts)
-2. **Variables de Entorno**: [`.env`](file:///c:/Users/Ryan/Pictures/WEBZAIREN/Zairen-web/.env) (o basarse en [`.env.example`](file:///c:/Users/Ryan/Pictures/WEBZAIREN/Zairen-web/.env.example))
-3. **Base de Datos (Opcional en caliente)**: Tabla `configuracion` en Supabase.
+### 1. Archivo de Configuración Principal: [`src/config/site.ts`](src/config/site.ts)
+Aquí se definen los valores por defecto del sistema con tipado TypeScript estricto:
+- **Número de WhatsApp**: Modifica `siteConfig.whatsapp.number` (sin el signo `+`, ej: `"59174522654"`) y `displayNumber` (formato legible: `"+591 74522654"`).
+- **Redes Sociales Dinámicas**:
+  ```ts
+  socialNetworks: [
+    {
+      id: 'instagram',
+      name: 'Instagram',
+      url: 'https://instagram.com/tu_cuenta', // Pon tu enlace aquí
+      enabled: true,                         // true = visible en la web
+      icon: 'Instagram',
+    },
+    {
+      id: 'tiktok',
+      name: 'TikTok',
+      url: 'https://tiktok.com/@tu_cuenta',  // Pon tu enlace aquí
+      enabled: true,                         // Cambia a true si tienes TikTok
+      icon: 'Video',
+    },
+    {
+      id: 'facebook',
+      name: 'Facebook',
+      url: '',                               // Dejar vacío o enabled: false
+      enabled: false,                        // Desaparece automáticamente
+      icon: 'Facebook',
+    },
+  ]
+  ```
+> **Comportamiento Dinámico:** Si solo tienes Instagram, únicamente aparecerá Instagram en el Navbar, Footer y Carrito Drawer. Si activas TikTok, aparecerán ambos de forma armónica sin dejar espacios vacíos.
 
-### 📱 Redes Sociales Dinámicas:
-En `src/config/site.ts`, la propiedad `socialNetworks` contiene la lista de redes activas.
-- Si solo tienes Instagram, se muestra únicamente Instagram.
-- Si agregas TikTok o Facebook, aparecerán automáticamente en el Navbar, Footer y Drawer.
-- Si dejas la URL vacía `""` o eliminas el elemento, desaparece de toda la interfaz sin romper nada.
+### 2. Archivo de Variables de Entorno: [`.env`](.env)
+Puedes sobreescribir los valores sin tocar el código fuente editando las siguientes variables:
+```env
+PUBLIC_WHATSAPP_NUMBER=59174522654
+PUBLIC_WHATSAPP_DISPLAY=+591 74522654
+
+# Enlaces de Redes (Si dejas una vacía, desaparece de toda la web automáticamente)
+PUBLIC_INSTAGRAM_URL=https://instagram.com/zairenlab
+PUBLIC_TIKTOK_URL=https://tiktok.com/@zairenlab
+PUBLIC_FACEBOOK_URL=
+```
+
+### 3. Panel Visual Web CMS: [`/admin/interfaz-web`](/admin/interfaz-web)
+Dentro del panel administrativo, ingresa a **Interfaz Web** para modificar visualmente los datos de la marca, activar o desactivar redes con interruptores interactivos y personalizar el banner promocional superior.
+
 
 ---
 
