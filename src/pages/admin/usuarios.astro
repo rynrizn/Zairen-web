@@ -1,0 +1,11 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { siteConfig } from '../../config/site';
+import { UsuariosManager } from '../../components/admin/usuarios/UsuariosManager';
+---
+
+<AdminLayout title={`Usuarios y Permisos // ${siteConfig.name}`} activePath="usuarios">
+  <div class="max-w-[1440px] mx-auto px-4 md:px-12 flex flex-col gap-8 pb-16">
+    <UsuariosManager client:load />
+  </div>
+</AdminLayout>
