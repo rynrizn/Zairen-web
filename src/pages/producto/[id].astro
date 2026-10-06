@@ -1,0 +1,96 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/common/Navbar.astro';
+import Footer from '../../components/common/Footer.astro';
+import { DetalleProducto } from '../../components/catalogo/DetalleProducto';
+import { CarritoDrawer } from '../../components/catalogo/CarritoDrawer';
+import { mockProducts } from '../../data/mockProducts';
+import { supabase } from '../../lib/supabase';
+import { siteConfig } from '../../config/site';
+
+export async function getStaticPaths() {
+  let products = mockProducts;
+
+  try {
+    const { data: dbProducts, error } = await supabase
+      .from('producto')
+      .select('id, slug, nombre')
+      .eq('activo', true);
+
+    if (!error && dbProducts && dbProducts.length > 0) {
+      // Retornar rutas tanto para slug como para ID
+      const paths = dbProducts.flatMap((p) => [
+        { params: { id: p.slug } },
+        { params: { id: p.id } },
+      ]);
+      return paths;
+    }
+  } catch (e) {}
+
+  // Rutas estáticas de respaldo con mockProducts
+  return products.flatMap((p) => [
+    { params: { id: p.slug } },
+    { params: { id: p.id } },
+  ]);
+}
+
+const { id } = Astro.params;
+
+// Buscar producto
+let product = mockProducts.find((p) => p.slug === id || p.id === id) || mockProducts[0];
+
+try {
+  const { data: dbProd, error } = await supabase
+    .from('vw_catalogo_publico')
+    .select('*')
+    .or(`slug.eq.${id},id_producto.eq.${id}`)
+    .maybeSingle();
+
+  if (!error && dbProd) {
+    product = {
+      id: dbProd.id_producto,
+      slug: dbProd.slug,
+      nombre: dbProd.nombre,
+      precio: Number(dbProd.precio_venta),
+      coleccion: dbProd.coleccion || 'DROP 01',
+      subtitulo: dbProd.descripcion || 'Confección pesada 280 GSM',
+      imagen: dbProd.imagen_portada || mockProducts[0].imagen,
+      imagenDorsal: dbProd.imagen_dorsal,
+      tallas: dbProd.tallas && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL'],
+      stockDisponible: Number(dbProd.stock_disponible || 0),
+      esPrioritario: Boolean(dbProd.es_prioritario),
+    };
+  }
+} catch (e) {}
+
+const imagenes = [product.imagen];
+if (product.imagenDorsal) imagenes.push(product.imagenDorsal);
+---
+
+<Layout
+  title={`${product.nombre} // ${siteConfig.name}`}
+  description={product.subtitulo}
+  image={product.imagen}
+>
+  <Navbar />
+
+  <main class="pt-24 pb-16 min-h-screen">
+    <DetalleProducto
+      client:load
+      id={product.id}
+      slug={product.slug}
+      nombre={product.nombre}
+      precio={product.precio}
+      coleccion={product.coleccion}
+      descripcion={product.subtitulo}
+      imagenes={imagenes}
+      tallas={product.tallas}
+      stockDisponible={product.stockDisponible}
+    />
+  </main>
+
+  <!-- Carrito Drawer Global -->
+  <CarritoDrawer client:load />
+
+  <Footer />
+</Layout>
