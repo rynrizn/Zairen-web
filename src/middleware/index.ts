@@ -29,22 +29,39 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     try {
-      // Si hay tokens, verificar con Supabase
-      if (accessToken && refreshToken) {
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+      if (accessToken) {
+        // Validación con getUser de Supabase (sin efectos secundarios de sesión de servidor)
+        const { data: { user }, error } = await supabase.auth.getUser(accessToken);
 
-        if (error || !data.session) {
-          return context.redirect(`/login?redirect=${encodeURIComponent(url.pathname)}`);
+        if (!error && user) {
+          context.locals.user = user;
+          return next();
         }
 
-        // Inyectar usuario en locals para consumo en páginas Astro
-        context.locals.user = data.session.user;
+        // Si falló o expiró el access token pero hay refresh token, intentar refrescar
+        if (refreshToken) {
+          const { data: refData, error: refError } = await supabase.auth.refreshSession({
+            refresh_token: refreshToken,
+          });
+          if (!refError && refData.session) {
+            context.cookies.set('sb-access-token', refData.session.access_token, {
+              path: '/',
+              maxAge: 604800,
+              sameSite: 'lax',
+            });
+            context.cookies.set('sb-refresh-token', refData.session.refresh_token, {
+              path: '/',
+              maxAge: 604800,
+              sameSite: 'lax',
+            });
+            context.locals.user = refData.session.user;
+            return next();
+          }
+        }
       }
+      return context.redirect(`/login?redirect=${encodeURIComponent(url.pathname)}`);
     } catch (e) {
-      return context.redirect('/login');
+      return context.redirect(`/login?redirect=${encodeURIComponent(url.pathname)}`);
     }
   }
 

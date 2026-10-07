@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
-export type UserRole = 'SuperAdmin' | 'Vendedor POS' | 'Almacenero';
+export type UserRole = 'SuperAdmin' | 'Admin' | 'Vendedor POS' | 'Almacenero';
 
 export interface UsuarioRecord {
   id: string;
@@ -19,7 +20,7 @@ const initialUsuarios: UsuarioRecord[] = [
     id: 'usr-1',
     name: 'Kenji S.',
     initials: 'KS',
-    email: 'kenji@zairenlab.com',
+    email: 'admin@zairenlab.com',
     role: 'SuperAdmin',
     location: 'Nodo Central La Paz',
     lastLogin: 'En línea ahora',
@@ -45,22 +46,50 @@ const initialUsuarios: UsuarioRecord[] = [
     lastLogin: 'Hoy 09:30',
     isActive: true,
   },
-  {
-    id: 'usr-4',
-    name: 'Camila Arce',
-    initials: 'CA',
-    email: 'camila.a@zairenlab.com',
-    role: 'Vendedor POS',
-    location: 'Pop-Up Santa Cruz Equipetrol',
-    lastLogin: 'Ayer 18:00',
-    isActive: false,
-  },
 ];
 
 export function UsuariosManager() {
   const [usuarios, setUsuarios] = useState<UsuarioRecord[]>(initialUsuarios);
   const [selectedUser, setSelectedUser] = useState<UsuarioRecord | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function loadProfiles() {
+      if (!isSupabaseConfigured) return;
+      try {
+        const { data, error } = await supabase.from('perfil').select('*');
+        if (!error && data && data.length > 0) {
+          const mapped: UsuarioRecord[] = data.map((p) => {
+            const initials = (p.nombre_completo || 'U')
+              .split(' ')
+              .map((n: string) => n[0])
+              .slice(0, 2)
+              .join('')
+              .toUpperCase();
+            let role: UserRole = 'Vendedor POS';
+            if (p.rol === 'SUPERADMIN') role = 'SuperAdmin';
+            else if (p.rol === 'ADMIN') role = 'Admin';
+            else if (p.rol === 'VISOR') role = 'Almacenero';
+
+            return {
+              id: p.id,
+              name: p.nombre_completo,
+              initials,
+              email: p.nombre_completo ? `${p.nombre_completo.toLowerCase().replace(/\s+/g, '.')}@zairenlab.com` : 'usuario@zairenlab.com',
+              role,
+              location: 'Nodo Central',
+              lastLogin: 'Registrado en Supabase',
+              isActive: p.activo,
+            };
+          });
+          setUsuarios(mapped);
+        }
+      } catch (e) {
+        console.warn('Error cargando perfiles:', e);
+      }
+    }
+    loadProfiles();
+  }, []);
 
   // Form fields
   const [formName, setFormName] = useState<string>('');
@@ -119,6 +148,20 @@ export function UsuariosManager() {
             : u
         )
       );
+
+      if (isSupabaseConfigured) {
+        const dbRol = formRole === 'SuperAdmin' ? 'SUPERADMIN' : formRole === 'Admin' ? 'ADMIN' : 'VENDEDOR';
+        supabase
+          .from('perfil')
+          .update({
+            nombre_completo: formName,
+            rol: dbRol,
+            activo: formActive,
+          })
+          .eq('id', selectedUser.id)
+          .then();
+      }
+
       toast.success(`Operador ${formName} actualizado`);
     } else {
       const newUser: UsuarioRecord = {
@@ -139,9 +182,18 @@ export function UsuariosManager() {
   };
 
   const handleToggleStatus = (id: string) => {
+    const target = usuarios.find((u) => u.id === id);
+    if (!target) return;
+    const newStatus = !target.isActive;
+
     setUsuarios((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u))
+      prev.map((u) => (u.id === id ? { ...u, isActive: newStatus } : u))
     );
+
+    if (isSupabaseConfigured) {
+      supabase.from('perfil').update({ activo: newStatus }).eq('id', id).then();
+    }
+
     toast.info('Estado de acceso actualizado');
   };
 

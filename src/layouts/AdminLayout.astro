@@ -46,18 +46,38 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
       </div>
     </main>
 
-    <!-- Script de ajuste dinámico de padding según estado colapsado -->
+    <!-- Script de ajuste dinámico de padding y guarda de autenticación -->
     <script>
+      import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+      // 1. Guarda de autenticación client-side
+      async function verifyAdminAuth() {
+        if (!isSupabaseConfigured) {
+          const hasDemoCookie = document.cookie.includes('sb-access-token=demo-admin-token');
+          if (!hasDemoCookie && window.location.pathname.startsWith('/admin')) {
+            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+          }
+          return;
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        const hasTokenCookie = document.cookie.includes('sb-access-token=');
+
+        if (!session && !hasTokenCookie) {
+          window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+        }
+      }
+      verifyAdminAuth();
+
+      // 2. Ajuste de padding según sidebar
       const wrapper = document.getElementById('admin-main-wrapper');
       if (wrapper) {
-        // Verificar estado inicial en localStorage
         const isCollapsed = localStorage.getItem('zairen_admin_sidebar_collapsed') === 'true';
         if (isCollapsed) {
           wrapper.classList.remove('md:pl-64');
           wrapper.classList.add('md:pl-20');
         }
 
-        // Escuchar eventos de cambio de estado
         window.addEventListener('sidebar-toggle', (e: any) => {
           if (e.detail?.isCollapsed) {
             wrapper.classList.remove('md:pl-64');
