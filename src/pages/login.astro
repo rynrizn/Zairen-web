@@ -85,7 +85,7 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 </Layout>
 
 <script>
-  import { supabase } from '../lib/supabase';
+  import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
   const form = document.getElementById('login-form') as HTMLFormElement;
   const errorBox = document.getElementById('login-error') as HTMLDivElement;
@@ -100,6 +100,22 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 
     const email = (document.getElementById('email') as HTMLInputElement).value;
     const password = (document.getElementById('password') as HTMLInputElement).value;
+
+    // Modo Demo Local si Supabase aún no está conectado con claves reales en .env
+    if (!isSupabaseConfigured) {
+      if ((email === 'admin@zairenlab.com' || email.includes('admin')) && password.length >= 6) {
+        document.cookie = `sb-access-token=demo-admin-token; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `sb-refresh-token=demo-refresh-token; path=/; max-age=604800; SameSite=Lax`;
+        window.location.href = redirectInput.value || '/admin';
+        return;
+      } else {
+        errorBox.textContent = 'Credenciales demo: Correo: admin@zairenlab.com | Contraseña: mín. 6 caracteres (ej: admin123)';
+        errorBox.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Iniciar Sesión // Acceder';
+        return;
+      }
+    }
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({

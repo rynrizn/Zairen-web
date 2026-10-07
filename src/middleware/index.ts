@@ -1,5 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 /**
  * Middleware de protección para rutas administrativas (/admin/*)
@@ -16,6 +16,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (!accessToken && !refreshToken) {
       // Redirigir a login si no hay sesión
       return context.redirect(`/login?redirect=${encodeURIComponent(url.pathname)}`);
+    }
+
+    // Modo Demo Local si Supabase aún no está configurado con claves en producción
+    if (!isSupabaseConfigured && accessToken === 'demo-admin-token') {
+      context.locals.user = {
+        id: 'demo-admin-id',
+        email: 'admin@zairenlab.com',
+        user_metadata: { full_name: 'Zairen Admin' },
+      };
+      return next();
     }
 
     try {
