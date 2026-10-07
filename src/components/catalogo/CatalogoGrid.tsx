@@ -8,6 +8,7 @@ interface CatalogoGridProps {
 
 export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps) {
   const [selectedCollection, setSelectedCollection] = useState<string>('todas');
+  const [commercialFilter, setCommercialFilter] = useState<string>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'recientes' | 'precio-asc' | 'precio-desc'>('recientes');
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
@@ -20,6 +21,15 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         if (selectedCollection !== 'todas') {
           const matchCol = p.coleccion.toLowerCase().includes(selectedCollection.toLowerCase());
           if (!matchCol) return false;
+        }
+
+        // Filtro por estado comercial
+        if (commercialFilter !== 'todos') {
+          if (commercialFilter === 'ofertas') {
+            if (p.estadoComercial !== 'oferta' && p.estadoComercial !== 'promocion') return false;
+          } else if (p.estadoComercial !== commercialFilter) {
+            return false;
+          }
         }
 
         // Filtro por disponibilidad
@@ -44,7 +54,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         if (sortBy === 'precio-desc') return b.precio - a.precio;
         return 0;
       });
-  }, [initialProducts, selectedCollection, searchQuery, sortBy, onlyAvailable]);
+  }, [initialProducts, selectedCollection, commercialFilter, searchQuery, sortBy, onlyAvailable]);
 
   return (
     <section id="catalogo" className="w-full max-w-[1440px] mx-auto px-4 md:px-12 py-16 scroll-mt-20">
@@ -137,6 +147,81 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             <option value="precio-desc">Precio: Mayor a Menor</option>
           </select>
         </div>
+      </div>
+
+      {/* Sub-barra de Filtro Comercial & Stock */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8 pb-3 border-b border-white/[0.04]">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-[#ac8888] mr-1">
+            ESTADO:
+          </span>
+          <button
+            type="button"
+            onClick={() => setCommercialFilter('todos')}
+            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              commercialFilter === 'todos'
+                ? 'bg-white text-black'
+                : 'bg-[#1c1b1b] text-[#ac8888] hover:text-white'
+            }`}
+          >
+            Todos
+          </button>
+          <button
+            type="button"
+            onClick={() => setCommercialFilter('preventa')}
+            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              commercialFilter === 'preventa'
+                ? 'bg-[#6d28d9] text-white shadow-[0_0_10px_rgba(139,92,246,0.5)]'
+                : 'bg-[#1c1b1b] text-[#ddd6fe]/70 hover:text-white hover:bg-[#201f1f]'
+            }`}
+          >
+            Pre-Order ⚡
+          </button>
+          <button
+            type="button"
+            onClick={() => setCommercialFilter('nuevo')}
+            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              commercialFilter === 'nuevo'
+                ? 'bg-[#047857] text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                : 'bg-[#1c1b1b] text-[#a7f3d0]/70 hover:text-white hover:bg-[#201f1f]'
+            }`}
+          >
+            Nuevo Drop 🔥
+          </button>
+          <button
+            type="button"
+            onClick={() => setCommercialFilter('promocion')}
+            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              commercialFilter === 'promocion'
+                ? 'bg-[#dc143c] text-white shadow-[0_0_10px_rgba(220,20,60,0.5)]'
+                : 'bg-[#1c1b1b] text-[#fca5a5]/70 hover:text-white hover:bg-[#201f1f]'
+            }`}
+          >
+            Promoción 🏷️
+          </button>
+          <button
+            type="button"
+            onClick={() => setCommercialFilter('oferta')}
+            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              commercialFilter === 'oferta'
+                ? 'bg-[#b91c1c] text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                : 'bg-[#1c1b1b] text-[#fca5a5]/70 hover:text-white hover:bg-[#201f1f]'
+            }`}
+          >
+            Oferta 💥
+          </button>
+        </div>
+
+        {/* Checkbox de Disponibilidad */}
+        <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors">
+          <input
+            type="checkbox"
+            checked={onlyAvailable}
+            onChange={(e) => setOnlyAvailable(e.target.checked)}
+            className="w-4 h-4 rounded accent-[#dc143c] cursor-pointer"
+          />
+          <span>Solo en stock</span>
+        </label>
       </div>
 
       {/* Cuadrícula de Prendas */}

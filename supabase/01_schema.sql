@@ -107,12 +107,14 @@ CREATE TABLE IF NOT EXISTS public.producto (
     publicado BOOLEAN NOT NULL DEFAULT FALSE,
     destacado BOOLEAN NOT NULL DEFAULT FALSE,
     es_prioritario BOOLEAN NOT NULL DEFAULT FALSE,
+    estado_comercial VARCHAR(20) NOT NULL DEFAULT 'ninguno',
     coleccion_id UUID NOT NULL REFERENCES public.coleccion(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_precio_producto CHECK (precio_venta >= 0),
-    CONSTRAINT chk_stock_minimo CHECK (stock_minimo >= 0)
+    CONSTRAINT chk_stock_minimo CHECK (stock_minimo >= 0),
+    CONSTRAINT chk_estado_comercial CHECK (estado_comercial IN ('preventa', 'promocion', 'oferta', 'nuevo', 'ninguno'))
 );
 
 

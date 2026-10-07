@@ -13,9 +13,11 @@ export interface TarjetaPoleraProps {
   subtitulo?: string;
   imagen: string;
   imagenDorsal?: string;
+  imagenes?: string[];
   tallas?: string[];
   stockDisponible?: number;
   esPrioritario?: boolean;
+  estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno';
 }
 
 export function TarjetaPolera({
@@ -29,6 +31,7 @@ export function TarjetaPolera({
   imagenDorsal,
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
+  estadoComercial = 'ninguno',
 }: TarjetaPoleraProps) {
   const [selectedTalla, setSelectedTalla] = useState<string>(tallas[0] || 'M');
   const [isAdded, setIsAdded] = useState<boolean>(false);
@@ -96,20 +99,44 @@ export function TarjetaPolera({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e]/80 via-transparent to-transparent pointer-events-none"></div>
 
-        {/* Badges de Disponibilidad */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+        {/* Badges de Disponibilidad y Estado Comercial */}
+        <div className="absolute top-2.5 left-2.5 flex flex-wrap items-center gap-1.5 z-10 max-w-[85%]">
           {isSoldOut ? (
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#7f1d1d]/90 text-[#f87171] border border-[#dc2626]/30 backdrop-blur-sm">
               SOLD OUT
             </span>
-          ) : isLowStock ? (
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#78350f]/90 text-[#fbbf24] border border-[#d97706]/30 backdrop-blur-sm animate-pulse">
-              POCAS UDS // {stockDisponible}
-            </span>
           ) : (
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#dc143c]/80 text-white backdrop-blur-sm shadow-[0_0_8px_rgba(220,20,60,0.5)]">
-              DISPONIBLE
-            </span>
+            <>
+              {estadoComercial === 'preventa' && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#6d28d9]/90 text-[#ddd6fe] border border-[#8b5cf6]/40 backdrop-blur-sm shadow-[0_0_10px_rgba(139,92,246,0.4)]">
+                  PRE-ORDER
+                </span>
+              )}
+              {estadoComercial === 'promocion' && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#dc143c]/90 text-white border border-[#ff4d6d]/40 backdrop-blur-sm shadow-[0_0_10px_rgba(220,20,60,0.5)]">
+                  PROMO
+                </span>
+              )}
+              {estadoComercial === 'oferta' && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#b91c1c]/90 text-[#fecaca] border border-[#ef4444]/40 backdrop-blur-sm shadow-[0_0_8px_rgba(239,68,68,0.4)]">
+                  OFERTA
+                </span>
+              )}
+              {estadoComercial === 'nuevo' && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#047857]/90 text-[#a7f3d0] border border-[#10b981]/40 backdrop-blur-sm shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+                  NUEVO
+                </span>
+              )}
+              {isLowStock ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#78350f]/90 text-[#fbbf24] border border-[#d97706]/30 backdrop-blur-sm animate-pulse">
+                  POCAS UDS // {stockDisponible}
+                </span>
+              ) : estadoComercial === 'ninguno' ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-[#dc143c]/80 text-white backdrop-blur-sm shadow-[0_0_8px_rgba(220,20,60,0.5)]">
+                  DISPONIBLE
+                </span>
+              ) : null}
+            </>
           )}
         </div>
       </a>

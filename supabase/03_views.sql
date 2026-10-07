@@ -25,6 +25,7 @@ SELECT
     p.stock_minimo,
     p.destacado,
     p.es_prioritario,
+    p.estado_comercial,
     c.id AS id_coleccion,
     c.nombre AS coleccion,
     c.slug AS coleccion_slug,
