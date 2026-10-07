@@ -11,13 +11,14 @@ export interface DetalleProductoProps {
   nombre: string;
   slug?: string;
   precio: number;
-  coleccion: string;
+  coleccion?: string;
+  seccion?: string;
+  tipo?: string;
   descripcion?: string;
   imagenes: string[];
   tallas?: string[];
   stockDisponible?: number;
-  estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno';
-  especificaciones?: Record<string, string>;
+  estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'disponible' | 'agotado' | 'ninguno';
 }
 
 export function DetalleProducto({
@@ -25,21 +26,14 @@ export function DetalleProducto({
   nombre,
   slug,
   precio,
-  coleccion,
-  descripcion = 'Polera boxy oversized confeccionada en algodón pesado 280 GSM con caída estructurada y acabado prémium.',
+  coleccion = 'DROP 01',
+  seccion,
+  tipo = 'Polera',
+  descripcion = '',
   imagenes = [],
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
-  estadoComercial = 'ninguno',
-  especificaciones = {
-    'Tejido Principal': '100% Algodón Peinado 280-420 GSM',
-    'Confección': 'Cuerpo tubular sin costuras laterales',
-    'Cuello': 'Ribete acanalado 3.5 cm con memoria spandex',
-    'Estampado': 'Serigrafía al agua tacto cero 4 tintas',
-    'Silueta': 'Boxy Oversized con caída de hombro pronunciada',
-    'Origen': 'Taller Zairen Lab // Tarija, Bolivia',
-    'Cuidados': 'Lavar en frío con prendas oscuras. No planchar sobre el estampado.',
-  },
+  estadoComercial = 'disponible',
 }: DetalleProductoProps) {
   // Asegurar mínimo 1 imagen
   const safeImages = imagenes.length > 0 ? imagenes : [
@@ -49,14 +43,37 @@ export function DetalleProducto({
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const [selectedTalla, setSelectedTalla] = useState<string>(tallas[0] || 'M');
   const [isAdded, setIsAdded] = useState<boolean>(false);
-  const [showSizeGuide, setShowSizeGuide] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  const isSoldOut = stockDisponible <= 0;
+  const isSoldOut = stockDisponible <= 0 || estadoComercial === 'agotado';
   const currentImage = safeImages[activeImageIndex] || safeImages[0];
+  const seccionTexto = (seccion || coleccion).toUpperCase();
 
-  // Tecla Escape para cerrar fullscreen
+  // Color de badge de estado comercial según CatalogoV0
+  const getEstadoBadge = () => {
+    if (isSoldOut) {
+      return { texto: 'AGOTADO', color: '#EF4444' };
+    }
+    switch (estadoComercial) {
+      case 'nuevo':
+        return { texto: 'NUEVO', color: '#10B981' };
+      case 'oferta':
+      case 'promocion':
+        return { texto: 'OFERTA', color: '#F59E0B' };
+      case 'preventa':
+        return { texto: 'PREVENTA', color: '#8B5CF6' };
+      case 'disponible':
+        return { texto: 'DISPONIBLE', color: '#3B82F6' };
+      default:
+        return null;
+    }
+  };
+
+  const badgeInfo = getEstadoBadge();
+
+  // Tecla Escape para modales
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -74,6 +91,16 @@ export function DetalleProducto({
 
   const handlePrevImage = () => {
     setActiveImageIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length);
+  };
+
+  const handleToggleFavorite = () => {
+    const next = !isFavorite;
+    setIsFavorite(next);
+    if (next) {
+      toast.success('Prenda agregada a favoritos');
+    } else {
+      toast.info('Prenda removida de favoritos');
+    }
   };
 
   const handleAddToCart = () => {
@@ -102,11 +129,9 @@ export function DetalleProducto({
   };
 
   const handleDirectWhatsApp = () => {
-    const statusNote = estadoComercial === 'preventa' ? ' (PRE-ORDER)' : '';
+    if (isSoldOut) return;
     const text = encodeURIComponent(
-      `Hola Zairen Lab, me interesa adquirir la prenda:\n\n🏷️ *${nombre}*${statusNote}\n📏 Talla: *${selectedTalla}*\n💰 Precio: *${formatCurrency(
-        precio
-      )}*\n\n¿Tienen disponibilidad para despacho inmediato en Tarija / Bolivia?`
+      `Hola Zairen Lab, me interesa adquirir: ${nombre} en talla ${selectedTalla}. ¿Está disponible?`
     );
     window.open(`https://wa.me/${siteConfig.whatsapp.number}?text=${text}`, '_blank');
   };
@@ -124,96 +149,64 @@ export function DetalleProducto({
   );
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-6">
-      {/* Breadcrumbs de Navegación */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-mono text-[#ac8888] mb-8">
+    <div className="detail-bento-container">
+      {/* Breadcrumb zen */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-mono text-[#ac8888] mb-6">
         <a href="/" className="hover:text-white transition-colors">Inicio</a>
         <span>/</span>
         <a href="/catalogo" className="hover:text-white transition-colors">Catálogo</a>
         <span>/</span>
-        <span className="text-[#dc143c] font-bold uppercase">{coleccion}</span>
+        <span className="text-[#dc143c] font-bold uppercase">{seccionTexto}</span>
         <span>/</span>
         <span className="text-white truncate max-w-[200px] sm:max-w-none">{nombre}</span>
       </nav>
 
-      {/* Bento Grid Principal // Estilo PublicOldZairen */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* ========================================================= */}
-        {/* COLUMNA IZQUIERDA: GALERÍA DE 1 A 5 IMÁGENES (7 cols)    */}
-        {/* ========================================================= */}
-        <div className="lg:col-span-7 flex flex-col gap-4">
-          {/* Viewport Principal de Imagen (Proporción 4:5) */}
-          <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-[#141416] border border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.8)] group select-none">
-            {/* Imagen Activa con Transición */}
+      {/* ======================================================== */}
+      {/* BENTO GRID PRINCIPAL // DISEÑO CATALOGO V0               */}
+      {/* ======================================================== */}
+      <div className="detail-bento">
+
+        {/* ===== BOX 1: HERO IMAGE (Spans rows) ===== */}
+        <div className="bento-cell bento-image">
+          <div className="bento-image-viewport">
+            {/* Imagen Principal con transición y zoom suave */}
             <img
-              src={getOptimizedImageUrl(currentImage, 1100, 1375)}
+              src={getOptimizedImageUrl(currentImage, 1000, 1250)}
               alt={`${nombre} - Vista ${activeImageIndex + 1}`}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
 
-            {/* Badges Flotantes de Estado */}
-            <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2 z-10">
-              {isSoldOut ? (
-                <span className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#7f1d1d]/90 text-[#f87171] border border-[#dc2626]/40 backdrop-blur-md shadow-md">
-                  SOLD OUT // AGOTADO
-                </span>
-              ) : (
-                <>
-                  {estadoComercial === 'preventa' && (
-                    <span className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#6d28d9]/90 text-[#ddd6fe] border border-[#8b5cf6]/40 backdrop-blur-md shadow-[0_0_12px_rgba(139,92,246,0.5)]">
-                      PRE-ORDER ⚡
-                    </span>
-                  )}
-                  {estadoComercial === 'promocion' && (
-                    <span className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#dc143c]/90 text-white border border-[#ff4d6d]/40 backdrop-blur-md shadow-[0_0_12px_rgba(220,20,60,0.6)]">
-                      PROMOCIÓN 🏷️
-                    </span>
-                  )}
-                  {estadoComercial === 'oferta' && (
-                    <span className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#b91c1c]/90 text-[#fecaca] border border-[#ef4444]/40 backdrop-blur-md shadow-[0_0_10px_rgba(239,68,68,0.5)]">
-                      OFERTA 💥
-                    </span>
-                  )}
-                  {estadoComercial === 'nuevo' && (
-                    <span className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#047857]/90 text-[#a7f3d0] border border-[#10b981]/40 backdrop-blur-md shadow-[0_0_10px_rgba(16,185,129,0.4)]">
-                      NUEVO DROP 🔥
-                    </span>
-                  )}
-                  {stockDisponible <= 4 ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#78350f]/90 text-[#fbbf24] border border-[#d97706]/40 backdrop-blur-md animate-pulse">
-                      ÚLTIMAS {stockDisponible} UDS
-                    </span>
-                  ) : estadoComercial === 'ninguno' ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase bg-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.6)]">
-                      DISPONIBLE EN STOCK
-                    </span>
-                  ) : null}
-                </>
-              )}
-            </div>
+            {/* Badge de Estado con Color Dinámico */}
+            {badgeInfo && (
+              <span
+                className="bento-badge"
+                style={{ backgroundColor: badgeInfo.color }}
+              >
+                {badgeInfo.texto}
+              </span>
+            )}
 
-            {/* Botón Pantalla Completa (Zoom Lightbox) */}
+            {/* Botón Pantalla Completa (Lightbox) */}
             <button
               type="button"
               onClick={() => setIsFullscreen(true)}
-              aria-label="Ver imagen en pantalla completa"
-              title="Pantalla Completa"
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 hover:bg-[#dc143c] text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-110 z-10"
+              aria-label="Ver en pantalla completa"
+              title="Ver en pantalla completa"
+              className="bento-fullscreen-btn"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
-            {/* Controles Prev / Next si hay múltiples fotos */}
+            {/* Flechas de Navegación del Carrusel (si hay > 1 imagen) */}
             {safeImages.length > 1 && (
               <>
                 <button
                   type="button"
                   onClick={handlePrevImage}
                   aria-label="Imagen anterior"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-white hover:text-black text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all cursor-pointer opacity-0 group-hover:opacity-100 z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-[#dc143c] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer z-20"
                 >
                   ‹
                 </button>
@@ -221,198 +214,173 @@ export function DetalleProducto({
                   type="button"
                   onClick={handleNextImage}
                   aria-label="Imagen siguiente"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-white hover:text-black text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all cursor-pointer opacity-0 group-hover:opacity-100 z-10"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-[#dc143c] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer z-20"
                 >
                   ›
                 </button>
               </>
             )}
 
-            {/* Tira Flotante de Miniaturas estilo PublicOldZairen */}
+            {/* Fila de Miniaturas Flotantes */}
             {safeImages.length > 1 && (
-              <div className="absolute bottom-4 inset-x-4 flex items-center justify-center gap-2 p-2 rounded-2xl bg-black/50 backdrop-blur-xl border border-white/10 z-10">
+              <div className="detail-thumbnails">
                 {safeImages.map((img, idx) => (
-                  <button
+                  <div
                     key={idx}
-                    type="button"
                     onClick={() => setActiveImageIndex(idx)}
-                    aria-label={`Seleccionar vista ${idx + 1}`}
-                    className={`relative w-12 h-14 md:w-14 md:h-16 rounded-xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
-                      activeImageIndex === idx
-                        ? 'border-[#dc143c] scale-105 shadow-[0_0_12px_rgba(220,20,60,0.6)]'
-                        : 'border-white/20 opacity-60 hover:opacity-100'
-                    }`}
+                    className={`detail-thumbnail ${idx === activeImageIndex ? 'active' : ''}`}
+                    title={`Vista ${idx + 1}`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
+                  </div>
                 ))}
               </div>
             )}
           </div>
         </div>
 
-        {/* ========================================================= */}
-        {/* COLUMNA DERECHA: PANEL DE COMPRA & BENTO CARDS (5 cols)   */}
-        {/* ========================================================= */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          {/* Card Principal: Título, Precio y Compartir */}
-          <div className="p-6 md:p-8 rounded-3xl bg-[#141416]/90 backdrop-blur-xl border border-white/[0.08] shadow-2xl space-y-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <span className="text-xs font-mono text-[#dc143c] uppercase tracking-widest font-bold block">
-                  {coleccion} // ARCHIVE 2026
-                </span>
-                <h1 className="text-2xl md:text-3xl font-bold font-display uppercase tracking-tight text-[#FAF9F6] mt-1">
-                  {nombre}
-                </h1>
+        {/* ===== BOX 2: NOMBRE, SECCIÓN & ACCIONES CABECERA ===== */}
+        <div className="bento-cell bento-description">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="bento-section-tag">
+                <span className="tag-crimson">{seccionTexto}</span>
+                <span className="tag-sep"></span>
+                <span className="tag-muted">{tipo}</span>
               </div>
+              <h1 className="bento-title">{nombre}</h1>
+            </div>
 
-              {/* Botón Compartir Prenda (Abre ShareProductModal) */}
+            {/* Botones Cabecera: Compartir en Redes (Sin QR) + Favoritos */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                aria-label="Favorito"
+                className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                  isFavorite
+                    ? 'bg-[#dc143c] border-[#dc143c] text-white'
+                    : 'bg-white/5 border-white/10 text-[#FAF9F6] hover:border-[#dc143c] hover:text-[#dc143c]'
+                }`}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                </svg>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setShowShareModal(true)}
-                title="Compartir prenda en redes sociales"
-                aria-label="Compartir prenda"
-                className="w-10 h-10 rounded-full bg-[#1c1b1b] hover:bg-[#2a2a2a] text-[#FAF9F6] border border-white/[0.1] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                title="Compartir prenda en redes"
+                aria-label="Compartir"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-[#FAF9F6] border border-white/10 flex items-center justify-center transition-all cursor-pointer hover:border-[#dc143c] hover:text-[#dc143c]"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
-
-            {/* Precio & Envíos */}
-            <div className="flex items-baseline justify-between border-y border-white/[0.06] py-4">
-              <div>
-                <span className="text-[10px] font-mono text-[#ac8888] uppercase tracking-wider block">
-                  PRECIO OFICIAL
-                </span>
-                <span className="font-mono text-3xl font-bold text-white tracking-tight">
-                  {formatCurrency(precio)}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-mono text-emerald-400 block font-medium">
-                  Envío gratis &gt; Bs {siteConfig.shipping.freeShippingThreshold}
-                </span>
-                <span className="text-[10px] font-mono text-[#ac8888]">
-                  Despacho express a toda Bolivia
-                </span>
-              </div>
-            </div>
-
-            {/* Descripción */}
-            <p className="text-sm font-body text-[#ac8888] leading-relaxed">
-              {descripcion}
-            </p>
-
-            {/* Selector de Tallas con Guía */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-[#FAF9F6] uppercase font-bold tracking-wider">
-                  Seleccionar Talla (Boxy Cut)
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowSizeGuide(!showSizeGuide)}
-                  className="text-[#dc143c] hover:underline cursor-pointer"
-                >
-                  {showSizeGuide ? 'Ocultar Medidas' : 'Guía de Tallas 📏'}
-                </button>
-              </div>
-
-              {/* Selector de Tallas */}
-              <div className="flex items-center gap-2.5">
-                {tallas.map((talla) => {
-                  const isSelected = selectedTalla === talla;
-                  return (
-                    <button
-                      key={talla}
-                      type="button"
-                      onClick={() => setSelectedTalla(talla)}
-                      disabled={isSoldOut}
-                      className={`w-12 h-12 rounded-2xl font-mono text-sm font-bold flex items-center justify-center transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#dc143c] text-white shadow-[0_0_16px_rgba(220,20,60,0.6)] scale-105'
-                          : 'bg-[#1c1b1b] text-[#ac8888] hover:bg-[#2a2a2a] hover:text-white border border-white/[0.08]'
-                      } ${isSoldOut ? 'opacity-40 cursor-not-allowed' : ''}`}
-                    >
-                      {talla}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Guía de Medidas Desplegable */}
-              {showSizeGuide && (
-                <div className="p-4 rounded-2xl bg-[#0a0a0a] border border-white/[0.08] text-xs font-mono space-y-2 mt-2 animate-in fade-in duration-200">
-                  <div className="text-[#ffb3b3] font-bold uppercase mb-1">Medidas en Centímetros:</div>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[#ac8888] border-b border-white/[0.06] pb-1">
-                    <span>Talla</span><span>Pecho</span><span>Largo</span><span>Manga</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[#e5e2e1]">
-                    <span>S</span><span>56 cm</span><span>71 cm</span><span>22 cm</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[#e5e2e1]">
-                    <span>M</span><span>60 cm</span><span>74 cm</span><span>24 cm</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[#e5e2e1]">
-                    <span>L</span><span>64 cm</span><span>77 cm</span><span>25 cm</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[#e5e2e1]">
-                    <span>XL</span><span>68 cm</span><span>80 cm</span><span>26 cm</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Botones de Acción / Compra */}
-            <div className="space-y-3 pt-4">
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={isSoldOut}
-                className="w-full py-4 px-6 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-widest font-bold shadow-[0_4px_24px_rgba(220,20,60,0.5)] hover:shadow-[0_8px_32px_rgba(222,5,65,0.7)] transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <MorphIcon
-                  active={isAdded}
-                  IconA={PlusIcon}
-                  IconB={CheckIcon}
-                  className="w-5 h-5 text-white"
-                />
-                <span>
-                  {isSoldOut
-                    ? 'Agotado Temporalmente'
-                    : `Añadir a la Bolsa (${selectedTalla})`}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDirectWhatsApp}
-                className="w-full py-3.5 px-6 rounded-full bg-[#1c1b1b] hover:bg-[#201f1f] text-[#FAF9F6] border border-white/[0.1] font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#25D366]"></span>
-                <span>Pedir Directamente por WhatsApp</span>
-              </button>
-            </div>
           </div>
 
-          {/* Ficha Técnica de Taller */}
-          <div className="p-6 rounded-3xl bg-[#141416]/70 border border-white/[0.06] space-y-3">
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#FAF9F6] border-b border-white/[0.06] pb-2">
-              Especificaciones de Taller // Specs
-            </h3>
-            <dl className="space-y-2 text-xs font-mono">
-              {Object.entries(especificaciones).map(([key, value]) => (
-                <div key={key} className="flex justify-between py-1 border-b border-white/[0.03]">
-                  <dt className="text-[#ac8888]">{key}</dt>
-                  <dd className="text-[#FAF9F6] font-bold text-right max-w-[240px]">{value}</dd>
-                </div>
-              ))}
-            </dl>
+          <div className="bento-footer-row">
+            <span className="bento-id">ID: {slug || id}</span>
+            {stockDisponible > 0 && stockDisponible <= 4 && (
+              <span className="text-[11px] font-mono text-amber-400 font-bold uppercase animate-pulse">
+                ⚡ Solo {stockDisponible} uds disponibles
+              </span>
+            )}
           </div>
         </div>
+
+        {/* ===== BOX 3: DESCRIPCIÓN REAL DE LA PRENDA ===== */}
+        <div className="bento-cell bento-composition">
+          <span className="bento-cell-label">DESCRIPCIÓN</span>
+          <p className="bento-desc">
+            {descripcion && descripcion.trim() !== ''
+              ? descripcion
+              : 'Prenda experimental Zairen Lab. Confección de alta densidad con estructura definida y corte arquitectónico oversized.'}
+          </p>
+        </div>
+
+        {/* ===== BOX 4: SELECTOR DE TALLAS ===== */}
+        <div className="bento-cell bento-sizes">
+          <div className="bento-sizes-header">
+            <span className="bento-cell-label" style={{ marginBottom: 0 }}>TALLA</span>
+            <span className="bento-talla-active">{selectedTalla}</span>
+          </div>
+
+          <div className="bento-talla-grid">
+            {tallas.map((talla) => {
+              const isSelected = selectedTalla === talla;
+              return (
+                <button
+                  key={talla}
+                  type="button"
+                  onClick={() => setSelectedTalla(talla)}
+                  disabled={isSoldOut}
+                  className={`talla-btn ${isSelected ? 'talla-selected' : ''}`}
+                >
+                  {talla}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ===== BOX 5: BARRA DE ACCIONES Y PRECIO ===== */}
+        <div className="bento-cell bento-actions">
+          <div className="bento-price-block">
+            <span className="bento-cell-label" style={{ marginBottom: 0 }}>PRECIO</span>
+            <span className="bento-price-value">Bs. {precio.toFixed(2)}</span>
+          </div>
+
+          <div className="bento-actions-btns">
+            {isSoldOut ? (
+              <button
+                type="button"
+                disabled
+                className="bento-btn-cart bento-btn-disabled"
+              >
+                <span>Agotado</span>
+                <span className="material-symbols-outlined text-[18px]">block</span>
+              </button>
+            ) : (
+              <>
+                {/* Botón WhatsApp Fiel a CatalogoV0 */}
+                <button
+                  type="button"
+                  onClick={handleDirectWhatsApp}
+                  className="bento-btn-wsp"
+                  title="Consultar y ordenar por WhatsApp"
+                >
+                  <svg fill="currentColor" viewBox="0 0 32 32" className="w-4 h-4">
+                    <path d="M26.576 5.363c-2.69-2.69-6.406-4.354-10.511-4.354-8.209 0-14.865 6.655-14.865 14.865 0 2.732 0.737 5.291 2.022 7.491l-0.038-0.070-2.109 7.702 7.879-2.067c2.051 1.139 4.498 1.809 7.102 1.809h0.006c8.209-0.003 14.862-6.659 14.862-14.868 0-4.103-1.662-7.817-4.349-10.507l0 0zM16.062 28.228h-0.005c-0 0-0.001 0-0.001 0-2.319 0-4.489-0.64-6.342-1.753l0.056 0.031-0.451-0.267-4.675 1.227 1.247-4.559-0.294-0.467c-1.185-1.862-1.889-4.131-1.889-6.565 0-6.822 5.531-12.353 12.353-12.353s12.353 5.531 12.353 12.353c0 6.822-5.53 12.353-12.353 12.353h-0zM22.838 18.977c-0.371-0.186-2.197-1.083-2.537-1.208-0.341-0.124-0.589-0.185-0.837 0.187-0.246 0.371-0.958 1.207-1.175 1.455-0.216 0.249-0.434 0.279-0.805 0.094-1.15-0.466-2.138-1.087-2.997-1.852l0.010 0.009c-0.799-0.74-1.484-1.587-2.037-2.521l-0.028-0.052c-0.216-0.371-0.023-0.572 0.162-0.757 0.167-0.166 0.372-0.434 0.557-0.65 0.146-0.179 0.271-0.384 0.366-0.604l0.006-0.017c0.043-0.087 0.068-0.188 0.068-0.296 0-0.131-0.037-0.253-0.101-0.357l0.002 0.003c-0.094-0.186-0.836-2.014-1.145-2.758-0.302-0.724-0.609-0.625-0.836-0.637-0.216-0.010-0.464-0.012-0.712-0.012-0.395 0.010-0.746 0.188-0.988 0.463l-0.001 0.002c-0.802 0.761-1.3 1.834-1.3 3.023 0 0.026 0 0.053 0.001 0.079l-0-0.004c0.131 1.467 0.681 2.784 1.527 3.857l-0.012-0.015c1.604 2.379 3.742 4.282 6.251 5.564l0.094 0.043c0.548 0.248 1.25 0.513 1.968 0.74l0.149 0.041c0.442 0.14 0.951 0.221 1.479 0.221 0.303 0 0.601-0.027 0.889-0.078l-0.031 0.004c1.069-0.223 1.956-0.868 2.497-1.749l0.009-0.017c0.165-0.366 0.261-0.793 0.261-1.242 0-0.185-0.016-0.366-0.047-0.542l0.003 0.019c-0.092-0.155-0.34-0.247-0.712-0.434z" />
+                  </svg>
+                  <span>WhatsApp</span>
+                  <span className="material-symbols-outlined text-[18px]">east</span>
+                </button>
+
+                {/* Botón Carrito / Bolsa */}
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="bento-btn-cart"
+                  title="Añadir prenda al carrito de la tienda"
+                >
+                  <MorphIcon
+                    state={isAdded ? 'B' : 'A'}
+                    IconA={PlusIcon}
+                    IconB={CheckIcon}
+                    className="w-4 h-4 text-white"
+                  />
+                  <span>Bolsa ({selectedTalla})</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
       </div>
 
       {/* Modal Pantalla Completa (Lightbox Zoom) */}

@@ -131,10 +131,39 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
         return;
       }
 
-      if (data.session) {
-        // Guardar tokens en cookies para que el middleware de SSR los reconozca
+      if (data.session && data.session.user) {
+        // Guardar tokens en cookies para middleware
         document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
+
+        // Verificar o crear perfil en public.perfil como SUPERADMIN
+        let userRole = 'SUPERADMIN';
+        try {
+          const { data: profile } = await supabase
+            .from('perfil')
+            .select('*')
+            .eq('id', data.session.user.id)
+            .maybeSingle();
+
+          if (!profile) {
+            // Asignar SUPERADMIN al primer usuario / dueño de la tienda
+            await supabase.from('perfil').insert({
+              id: data.session.user.id,
+              nombre_completo: data.session.user.user_metadata?.full_name || email.split('@')[0].toUpperCase(),
+              rol: 'SUPERADMIN',
+              activo: true,
+            });
+            userRole = 'SUPERADMIN';
+          } else {
+            userRole = profile.rol || 'SUPERADMIN';
+          }
+        } catch (perfilErr) {
+          console.warn('Perfil warning:', perfilErr);
+        }
+
+        localStorage.setItem('zairen_user_id', data.session.user.id);
+        localStorage.setItem('zairen_user_email', data.session.user.email || email);
+        localStorage.setItem('zairen_user_role', userRole);
 
         window.location.href = redirectInput.value || '/admin';
       }
