@@ -38,6 +38,7 @@ const { id } = Astro.params;
 
 // Buscar producto
 let product = mockProducts.find((p) => p.slug === id || p.id === id) || mockProducts[0];
+let productImages = product.imagenes || [product.imagen];
 
 try {
   const { data: dbProd, error } = await supabase
@@ -59,18 +60,32 @@ try {
       tallas: dbProd.tallas && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL'],
       stockDisponible: Number(dbProd.stock_disponible || 0),
       esPrioritario: Boolean(dbProd.es_prioritario),
+      estadoComercial: dbProd.estado_comercial || 'ninguno',
     };
+
+    // Consultar imágenes de la tabla imagen si existen
+    const { data: dbImgs } = await supabase
+      .from('imagen')
+      .select('url_imagen')
+      .eq('producto_id', dbProd.id_producto)
+      .order('orden', { ascending: true });
+
+    if (dbImgs && dbImgs.length > 0) {
+      productImages = dbImgs.map((img) => img.url_imagen);
+    } else {
+      productImages = [product.imagen];
+      if (product.imagenDorsal) productImages.push(product.imagenDorsal);
+    }
   }
 } catch (e) {}
-
-const imagenes = [product.imagen];
-if (product.imagenDorsal) imagenes.push(product.imagenDorsal);
 ---
 
 <Layout
   title={`${product.nombre} // ${siteConfig.name}`}
-  description={product.subtitulo}
+  description={`${product.subtitulo} • Precio: Bs ${product.precio.toFixed(2)} • Confección en algodón peinado pesado en Tarija, Bolivia.`}
   image={product.imagen}
+  type="product"
+  price={product.precio}
 >
   <Navbar />
 
@@ -83,9 +98,10 @@ if (product.imagenDorsal) imagenes.push(product.imagenDorsal);
       precio={product.precio}
       coleccion={product.coleccion}
       descripcion={product.subtitulo}
-      imagenes={imagenes}
+      imagenes={productImages}
       tallas={product.tallas}
       stockDisponible={product.stockDisponible}
+      estadoComercial={product.estadoComercial}
     />
   </main>
 
