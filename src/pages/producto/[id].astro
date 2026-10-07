@@ -57,13 +57,15 @@ if (isSupabaseConfigured) {
         nombre: dbProd.nombre,
         precio: Number(dbProd.precio_venta),
         coleccion: dbProd.coleccion || 'DROP 01',
-        subtitulo: dbProd.descripcion || 'Confección pesada 280 GSM',
+        seccion: dbProd.coleccion || 'DROP 01',
+        tipo: 'Polera',
+        descripcion: dbProd.descripcion || '',
         imagen: dbProd.imagen_portada || mockProducts[0].imagen,
         imagenDorsal: dbProd.imagen_dorsal,
         tallas: dbProd.tallas && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL'],
         stockDisponible: Number(dbProd.stock_disponible || 0),
         esPrioritario: Boolean(dbProd.es_prioritario),
-        estadoComercial: dbProd.estado_comercial || 'ninguno',
+        estadoComercial: dbProd.estado_comercial || 'disponible',
       };
 
       // Consultar imágenes de la tabla imagen si existen
@@ -86,7 +88,7 @@ if (isSupabaseConfigured) {
 
 <Layout
   title={`${product.nombre} // ${siteConfig.name}`}
-  description={`${product.subtitulo} • Precio: Bs ${product.precio.toFixed(2)} • Confección en algodón peinado pesado en Tarija, Bolivia.`}
+  description={`${product.descripcion || product.nombre} • Precio: Bs ${product.precio.toFixed(2)} • Zairen Lab // Tarija, Bolivia.`}
   image={product.imagen}
   type="product"
   price={product.precio}
@@ -101,7 +103,9 @@ if (isSupabaseConfigured) {
       nombre={product.nombre}
       precio={product.precio}
       coleccion={product.coleccion}
-      descripcion={product.subtitulo}
+      seccion={product.seccion}
+      tipo={product.tipo}
+      descripcion={product.descripcion}
       imagenes={productImages}
       tallas={product.tallas}
       stockDisponible={product.stockDisponible}
