@@ -17,11 +17,20 @@ export interface SocialNetwork {
   icon?: string; // Nombre del icono lucide
 }
 
+export type EstadoComercial = 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno';
+
 export interface SiteConfig {
   name: string;
   slogan: string;
+  tagline: string;
+  origin: string;
   description: string;
   url: string;
+  cloudflareDomain: string;
+  seo: {
+    defaultImage: string;
+    twitterHandle: string;
+  };
   whatsapp: {
     number: string; // Formato internacional sin +, ej: 59174522654
     displayNumber: string; // Formato legible para el cliente, ej: +591 74522654
@@ -44,11 +53,20 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  // 1. IDENTIDAD DE LA MARCA
+  // 1. IDENTIDAD DE LA MARCA (BRAND BOOK 2026)
   name: import.meta.env.PUBLIC_BRAND_NAME || 'ZAIREN LAB',
-  slogan: 'TOKYO EXPERIMENTAL APPAREL // 2026',
-  description: 'Catálogo experimental streetwear fusionando minimalismo japonés, anime mecha cyberpunk y cortes oversized de 280-420 GSM.',
+  slogan: 'Evolución constante, identidad propia',
+  tagline: 'Menos ruido, más identidad',
+  origin: 'Tarija, Bolivia',
+  description: 'ZAIREN LAB // Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo.',
   url: import.meta.env.PUBLIC_SITE_URL || 'https://zairenlab.com',
+  cloudflareDomain: import.meta.env.PUBLIC_CLOUDFLARE_DOMAIN || 'https://zairen-web.pages.dev',
+
+  // SEO & Open Graph
+  seo: {
+    defaultImage: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1200&auto=format&fit=crop',
+    twitterHandle: '@zairenlab',
+  },
 
   // 2. WHATSAPP & CHECKOUT (Aquí defines el número donde llegarán los pedidos)
   whatsapp: {

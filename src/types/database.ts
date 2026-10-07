@@ -46,6 +46,8 @@ export interface Coleccion {
   created_at: string;
 }
 
+export type EstadoComercial = 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno';
+
 export interface Producto {
   id: string;
   nombre: string;
@@ -57,6 +59,7 @@ export interface Producto {
   publicado: boolean;
   destacado: boolean;
   es_prioritario: boolean;
+  estado_comercial?: EstadoComercial;
   coleccion_id: string;
   created_at: string;
   updated_at: string;

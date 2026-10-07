@@ -78,11 +78,13 @@ CREATE TABLE IF NOT EXISTS public.producto (
     publicado BOOLEAN NOT NULL DEFAULT FALSE,
     destacado BOOLEAN NOT NULL DEFAULT FALSE,
     es_prioritario BOOLEAN NOT NULL DEFAULT FALSE,
+    estado_comercial VARCHAR(20) NOT NULL DEFAULT 'ninguno',
     coleccion_id UUID NOT NULL REFERENCES public.coleccion(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_precio_producto CHECK (precio_venta >= 0),
-    CONSTRAINT chk_stock_minimo CHECK (stock_minimo >= 0)
+    CONSTRAINT chk_stock_minimo CHECK (stock_minimo >= 0),
+    CONSTRAINT chk_estado_comercial CHECK (estado_comercial IN ('preventa', 'promocion', 'oferta', 'nuevo', 'ninguno'))
 );
 
 CREATE TABLE IF NOT EXISTS public.atributo_producto (
@@ -362,7 +364,7 @@ CREATE TRIGGER trg_actualizar_estadisticas_cliente AFTER INSERT OR DELETE ON pub
 -- 4. VISTAS
 CREATE OR REPLACE VIEW public.vw_catalogo_publico AS
 SELECT
-    p.id AS id_producto, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, p.destacado, p.es_prioritario,
+    p.id AS id_producto, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, p.destacado, p.es_prioritario, p.estado_comercial,
     c.id AS id_coleccion, c.nombre AS coleccion, c.slug AS coleccion_slug,
     COALESCE((SELECT img.url_imagen FROM public.imagen img WHERE img.producto_id = p.id AND img.es_portada = TRUE LIMIT 1), (SELECT img.url_imagen FROM public.imagen img WHERE img.producto_id = p.id ORDER BY img.orden ASC LIMIT 1), '') AS imagen_portada,
     COALESCE(SUM(inv.cantidad - inv.cantidad_reservada), 0)::INT AS stock_disponible,
@@ -371,7 +373,7 @@ FROM public.producto p
 INNER JOIN public.coleccion c ON c.id = p.coleccion_id
 LEFT JOIN public.inventario inv ON inv.producto_id = p.id
 WHERE p.activo = TRUE AND p.publicado = TRUE AND c.activa = TRUE
-GROUP BY p.id, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, p.destacado, p.es_prioritario, c.id, c.nombre, c.slug;
+GROUP BY p.id, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, p.destacado, p.es_prioritario, p.estado_comercial, c.id, c.nombre, c.slug;
 
 CREATE OR REPLACE VIEW public.vw_inventario AS
 SELECT

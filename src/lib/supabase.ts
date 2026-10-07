@@ -3,6 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 
+export const isSupabaseConfigured =
+  Boolean(supabaseUrl) &&
+  !supabaseUrl.includes('placeholder') &&
+  !supabaseUrl.includes('tu-proyecto') &&
+  Boolean(supabaseAnonKey) &&
+  !supabaseAnonKey.includes('placeholder') &&
+  !supabaseAnonKey.includes('dummy');
+
 /**
  * Cliente público de Supabase para consultas client-side y SSR con RLS
  */
