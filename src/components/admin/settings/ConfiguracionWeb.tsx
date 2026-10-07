@@ -19,6 +19,16 @@ export function ConfiguracionWeb() {
     'FREE SHIPPING EN PEDIDOS > BS 250 // ENVÍOS EXPRESS A TODA BOLIVIA'
   );
   const [bannerActive, setBannerActive] = useState(true);
+  const [cartPromoActive, setCartPromoActive] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedPromo = localStorage.getItem('zairen_cart_promo_enabled');
+      if (savedPromo !== null) {
+        setCartPromoActive(savedPromo === 'true');
+      }
+    }
+  }, []);
 
   // Redes sociales dinámicas
   const [socials, setSocials] = useState<SocialNetwork[]>([
@@ -73,6 +83,9 @@ export function ConfiguracionWeb() {
 
   const handleSaveAll = (e: React.FormEvent) => {
     e.preventDefault();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('zairen_cart_promo_enabled', String(cartPromoActive));
+    }
     toast.success('Configuración de la tienda guardada con éxito', {
       description: 'Los cambios se reflejarán en toda la web pública y en el canal de WhatsApp.',
     });
@@ -347,6 +360,26 @@ export function ConfiguracionWeb() {
                 className="w-full px-3.5 py-2 bg-[#141416] text-white font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
               />
             </div>
+          </div>
+
+          {/* Toggle Opcional: Promoción en Carrito */}
+          <div className="pt-3 border-t border-white/[0.06]">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={cartPromoActive}
+                onChange={(e) => setCartPromoActive(e.target.checked)}
+                className="w-4 h-4 mt-0.5 rounded accent-[#dc143c] cursor-pointer"
+              />
+              <div>
+                <span className="font-mono text-xs uppercase font-bold text-white block">
+                  Mostrar Barra de Promoción de Envío Gratis en Carrito
+                </span>
+                <span className="text-[11px] font-body text-[#ac8888] block mt-0.5">
+                  (Desactivada por defecto. Si la activas, los clientes verán cuánto les falta para envío gratis en su bolsa).
+                </span>
+              </div>
+            </label>
           </div>
         </div>
 
