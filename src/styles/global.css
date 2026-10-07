@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #131313;
-  --color-surface-dim: #131313;
+  --color-surface: #0E0F11;
+  --color-surface-dim: #0A0A0A;
   --color-surface-bright: #3a3939;
-  --color-surface-container-lowest: #0e0e0e;
-  --color-surface-container-low: #1c1b1b;
-  --color-surface-container: #201f1f;
-  --color-surface-container-high: #2a2a2a;
-  --color-surface-container-highest: #353534;
-  --color-on-surface: #e5e2e1;
+  --color-surface-container-lowest: #050505;
+  --color-surface-container-low: #141416;
+  --color-surface-container: #1c1b1b;
+  --color-surface-container-high: #201f1f;
+  --color-surface-container-highest: #2a2a2a;
+  --color-on-surface: #FAF9F6;
   --color-on-surface-variant: #e6bdbc;
-  --color-outline: #ac8888;
+  --color-outline: #4A4A4A;
   --color-outline-variant: #5c3f3f;
   
   --color-primary: #ffb3b3;
@@ -28,14 +28,21 @@
   --color-error-container: #93000a;
   --color-on-error-container: #ffdad6;
   
-  --color-background: #131313;
-  --color-on-background: #e5e2e1;
+  --color-background: #0A0A0A;
+  --color-on-background: #FAF9F6;
 
-  --font-display: "Space Mono", monospace;
-  --font-headline: "Space Mono", monospace;
-  --font-body: "Hanken Grotesk", sans-serif;
+  /* Brand Book Oficial Tokens */
+  --color-brand-obsidian: #0A0A0A;
+  --color-brand-alabaster: #FAF9F6;
+  --color-brand-graphite: #4A4A4A;
+  --color-brand-crimson: #dc143c;
+
+  --font-display: "Poppins", sans-serif;
+  --font-headline: "Poppins", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-editorial: "Cormorant Garamond", serif;
   --font-code: "JetBrains Mono", monospace;
-  --font-price: "Space Mono", monospace;
+  --font-price: "JetBrains Mono", monospace;
 }
 
 @layer base {
@@ -51,10 +58,11 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background-color: #131313;
+    background-color: #0A0A0A;
     overflow-x: hidden;
   }
 }
+
 
 /* Ocultar barra de desplazamiento manteniendo scroll */
 ::-webkit-scrollbar {
