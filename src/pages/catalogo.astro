@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
+import Footer from '../components/common/Footer.astro';
+import { CatalogoGrid } from '../components/catalogo/CatalogoGrid';
+import { CarritoDrawer } from '../components/catalogo/CarritoDrawer';
+import { siteConfig } from '../config/site';
+import { supabase } from '../lib/supabase';
+import { mockProducts, mockCollections } from '../data/mockProducts';
+
+// Carga de productos desde Supabase (o mock de respaldo)
+let products = mockProducts;
+let collections = mockCollections;
+
+try {
+  const { data: dbProducts, error: pError } = await supabase
+    .from('vw_catalogo_publico')
+    .select('*')
+    .limit(50);
+
+  if (!pError && dbProducts && dbProducts.length > 0) {
+    products = dbProducts.map((p) => ({
+      id: p.id_producto,
+      slug: p.slug,
+      nombre: p.nombre,
+      precio: Number(p.precio_venta),
+      coleccion: p.coleccion || 'DROP 01',
+      subtitulo: p.descripcion || 'Confección pesada 280 GSM',
+      imagen: p.imagen_portada || mockProducts[0].imagen,
+      imagenDorsal: p.imagen_dorsal,
+      tallas: p.tallas && p.tallas.length > 0 ? p.tallas : ['S', 'M', 'L', 'XL'],
+      stockDisponible: Number(p.stock_disponible || 0),
+      esPrioritario: Boolean(p.es_prioritario),
+      estadoComercial: p.estado_comercial || 'ninguno',
+    }));
+  }
+
+  const { data: dbCols, error: cError } = await supabase
+    .from('coleccion')
+    .select('id, nombre, slug')
+    .eq('activa', true)
+    .order('orden', { ascending: true });
+
+  if (!cError && dbCols && dbCols.length > 0) {
+    collections = dbCols;
+  }
+} catch (e) {
+  // mock fallback
+}
+---
+
+<Layout
+  title={`Catálogo Oficial // ${siteConfig.name}`}
+  description="Catálogo de prendas oversize con confección pesada de 280 a 420 GSM. Pre-orders, nuevos lanzamientos y ediciones limitadas."
+>
+  <Navbar activePath="/catalogo" />
+
+  <main class="pt-28 pb-20 min-h-screen">
+    <!-- Header del Catálogo -->
+    <header class="max-w-[1440px] mx-auto px-4 md:px-12 mb-6">
+      <div class="p-8 md:p-12 rounded-3xl bg-gradient-to-br from-[#141416] via-[#0e0e0e] to-[#141416] border border-white/[0.08] relative overflow-hidden shadow-2xl">
+        <!-- Resplandor ambiental -->
+        <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#dc143c]/15 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-2xl space-y-3">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-xs font-mono uppercase tracking-widest font-bold">
+            <span class="w-2 h-2 rounded-full bg-[#dc143c] animate-pulse"></span>
+            CATÁLOGO & ARCHIVO // 2026
+          </div>
+          <h1 class="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight text-[#FAF9F6]">
+            Explora Nuestras Prendas
+          </h1>
+          <p className="text-sm font-body text-[#ac8888] leading-relaxed">
+            Pre-orders, nuevos drops y siluetas de identidad en reposo. Todas las piezas cuentan con algodón peinado pesado y corte boxy estructurado.
+          </p>
+          <div class="pt-2 flex flex-wrap items-center gap-3 text-xs font-mono text-[#ffb3b3]">
+            <span class="flex items-center gap-1.5 bg-[#1c1b1b] px-3 py-1 rounded-full border border-white/[0.06]">
+              <span class="text-emerald-400">✓</span> Envío gratis desde Bs {siteConfig.shipping.freeShippingThreshold}
+            </span>
+            <span class="flex items-center gap-1.5 bg-[#1c1b1b] px-3 py-1 rounded-full border border-white/[0.06]">
+              <span class="text-[#dc143c]">⚡</span> Despacho 24-48 hrs en Tarija y Bolivia
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Isla Interactiva: Cuadrícula con Filtros, Tallas, Carrito y Búsqueda -->
+    <CatalogoGrid
+      client:load
+      initialProducts={products}
+      collections={collections}
+    />
+  </main>
+
+  <!-- Carrito Drawer Global -->
+  <CarritoDrawer client:load />
+
+  <Footer />
+</Layout>
