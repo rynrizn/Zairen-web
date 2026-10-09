@@ -1,0 +1,105 @@
+---
+import { siteConfig } from '../../config/site';
+---
+
+<section class="relative min-h-[92vh] flex items-center justify-center pt-24 pb-16 px-4 md:px-8 overflow-hidden bg-[#0A0A0A]">
+  <!-- 1. Ambient Lighting (Sutil resplandor central) -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-white/[0.03] rounded-full blur-[140px] pointer-events-none -z-10"></div>
+  <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] bg-[#dc143c]/10 rounded-full blur-[160px] pointer-events-none -z-10"></div>
+
+  <!-- 2. Giant Typographic Watermark (Backdrop 'ZAIREN') -->
+  <div 
+    aria-hidden="true" 
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center select-none pointer-events-none -z-10"
+  >
+    <span class="text-[18vw] sm:text-[16vw] font-display font-extrabold uppercase tracking-tight text-white/[0.04] leading-none block transform scale-y-105">
+      ZAIREN
+    </span>
+  </div>
+
+  <!-- 3. Contenedor Principal en Retícula Editorial -->
+  <div class="w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+    
+    <!-- Lado Izquierdo: Manifiesto Oficial de Marca (Zairen Lab) -->
+    <div class="lg:col-span-3 flex flex-col items-start space-y-4 order-2 lg:order-1 text-left">
+      <div class="inline-flex items-center gap-2 border-l-2 border-[#dc143c] pl-3 py-0.5">
+        <span class="text-xs font-mono tracking-widest text-[#8F8F8C] uppercase block">
+          LÍNEA BÁSICOS // 280-420 GSM
+        </span>
+      </div>
+      <p class="text-sm md:text-base font-body text-[#FAF9F6]/90 leading-relaxed max-w-xs">
+        Vestir la identidad sin necesidad de gritarla. Confección pesada de silueta boxy y caída limpia.
+      </p>
+      <div class="pt-2 flex flex-col gap-1.5 text-xs font-mono text-[#8F8F8C]">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 bg-[#dc143c]"></span>
+          <span>100% Algodón Peinado</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 bg-[#FAF9F6]"></span>
+          <span>Cuello Ribete 3.5 cm reforzado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Centro Protagónico: Polera Lisa Negra Flotante (Sin texto, sin modelo) -->
+    <div class="lg:col-span-6 flex flex-col items-center justify-center relative order-1 lg:order-2 py-4">
+      <div class="relative w-full max-w-[480px] sm:max-w-[540px] aspect-square flex items-center justify-center group">
+        <!-- Resplandor sutil interactivo -->
+        <div class="absolute inset-8 bg-black/50 rounded-full blur-2xl -z-10 group-hover:scale-105 transition-transform duration-700"></div>
+        
+        <img
+          src="/editorial/hero_polera_plain_black.png"
+          alt="Polera Lisa Negra Boxy Zairen Lab // Confección Pesada 380 GSM"
+          class="w-full h-full object-contain filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.95)] transform group-hover:scale-[1.02] transition-transform duration-700 ease-out select-none"
+          loading="eager"
+        />
+
+        <!-- CTA Principal Centrado: Botón Rectangular de Alto Contraste -->
+        <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20">
+          <a
+            href="/catalogo"
+            class="group/btn inline-flex items-center gap-3 px-8 py-3.5 bg-[#FAF9F6] hover:bg-[#FAF9F6] text-[#0A0A0A] font-display font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:scale-105 active:scale-95 border border-[#FAF9F6]"
+          >
+            <span>VER CATÁLOGO</span>
+            <span class="inline-block transform group-hover/btn:translate-x-1 transition-transform">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lado Derecho: Metadatos Oficiales de Zairen Lab -->
+    <div class="lg:col-span-3 flex flex-col items-start lg:items-end space-y-4 order-3 text-left lg:text-right">
+      <div class="space-y-1.5">
+        <span class="text-xs font-mono tracking-widest text-[#8F8F8C] uppercase block">
+          TARIJA, BOLIVIA // TALLER TEXTIL
+        </span>
+        <span class="text-xs font-mono text-[#FAF9F6] block font-bold">
+          Despacho a todo el país
+        </span>
+        <p class="text-sm font-editorial italic text-[#8F8F8C] pt-1">
+          "{siteConfig.slogan}"
+        </p>
+        <span class="text-[11px] font-mono text-[#dc143c] uppercase tracking-wider block">
+          "Menos ruido, más identidad"
+        </span>
+      </div>
+
+      <!-- Sello Isotipo Hexagonal Oficial Zairen -->
+      <div class="pt-4 flex items-center gap-3">
+        <div class="w-12 h-12 p-2 border border-[#4A4A4A] bg-[#141416] flex items-center justify-center hover:border-[#FAF9F6] transition-colors">
+          <img
+            src="/brand/zairen_logo_oficial.svg"
+            alt="Isotipo Hexagonal Zairen Lab"
+            class="w-full h-full object-contain"
+          />
+        </div>
+        <div class="text-left">
+          <span class="text-[9px] font-mono text-[#8F8F8C] uppercase tracking-wider block">IDENTIDAD</span>
+          <span class="text-xs font-mono text-[#FAF9F6] uppercase font-bold block">ZAIREN LAB</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

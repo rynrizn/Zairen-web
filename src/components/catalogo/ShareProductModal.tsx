@@ -78,7 +78,7 @@ export function ShareProductModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md bg-[#141416] border border-white/[0.12] rounded-3xl p-6 md:p-8 shadow-[0_24px_64px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-6"
+        className="relative w-full max-w-sm sm:max-w-md max-h-[92vh] overflow-y-auto bg-[#141416] border border-white/[0.12] rounded-3xl p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botón Cerrar */}

@@ -1,0 +1,248 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
+import Footer from '../components/common/Footer.astro';
+import BrandManifestoGrid from '../components/home/BrandManifestoGrid.astro';
+import { WhatsAppContactModule } from '../components/common/WhatsAppContactModule';
+import { CarritoDrawer } from '../components/catalogo/CarritoDrawer';
+import { siteConfig } from '../config/site';
+---
+
+<Layout
+  title={`Identidad & Marca // ${siteConfig.name}`}
+  description="Manifiesto, líneas de diseño y especificaciones de calidad de Zairen Lab. Indumentaria experimental con corte boxy pesado."
+>
+  <Navbar activePath="/marca" />
+
+  <main class="min-h-screen bg-[#0A0A0A] pt-20 transition-colors">
+    <!-- Cabecera Editorial Limpia -->
+    <header class="max-w-[1440px] mx-auto px-4 md:px-8 py-12 md:py-16 border-b border-[#1C1B1B]">
+      <div class="space-y-3 max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-xs font-mono uppercase tracking-widest font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#dc143c]"></span>
+          IDENTIDAD // ARCHIVO
+        </div>
+        <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold font-display uppercase tracking-tight text-[#FAF9F6]">
+          Menos Ruido, <span class="text-[#dc143c]">Más Identidad</span>
+        </h1>
+        <p class="text-sm md:text-base font-body text-[#8F8F8C] leading-relaxed pt-2">
+          Zairen Lab es una tienda de indumentaria experimental streetwear. Prendas de alta densidad con siluetas boxy y acabados diseñados para perdurar sin saturación visual.
+        </p>
+      </div>
+    </header>
+
+    <!-- 1. MANIFIESTO EDITORIAL & RETÍCULA DE ESTÁNDARES -->
+    <div id="manifiesto">
+      <BrandManifestoGrid />
+    </div>
+
+    <!-- 2. LÍNEAS DE DISEÑO // CORTES ORTOGONALES -->
+    <section id="lineas" class="w-full py-20 px-4 md:px-8 max-w-[1440px] mx-auto border-t border-[#1C1B1B]">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+        <div>
+          <span class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest block">
+            COLECCIONES & LÍNEAS // 2026
+          </span>
+          <h2 class="text-3xl md:text-4xl font-extrabold font-display uppercase tracking-tight text-[#FAF9F6] mt-2">
+            Tres Expresiones
+          </h2>
+        </div>
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 text-xs font-mono text-[#FAF9F6] uppercase tracking-wider font-bold hover:text-[#dc143c] transition-colors"
+        >
+          <span>Explorar Catálogo Completo</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Línea 01: Poleras Limpias -->
+        <article class="bg-[#141416] border border-[#201f1f] p-8 flex flex-col justify-between min-h-[440px] group transition-all duration-300 hover:border-[#4A4A4A]">
+          <div class="space-y-4">
+            <span class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest block">
+              LÍNEA 01 // BÁSICOS
+            </span>
+            <h3 class="text-2xl font-bold font-display uppercase text-[#FAF9F6]">
+              Poleras Limpias
+            </h3>
+            <p class="text-sm font-body text-[#8F8F8C] leading-relaxed">
+              Silueta de máxima densidad sin estampados invasivos. Algodón peinado 280 GSM con caída boxy recta y cuello reforzado de 3.5 cm.
+            </p>
+          </div>
+          <div class="relative w-full aspect-[4/3] overflow-hidden mt-6 bg-[#0E0F11]">
+            <img
+              src="/editorial/editorial_white_heavyweight.png"
+              alt="Poleras Limpias Zairen Lab"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          </div>
+          <a
+            href="/?col=basicos"
+            class="mt-6 w-full py-3 bg-[#0A0A0A] hover:bg-[#FAF9F6] text-[#FAF9F6] hover:text-[#0A0A0A] border border-[#2A2A2A] text-xs font-mono uppercase tracking-wider font-bold text-center transition-colors block"
+          >
+            Ver Básicos
+          </a>
+        </article>
+
+        <!-- Línea 02: Mecha Tech -->
+        <article class="bg-[#141416] border border-[#201f1f] p-8 flex flex-col justify-between min-h-[440px] group transition-all duration-300 hover:border-[#4A4A4A]">
+          <div class="space-y-4">
+            <span class="text-xs font-mono text-[#dc143c] uppercase tracking-widest block">
+              LÍNEA 02 // MECHA TECH
+            </span>
+            <h3 class="text-2xl font-bold font-display uppercase text-[#FAF9F6]">
+              Diseño Propio
+            </h3>
+            <p class="text-sm font-body text-[#8F8F8C] leading-relaxed">
+              Ilustraciones inspiradas en anime mecha, tecnología distópica y tipografía urbana. Serigrafía tacto cero de alta durabilidad y fijación.
+            </p>
+          </div>
+          <div class="relative w-full aspect-[4/3] overflow-hidden mt-6 bg-[#0E0F11]">
+            <img
+              src="/editorial/editorial_male_oversized.png"
+              alt="Diseño Propio Zairen Lab"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          </div>
+          <a
+            href="/?col=mecha-tech"
+            class="mt-6 w-full py-3 bg-[#0A0A0A] hover:bg-[#FAF9F6] text-[#FAF9F6] hover:text-[#0A0A0A] border border-[#2A2A2A] text-xs font-mono uppercase tracking-wider font-bold text-center transition-colors block"
+          >
+            Ver Mecha Tech
+          </a>
+        </article>
+
+        <!-- Línea 03: Cotizaciones Especiales -->
+        <article class="bg-[#141416] border border-[#201f1f] p-8 flex flex-col justify-between min-h-[440px] group transition-all duration-300 hover:border-[#4A4A4A]">
+          <div class="space-y-4">
+            <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest block">
+              LÍNEA 03 // EXCLUSIVO
+            </span>
+            <h3 class="text-2xl font-bold font-display uppercase text-[#FAF9F6]">
+              Cotizaciones
+            </h3>
+            <p class="text-sm font-body text-[#8F8F8C] leading-relaxed">
+              Atención personalizada para pedidos de volumen, marcas colaboradoras y encargos especiales. Selecciona gramajes, siluetas y acabados.
+            </p>
+          </div>
+          <div class="relative w-full aspect-[4/3] overflow-hidden mt-6 bg-[#0E0F11]">
+            <img
+              src="/editorial/editorial_female_washed.png"
+              alt="Cotizaciones Especiales Zairen Lab"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          </div>
+          <a
+            href="#contacto"
+            class="mt-6 w-full py-3 bg-[#0A0A0A] hover:bg-emerald-600 text-[#FAF9F6] hover:text-white border border-[#2A2A2A] text-xs font-mono uppercase tracking-wider font-bold text-center transition-colors block"
+          >
+            Solicitar Cotización
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- 3. ESPECIFICACIONES TEXTILES // BLUEPRINT -->
+    <section id="especificaciones" class="w-full bg-[#0A0A0A] py-20 px-4 md:px-8 border-t border-[#1C1B1B]">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div class="lg:col-span-6 space-y-6">
+            <span class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest block">
+              ESTÁNDARES DE CALIDAD // 2026
+            </span>
+            <h2 class="text-3xl md:text-5xl font-extrabold font-display uppercase tracking-tight text-[#FAF9F6]">
+              Estructura en Cada Fibra
+            </h2>
+            <p class="text-sm font-body text-[#8F8F8C] leading-relaxed">
+              Cada prenda pasa por un control estricto de hilado, corte y fijación de pigmento antes de llegar a tus manos.
+            </p>
+
+            <div class="space-y-4 pt-2">
+              <div class="flex items-start gap-4 p-5 bg-[#141416] border border-[#201f1f]">
+                <span class="font-mono text-sm text-[#FAF9F6] font-bold shrink-0 pt-0.5">
+                  01 //
+                </span>
+                <div>
+                  <h4 class="font-mono text-sm uppercase font-bold text-[#FAF9F6]">
+                    Algodón Peinado 280-420 GSM
+                  </h4>
+                  <p class="text-xs font-body text-[#8F8F8C] mt-1 leading-relaxed">
+                    Cuerpo rígido y estructurado que mantiene la silueta boxy incluso tras decenas de lavados.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-4 p-5 bg-[#141416] border border-[#201f1f]">
+                <span class="font-mono text-sm text-[#FAF9F6] font-bold shrink-0 pt-0.5">
+                  02 //
+                </span>
+                <div>
+                  <h4 class="font-mono text-sm uppercase font-bold text-[#FAF9F6]">
+                    Serigrafía al Agua Tacto Cero
+                  </h4>
+                  <p class="text-xs font-body text-[#8F8F8C] mt-1 leading-relaxed">
+                    Sin plástico pegajoso ni rigidez. La tinta se fusiona directamente con la fibra del algodón.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-4 p-5 bg-[#141416] border border-[#201f1f]">
+                <span class="font-mono text-sm text-[#FAF9F6] font-bold shrink-0 pt-0.5">
+                  03 //
+                </span>
+                <div>
+                  <h4 class="font-mono text-sm uppercase font-bold text-[#FAF9F6]">
+                    Cuello Ribete de 3.5 cm Reforzado
+                  </h4>
+                  <p class="text-xs font-body text-[#8F8F8C] mt-1 leading-relaxed">
+                    Incorpora spandex de memoria para evitar que el cuello se deforme con el uso cotidiano.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6">
+            <div class="relative bg-[#141416] border border-[#201f1f] overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1000&auto=format&fit=crop"
+                alt="Detalle Textil Zairen Lab"
+                class="w-full h-full object-cover filter contrast-105"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+              <div class="absolute bottom-6 left-6 right-6 p-4 bg-[#0A0A0A]/90 backdrop-blur-md border border-[#201f1f] text-center">
+                <span class="font-mono text-xs text-[#FAF9F6] uppercase tracking-wider block">
+                  ZAIREN LAB // DESPACHO Y ATENCIÓN DIRECTA
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CANAL DE CONSULTAS & COTIZACIÓN POR WHATSAPP -->
+    <section id="contacto" class="w-full py-20 px-4 md:px-8 bg-[#0A0A0A] border-t border-[#1C1B1B]">
+      <div class="max-w-[1440px] mx-auto space-y-10">
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+          <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest block font-bold">
+            CANAL DIRECTO // ATENCIÓN
+          </span>
+          <h2 class="text-3xl md:text-5xl font-extrabold font-display uppercase tracking-tight text-[#FAF9F6]">
+            ¿Tienes alguna consulta o cotización?
+          </h2>
+          <p class="text-sm font-body text-[#8F8F8C]">
+            Escríbenos directamente para resolver cualquier duda sobre prendas, tallas, cotizaciones o disponibilidad.
+          </p>
+        </div>
+
+        <!-- Módulo Interactivo WhatsApp -->
+        <WhatsAppContactModule client:load />
+      </div>
+    </section>
+  </main>
+
+  <CarritoDrawer client:load />
+  <Footer />
+</Layout>

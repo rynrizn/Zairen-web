@@ -73,7 +73,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             </h2>
           </div>
           <p className="text-sm font-body text-[#ac8888] max-w-md">
-            Cortes oversized confeccionados en algodón pesado. Disponibilidad limitada con reabastecimiento programado.
+            Cortes oversized diseñados en algodón pesado de alto gramaje. Disponibilidad limitada con reabastecimiento programado.
           </p>
         </div>
         <div className="w-full h-[1px] bg-gradient-to-r from-[#dc143c] via-[#dc143c]/30 to-transparent mt-2"></div>
