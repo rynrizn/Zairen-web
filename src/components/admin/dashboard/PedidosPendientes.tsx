@@ -59,13 +59,13 @@ export function PedidosPendientes() {
   };
 
   return (
-    <section className="relative w-full rounded-2xl bg-[#1c1b1b]/90 backdrop-blur-xl p-6 border border-white/[0.08] shadow-xl overflow-hidden">
+    <section className="relative w-full rounded-none bg-[#1c1b1b]/90 backdrop-blur-xl p-6 border border-white/[0.08] shadow-xl overflow-hidden">
       {/* Indicador sutil carmesí superior */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#dc143c] via-[#de0541] to-transparent"></div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#dc143c]/15 text-[#dc143c] flex items-center justify-center">
+          <div className="w-9 h-9 rounded-none bg-[#dc143c]/15 text-[#dc143c] flex items-center justify-center">
             <span className="material-symbols-outlined text-[20px]">notifications_active</span>
           </div>
           <div>
@@ -73,7 +73,7 @@ export function PedidosPendientes() {
               <h2 className="font-headline text-base font-bold text-[#e5e2e1] uppercase tracking-tight">
                 Pedidos Pendientes por Revisar
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#dc143c] text-white font-mono text-[10px] tracking-wider font-bold shadow-[0_0_12px_rgba(220,20,60,0.5)]">
+              <span className="px-2.5 py-0.5 rounded-none bg-[#dc143c] text-white font-mono text-[10px] tracking-wider font-bold shadow-[0_0_12px_rgba(220,20,60,0.5)]">
                 {orders.length} PENDIENTES
               </span>
             </div>
@@ -98,10 +98,10 @@ export function PedidosPendientes() {
           orders.map((order) => (
             <div
               key={order.id}
-              className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] transition-all border border-white/[0.04]"
+              className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] transition-all border border-white/[0.04]"
             >
               <div className="flex items-start sm:items-center gap-4 min-w-0">
-                <div className="w-12 h-12 rounded-xl bg-[#141416] shrink-0 flex items-center justify-center font-mono font-bold text-[#dc143c] text-sm border border-white/[0.06]">
+                <div className="w-12 h-12 rounded-none bg-[#141416] shrink-0 flex items-center justify-center font-mono font-bold text-[#dc143c] text-sm border border-white/[0.06]">
                   {order.orderNumber}
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -111,7 +111,7 @@ export function PedidosPendientes() {
                     </span>
                     <span className="text-[#ac8888] text-xs font-mono">•</span>
                     <span className="text-xs font-mono text-[#dc143c]">{order.timeAgo}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#141416] text-[10px] font-mono text-[#e6bdbc] uppercase border border-white/[0.04]">
+                    <span className="px-2 py-0.5 rounded-none bg-[#141416] text-[10px] font-mono text-[#e6bdbc] uppercase border border-white/[0.04]">
                       {order.paymentMethod}
                     </span>
                   </div>
@@ -135,7 +135,7 @@ export function PedidosPendientes() {
                   <button
                     type="button"
                     onClick={() => handleConfirm(order)}
-                    className="px-4 py-1.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_2px_12px_rgba(220,20,60,0.35)] transition-all cursor-pointer"
+                    className="px-4 py-1.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_2px_12px_rgba(220,20,60,0.35)] transition-all cursor-pointer"
                   >
                     Confirmar
                   </button>
@@ -143,7 +143,7 @@ export function PedidosPendientes() {
                     type="button"
                     onClick={() => handleReject(order)}
                     title="Rechazar pedido"
-                    className="w-8 h-8 rounded-full bg-[#141416] hover:bg-[#93000a] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer border border-white/[0.06]"
+                    className="w-8 h-8 rounded-none bg-[#141416] hover:bg-[#93000a] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer border border-white/[0.06]"
                   >
                     ✕
                   </button>

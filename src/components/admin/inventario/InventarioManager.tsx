@@ -104,8 +104,8 @@ const initialInventoryData: InventarioItem[] = [
 
 export function InventarioManager() {
   const [items, setItems] = useState<InventarioItem[]>(initialInventoryData);
-  const [selectedItem, setSelectedItem] = useState<InventarioItem | null>(initialInventoryData[0]);
-  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(true);
+  const [selectedItem, setSelectedItem] = useState<InventarioItem | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selectedColeccion, setSelectedColeccion] = useState<string>('Todas');
   const [selectedEstado, setSelectedEstado] = useState<'Todos' | 'Disponible' | 'Pocas Uds' | 'Agotado'>('Todos');
@@ -181,11 +181,11 @@ export function InventarioManager() {
       <section className="flex flex-col xl:flex-row items-start xl:items-end justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.8)]"></span>
+            <span className="inline-block w-2.5 h-2.5 rounded-none bg-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.8)]"></span>
             <span className="font-mono text-xs text-[#dc143c] uppercase tracking-widest font-bold">
               STOCK CONTROL // PROTOCOL 04
             </span>
-            <span className="text-[#ac8888] font-mono text-xs">// TOKYO ARCHIVE</span>
+            <span className="text-[#ac8888] font-mono text-xs">// ZAIREN ARCHIVE</span>
           </div>
           <h1 className="font-headline text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight leading-none">
             CONTROL DE INVENTARIO{' '}
@@ -196,11 +196,11 @@ export function InventarioManager() {
           <div className="h-0.5 w-60 bg-gradient-to-r from-[#dc143c] via-[#dc143c]/40 to-transparent"></div>
         </div>
 
-        {/* Micro-Cards de Estadísticas Rápidas */}
+        {/* Micro-Cards de Estadísticas Rápidas (Ortogonales) */}
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           {/* Total Prendas */}
-          <div className="bg-[#1c1b1b]/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/[0.08] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-lg bg-[#141416] flex items-center justify-center text-[#dc143c]">
+          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
+            <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04]">
               <span className="material-symbols-outlined text-[18px]">inventory_2</span>
             </div>
             <div>
@@ -212,8 +212,8 @@ export function InventarioManager() {
           </div>
 
           {/* SKUs Activos */}
-          <div className="bg-[#1c1b1b]/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/[0.08] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-lg bg-[#141416] flex items-center justify-center text-[#dc143c]">
+          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
+            <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04]">
               <span className="material-symbols-outlined text-[18px]">tag</span>
             </div>
             <div>
@@ -225,8 +225,8 @@ export function InventarioManager() {
           </div>
 
           {/* Bajo Stock Crítico */}
-          <div className="bg-[#1c1b1b]/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/[0.08] shadow-md flex items-center gap-3 flex-1 sm:flex-initial shadow-[0_0_18px_rgba(220,20,60,0.15)]">
-            <div className="w-8 h-8 rounded-lg bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
+          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#dc143c]/30 shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
+            <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
               <span className="material-symbols-outlined text-[18px]">warning</span>
             </div>
             <div>
@@ -242,7 +242,7 @@ export function InventarioManager() {
             <button
               type="button"
               onClick={handleRefreshCdn}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border border-white/[0.06] cursor-pointer"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border border-[#2A2A2A] cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] text-[#dc143c]">sync</span>
               <span>Sincronizar CDN</span>
@@ -250,7 +250,7 @@ export function InventarioManager() {
             <button
               type="button"
               onClick={handleCreateNew}
-              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(220,20,60,0.35)] cursor-pointer"
+              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(220,20,60,0.35)] cursor-pointer border border-[#dc143c]"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>+ AGREGAR PRENDA</span>
@@ -259,8 +259,8 @@ export function InventarioManager() {
         </div>
       </section>
 
-      {/* 2. Barra de Filtros y Búsqueda */}
-      <section className="bg-[#1c1b1b]/80 backdrop-blur-md p-3 rounded-2xl border border-white/[0.08] shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      {/* 2. Barra de Filtros y Búsqueda (Ortogonal) */}
+      <section className="bg-[#1c1b1b]/80 p-3 rounded-none border border-[#2A2A2A] shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Input de Búsqueda */}
         <div className="relative flex-1 min-w-[260px] max-w-xl">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ac8888] text-[18px]">
@@ -271,7 +271,7 @@ export function InventarioManager() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="BUSCAR POR SKU (EJ: ZRN-044) O NOMBRE..."
-            className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs placeholder:text-[#5c3f3f] pl-10 pr-10 py-2.5 rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none shadow-inner"
+            className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs placeholder:text-[#888] pl-10 pr-10 py-2.5 rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
           />
           {search && (
             <button
@@ -287,7 +287,7 @@ export function InventarioManager() {
         {/* Grupo de Filtros */}
         <div className="flex flex-wrap items-center gap-2 overflow-x-auto py-1">
           {/* Colección */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-full border border-white/[0.04]">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A]">
             <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
               Colección:
             </span>
@@ -296,10 +296,10 @@ export function InventarioManager() {
                 key={col}
                 type="button"
                 onClick={() => setSelectedColeccion(col)}
-                className={`px-3 py-1 rounded-full font-mono text-xs uppercase transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border ${
                   selectedColeccion === col
-                    ? 'bg-[#dc143c] text-white font-bold shadow-sm'
-                    : 'text-[#ac8888] hover:text-white'
+                    ? 'bg-[#dc143c] text-white font-bold border-[#dc143c]'
+                    : 'text-[#ac8888] hover:text-white border-transparent'
                 }`}
               >
                 {col}
@@ -308,7 +308,7 @@ export function InventarioManager() {
           </div>
 
           {/* Estado de Stock */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-full border border-white/[0.04]">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A]">
             <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
               Estado:
             </span>
@@ -317,10 +317,10 @@ export function InventarioManager() {
                 key={est}
                 type="button"
                 onClick={() => setSelectedEstado(est)}
-                className={`px-2.5 py-1 rounded-full font-mono text-xs uppercase transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border ${
                   selectedEstado === est
-                    ? 'bg-[#2a2a2a] text-[#ffb3b3] font-bold border border-white/[0.08]'
-                    : 'text-[#ac8888] hover:text-white'
+                    ? 'bg-[#2a2a2a] text-[#FAF9F6] font-bold border-white/20'
+                    : 'text-[#ac8888] hover:text-white border-transparent'
                 }`}
               >
                 {est}
@@ -329,12 +329,12 @@ export function InventarioManager() {
           </div>
 
           {/* Selector de Vista */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-full ml-auto border border-white/[0.04]">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none ml-auto border border-[#2A2A2A]">
             <button
               type="button"
               onClick={() => setViewMode('list')}
               aria-label="Vista Lista"
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              className={`w-8 h-8 rounded-none flex items-center justify-center transition-all cursor-pointer ${
                 viewMode === 'list'
                   ? 'bg-[#dc143c] text-white shadow-sm'
                   : 'text-[#ac8888] hover:text-white'
@@ -346,7 +346,7 @@ export function InventarioManager() {
               type="button"
               onClick={() => setViewMode('grid')}
               aria-label="Vista Cuadrícula"
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              className={`w-8 h-8 rounded-none flex items-center justify-center transition-all cursor-pointer ${
                 viewMode === 'grid'
                   ? 'bg-[#dc143c] text-white shadow-sm'
                   : 'text-[#ac8888] hover:text-white'
@@ -358,172 +358,155 @@ export function InventarioManager() {
         </div>
       </section>
 
-      {/* 3. Main Workspace: Side-by-Side Dual Context */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        {/* Editor Activo (7 cols en XL cuando está abierto) */}
-        {isEditorOpen && (
-          <div className="xl:col-span-7">
-            <ProductoEditor
-              product={selectedItem}
-              onSave={handleSaveProduct}
-              onClose={() => setIsEditorOpen(false)}
-            />
+      {/* 3. Matriz Global de Stock - Ancho Completo a 12 Columnas */}
+      <div className="w-full bg-[#1c1b1b]/80 rounded-none p-6 border border-[#2A2A2A] shadow-xl flex flex-col space-y-4">
+        {/* Header de la Tabla */}
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px] text-[#dc143c]">
+              table_chart
+            </span>
+            <span className="font-headline text-base font-bold text-[#e5e2e1] uppercase tracking-wide">
+              CATÁLOGO DE PRODUCTOS & STOCK
+            </span>
           </div>
-        )}
-
-        {/* Tabla / Matriz Global de Stock (5 cols o 12 cols si editor cerrado) */}
-        <div
-          className={`${
-            isEditorOpen ? 'xl:col-span-5' : 'xl:col-span-12'
-          } bg-[#1c1b1b]/80 backdrop-blur-md rounded-2xl p-6 border border-white/[0.08] shadow-xl flex flex-col space-y-4`}
-        >
-          {/* Header de la Tabla */}
-          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-[#dc143c]">
-                table_chart
-              </span>
-              <span className="font-headline text-sm font-bold text-[#e5e2e1] uppercase">
-                REGISTRO DE STOCK
-              </span>
-            </div>
-            <div className="font-mono text-xs text-[#ac8888]">
-              MOSTRANDO {filteredItems.length} DE {items.length} SKUS
-            </div>
+          <div className="font-mono text-xs text-[#ac8888] uppercase">
+            MOSTRANDO {filteredItems.length} DE {items.length} SKUS REGISTRADOS
           </div>
+        </div>
 
-          {/* Listado de Productos */}
-          <div className={viewMode === 'list' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 gap-3'}>
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => {
-                const totalItem = Object.values(item.stock).reduce((a, b) => a + b, 0);
-                const isSelected = selectedItem?.id === item.id && isEditorOpen;
+        {/* Listado de Productos con Tipografía Aumentada en Escritorio */}
+        <div className={viewMode === 'list' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'}>
+          {filteredItems.length > 0 ? (
+            filteredItems.map((item) => {
+              const totalItem = Object.values(item.stock).reduce((a, b) => a + b, 0);
 
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => handleSelectItem(item)}
-                    className={`p-3.5 rounded-xl space-y-2.5 transition-all cursor-pointer border ${
-                      isSelected
-                        ? 'bg-[#201f1f] border-[#dc143c] shadow-[0_0_20px_rgba(220,20,60,0.2)]'
-                        : 'bg-[#141416]/70 hover:bg-[#201f1f] border-white/[0.04]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-14 rounded-lg overflow-hidden shrink-0 bg-[#201f1f] border border-white/[0.06]">
-                        <img
-                          src={item.imagen}
-                          alt={item.nombre}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs font-bold text-[#dc143c]">
-                            {item.sku}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 rounded-full font-mono text-[10px] uppercase font-bold ${
-                              totalItem === 0
-                                ? 'bg-red-950 text-red-400'
-                                : totalItem <= 8
-                                ? 'bg-amber-950 text-amber-400'
-                                : 'bg-emerald-950 text-emerald-400'
-                            }`}
-                          >
-                            {totalItem === 0
-                              ? 'Agotado'
-                              : totalItem <= 8
-                              ? 'Pocas Uds'
-                              : 'Disponible'}
-                          </span>
-                        </div>
-                        <h3 className="font-headline text-xs font-bold text-[#e5e2e1] truncate mt-0.5">
-                          {item.nombre}
-                        </h3>
-                        <p className="font-mono text-[10px] text-[#ac8888] truncate">
-                          {item.coleccion}
-                        </p>
-                      </div>
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectItem(item)}
+                  className="p-4 rounded-none space-y-3 transition-all cursor-pointer border bg-[#141416] hover:bg-[#1a191c] border-[#201f1f] hover:border-[#4A4A4A] group shadow-md"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Foto Prenda */}
+                    <div className="w-16 h-20 sm:w-20 sm:h-24 rounded-none overflow-hidden shrink-0 bg-[#0E0F11] border border-white/[0.08] relative">
+                      <img
+                        src={item.imagen}
+                        alt={item.nombre}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
 
-                    {/* Fila de Tallas y Stock Total */}
-                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
-                      <div className="flex items-center gap-1 font-mono text-[10px]">
-                        <span
-                          className={`px-1.5 py-0.5 rounded ${
-                            item.stock.S === 0
-                              ? 'bg-red-950/80 text-red-400 font-bold'
-                              : item.stock.S <= 3
-                              ? 'bg-amber-950/60 text-amber-300'
-                              : 'bg-[#2a2a2a] text-[#e5e2e1]'
-                          }`}
-                        >
-                          S: {item.stock.S}
+                    {/* Datos Principales con Tipografía Legible */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-xs sm:text-sm font-bold text-[#dc143c] tracking-wider">
+                          {item.sku}
                         </span>
                         <span
-                          className={`px-1.5 py-0.5 rounded ${
-                            item.stock.M === 0
-                              ? 'bg-red-950/80 text-red-400 font-bold'
-                              : item.stock.M <= 3
-                              ? 'bg-amber-950/60 text-amber-300'
-                              : 'bg-[#2a2a2a] text-[#e5e2e1]'
+                          className={`px-2.5 py-0.5 rounded-none font-mono text-[11px] uppercase font-bold border ${
+                            totalItem === 0
+                              ? 'bg-red-950/80 text-red-400 border-red-800'
+                              : totalItem <= 8
+                              ? 'bg-amber-950/80 text-amber-300 border-amber-800'
+                              : 'bg-emerald-950/80 text-emerald-300 border-emerald-800'
                           }`}
                         >
-                          M: {item.stock.M}
-                        </span>
-                        <span
-                          className={`px-1.5 py-0.5 rounded ${
-                            item.stock.L === 0
-                              ? 'bg-red-950/80 text-red-400 font-bold'
-                              : item.stock.L <= 3
-                              ? 'bg-amber-950/60 text-amber-300'
-                              : 'bg-[#2a2a2a] text-[#e5e2e1]'
-                          }`}
-                        >
-                          L: {item.stock.L}
-                        </span>
-                        <span
-                          className={`px-1.5 py-0.5 rounded ${
-                            item.stock.XL === 0
-                              ? 'bg-red-950/80 text-red-400 font-bold'
-                              : item.stock.XL <= 3
-                              ? 'bg-amber-950/60 text-amber-300'
-                              : 'bg-[#2a2a2a] text-[#e5e2e1]'
-                          }`}
-                        >
-                          XL: {item.stock.XL}
+                          {totalItem === 0
+                            ? 'Agotado'
+                            : totalItem <= 8
+                            ? `Pocas Uds (${totalItem})`
+                            : `Disponible (${totalItem})`}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-white">
-                          {totalItem} uds
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelectItem(item);
-                          }}
-                          className="w-7 h-7 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white flex items-center justify-center transition-transform hover:scale-105 cursor-pointer"
-                          title="Editar prenda"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">edit</span>
-                        </button>
+                      {/* Título en tamaño mediano/grande */}
+                      <h3 className="font-headline text-sm sm:text-base font-bold text-[#FAF9F6] truncate group-hover:text-[#dc143c] transition-colors">
+                        {item.nombre}
+                      </h3>
+
+                      <div className="flex flex-wrap items-center gap-3 pt-0.5 font-mono text-xs text-[#ac8888]">
+                        <span>{item.coleccion}</span>
+                        <span>•</span>
+                        <span className="text-white font-bold">Bs. {item.precio.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
-                );
-              })
-            ) : (
-              <div className="text-center py-12 text-xs font-mono text-[#ac8888]">
-                No se encontraron prendas con los filtros aplicados.
-              </div>
-            )}
-          </div>
+
+                  {/* Fila de Tallas y Stock Total */}
+                  <div className="flex items-center justify-between pt-2.5 border-t border-white/[0.06]">
+                    <div className="flex items-center gap-1.5 font-mono text-xs">
+                      {['S', 'M', 'L', 'XL'].map((talla) => {
+                        const stockTalla = item.stock[talla] || 0;
+                        return (
+                          <span
+                            key={talla}
+                            className={`px-2 py-0.5 rounded-none border text-[11px] font-bold ${
+                              stockTalla === 0
+                                ? 'bg-red-950/60 text-red-400 border-red-900/50'
+                                : stockTalla <= 3
+                                ? 'bg-amber-950/50 text-amber-300 border-amber-800/40'
+                                : 'bg-[#1c1b1b] text-[#FAF9F6] border-white/10'
+                            }`}
+                          >
+                            {talla}: {stockTalla}
+                          </span>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-[#FAF9F6]">
+                        {totalItem} UDS
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectItem(item);
+                        }}
+                        className="px-3 py-1 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-white text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer border border-[#2A2A2A]"
+                        title="Editar prenda en modal"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">edit</span>
+                        <span className="hidden sm:inline">Editar</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-center py-16 text-xs font-mono text-[#ac8888]">
+              No se encontraron prendas con los filtros aplicados.
+            </div>
+          )}
         </div>
       </div>
+
+      {/* 4. Modal Flotante de Edición / Creación de Producto (Portal UI) */}
+      {isEditorOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
+          onClick={() => setIsEditorOpen(false)}
+        >
+          <div
+            className="w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ProductoEditor
+              product={selectedItem}
+              onSave={(item) => {
+                handleSaveProduct(item);
+                setIsEditorOpen(false);
+              }}
+              onClose={() => setIsEditorOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

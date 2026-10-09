@@ -51,10 +51,10 @@ export function AlertasInventario() {
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl space-y-4">
+    <div className="p-6 rounded-none bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#f87171] animate-ping"></span>
+          <span className="w-2 h-2 rounded-none bg-[#f87171] animate-ping"></span>
           <h3 className="text-sm font-bold font-headline uppercase text-[#e5e2e1]">
             Alertas de Stock Crítico
           </h3>
@@ -87,7 +87,7 @@ export function AlertasInventario() {
               <button
                 type="button"
                 onClick={() => handleRestock(item)}
-                className="px-3 py-1.5 rounded-full bg-[#201f1f] hover:bg-[#dc143c] text-[#e5e2e1] hover:text-white border border-white/[0.06] text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
+                className="px-3 py-1.5 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-[#e5e2e1] hover:text-white border border-white/[0.06] text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap"
               >
                 + Reponer
               </button>

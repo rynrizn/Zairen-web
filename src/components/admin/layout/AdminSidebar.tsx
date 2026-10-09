@@ -137,19 +137,6 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
         </svg>
       ),
     },
-    {
-      label: 'Usuarios y Roles',
-      path: '/admin/usuarios',
-      id: 'usuarios',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      ),
-    },
   ];
 
   return (
@@ -319,7 +306,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           <div className="h-20 px-4 flex items-center justify-between border-b border-white/[0.06]">
             {!isCollapsed ? (
               <a href="/admin" className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] border border-white/[0.1] p-2 flex items-center justify-center shrink-0 shadow-md">
+                <div className="w-10 h-10 rounded-none bg-[#0a0a0a] border border-white/[0.1] p-2 flex items-center justify-center shrink-0 shadow-md">
                   <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex flex-col truncate">
@@ -333,7 +320,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
               </a>
             ) : (
               <a href="/admin" title="Panel General" className="mx-auto">
-                <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] border border-white/[0.1] p-2 flex items-center justify-center shadow-md hover:border-[#dc143c]/60 transition-colors">
+                <div className="w-10 h-10 rounded-none bg-[#0a0a0a] border border-white/[0.1] p-2 flex items-center justify-center shadow-md hover:border-[#dc143c]/60 transition-colors">
                   <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
                 </div>
               </a>
@@ -344,7 +331,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
               type="button"
               onClick={toggleCollapsed}
               title={isCollapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'}
-              className={`w-8 h-8 rounded-lg bg-[#1c1b1b] hover:bg-[#201f1f] text-[#ac8888] hover:text-white border border-white/[0.06] flex items-center justify-center cursor-pointer transition-colors ${
+              className={`w-8 h-8 rounded-none bg-[#1c1b1b] hover:bg-[#201f1f] text-[#ac8888] hover:text-white border border-white/[0.06] flex items-center justify-center cursor-pointer transition-colors ${
                 isCollapsed ? 'hidden' : 'flex'
               }`}
             >
@@ -367,7 +354,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                 type="button"
                 onClick={toggleCollapsed}
                 title="Expandir barra lateral"
-                className="w-9 h-9 rounded-xl bg-[#1c1b1b] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white border border-white/[0.06] flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-none bg-[#1c1b1b] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white border border-white/[0.06] flex items-center justify-center cursor-pointer transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />

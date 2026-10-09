@@ -8,12 +8,12 @@ const collectionsData = [
 
 export function DonutColecciones() {
   return (
-    <div className="p-6 rounded-2xl bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl flex flex-col justify-between">
+    <div className="p-6 rounded-none bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl flex flex-col justify-between">
       <div className="flex items-center justify-between pb-4 border-b border-white/[0.06] mb-4">
         <span className="text-xs font-mono text-[#e5e2e1] uppercase tracking-wider font-bold">
           Ventas por Colección
         </span>
-        <span className="text-[10px] font-mono text-[#dc143c] bg-[#dc143c]/15 px-2 py-0.5 rounded-full uppercase">
+        <span className="text-[10px] font-mono text-[#dc143c] bg-[#dc143c]/15 px-2 py-0.5 rounded-none uppercase">
           DROP 01
         </span>
       </div>
@@ -73,7 +73,7 @@ export function DonutColecciones() {
         {collectionsData.map((col) => (
           <div key={col.name} className="flex items-center justify-between text-xs font-mono">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: col.color }} />
+              <span className="w-2.5 h-2.5 rounded-none" style={{ backgroundColor: col.color }} />
               <span className="text-[#e5e2e1]">{col.name}</span>
             </div>
             <div className="flex items-center gap-2">

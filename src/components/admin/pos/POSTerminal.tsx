@@ -306,14 +306,14 @@ export function POSTerminal() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-white/[0.06] relative">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2 font-mono text-xs text-[#dc143c] uppercase tracking-widest font-bold">
-            <span className="inline-flex w-2 h-2 rounded-full bg-[#dc143c] shadow-[0_0_10px_#dc143c] animate-ping"></span>
+            <span className="inline-flex w-2 h-2 rounded-none bg-[#dc143c] shadow-[0_0_10px_#dc143c] animate-ping"></span>
             <span>ONLINE NODE // TOKYO-03</span>
             <span className="text-[#5c3f3f]">/</span>
             <span>ADMIN-POS-INTERFACE</span>
           </div>
           <h1 className="font-headline text-2xl md:text-4xl font-bold text-[#e5e2e1] uppercase tracking-tight flex items-center gap-3">
             TERMINAL DE REGISTRO DE VENTAS
-            <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-[#201f1f] text-[#ffb3b3] border border-white/[0.06]">
+            <span className="font-mono text-xs px-2.5 py-0.5 rounded-none bg-[#201f1f] text-[#ffb3b3] border border-white/[0.06]">
               POS & CONCIERGE
             </span>
           </h1>
@@ -323,8 +323,8 @@ export function POSTerminal() {
         </div>
 
         {/* Shift KPIs Compact Bar */}
-        <div className="flex flex-wrap items-center gap-3 bg-[#141416] p-2 rounded-xl border border-white/[0.06] shadow-xl">
-          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-lg border border-white/[0.04]">
+        <div className="flex flex-wrap items-center gap-3 bg-[#141416] p-2 rounded-none border border-white/[0.06] shadow-xl">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
             <span className="material-symbols-outlined text-[18px] text-[#dc143c]">payments</span>
             <div className="flex flex-col">
               <span className="font-mono text-[10px] text-[#ac8888] uppercase">Turno Actual</span>
@@ -332,7 +332,7 @@ export function POSTerminal() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-lg border border-white/[0.04]">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
             <span className="material-symbols-outlined text-[18px] text-[#ffb3b3]">receipt_long</span>
             <div className="flex flex-col">
               <span className="font-mono text-[10px] text-[#ac8888] uppercase">Tickets Hoy</span>
@@ -340,7 +340,7 @@ export function POSTerminal() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-lg border border-white/[0.04]">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
             <span className="material-symbols-outlined text-[18px] text-[#34d399]">badge</span>
             <div className="flex flex-col">
               <span className="font-mono text-[10px] text-[#ac8888] uppercase">Vendedor</span>
@@ -355,7 +355,7 @@ export function POSTerminal() {
         {/* Left Column: Product Catalog Picker (7 Cols) */}
         <section className="lg:col-span-7 flex flex-col gap-4">
           {/* Search & Barcode Input + Category Filter Bar */}
-          <div className="bg-[#1c1b1b]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/[0.08] shadow-lg flex flex-col gap-3">
+          <div className="bg-[#1c1b1b]/90 backdrop-blur-xl p-4 rounded-none border border-white/[0.08] shadow-lg flex flex-col gap-3">
             <div className="relative w-full flex items-center">
               <span className="material-symbols-outlined absolute left-3.5 text-[#ac8888] text-[20px] pointer-events-none">
                 barcode_scanner
@@ -365,9 +365,9 @@ export function POSTerminal() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Escanear código de barras, SKU o nombre (ej: ZRN-MK-01)..."
-                className="w-full pl-11 pr-24 py-2.5 bg-[#141416] text-white font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
+                className="w-full pl-11 pr-24 py-2.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
               />
-              <div className="absolute right-2 flex items-center gap-1 font-mono text-[10px] text-[#ac8888] bg-[#201f1f] px-2 py-1 rounded border border-white/[0.04]">
+              <div className="absolute right-2 flex items-center gap-1 font-mono text-[10px] text-[#ac8888] bg-[#201f1f] px-2 py-1 rounded-none border border-white/[0.04]">
                 <span className="text-[#dc143c] font-bold">⌘K</span>
                 <span>SCAN</span>
               </div>
@@ -380,7 +380,7 @@ export function POSTerminal() {
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-full font-mono text-xs uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-none font-mono text-xs uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                     selectedCategory === cat
                       ? 'bg-[#dc143c] text-white font-bold shadow-sm'
                       : 'bg-[#141416] text-[#ac8888] hover:text-white'
@@ -401,18 +401,18 @@ export function POSTerminal() {
               return (
                 <article
                   key={product.id}
-                  className="bg-[#1c1b1b]/90 backdrop-blur-md rounded-2xl p-3 flex flex-col justify-between border border-white/[0.06] hover:border-[#dc143c]/50 transition-all shadow-md group"
+                  className="bg-[#1c1b1b]/90 backdrop-blur-md rounded-none p-3 flex flex-col justify-between border border-white/[0.06] hover:border-[#dc143c]/50 transition-all shadow-md group"
                 >
-                  <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#141416] mb-2">
+                  <div className="relative w-full aspect-[4/5] rounded-none overflow-hidden bg-[#141416] mb-2">
                     <img
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-[#141416]/80 backdrop-blur-md font-mono text-[9px] text-[#ffb3b3] tracking-wider uppercase font-bold">
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-none bg-[#141416]/80 backdrop-blur-md font-mono text-[9px] text-[#ffb3b3] tracking-wider uppercase font-bold">
                       STOCK: {availableInSize}
                     </span>
-                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-[#dc143c] text-white font-mono text-[10px] font-bold">
+                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-none bg-[#dc143c] text-white font-mono text-[10px] font-bold">
                       {product.sku}
                     </span>
                   </div>
@@ -439,7 +439,7 @@ export function POSTerminal() {
                             type="button"
                             onClick={() => handleSelectSize(product.id, sz)}
                             disabled={!inStock}
-                            className={`w-6 h-6 rounded flex items-center justify-center font-bold text-xs transition-colors cursor-pointer ${
+                            className={`w-6 h-6 rounded-none flex items-center justify-center font-bold text-xs transition-colors cursor-pointer ${
                               !inStock
                                 ? 'opacity-30 line-through text-[#ac8888] cursor-not-allowed bg-[#141416]'
                                 : isSelected
@@ -457,7 +457,7 @@ export function POSTerminal() {
                       type="button"
                       onClick={() => handleAddToCart(product)}
                       disabled={availableInSize <= 0}
-                      className="w-7 h-7 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] disabled:opacity-40 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
+                      className="w-7 h-7 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] disabled:opacity-40 text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
                       title="Añadir a la orden"
                     >
                       <span className="material-symbols-outlined text-[16px]">add</span>
@@ -470,12 +470,12 @@ export function POSTerminal() {
         </section>
 
         {/* Right Column: Active Cart & Checkout Concierge (5 Cols) */}
-        <section className="lg:col-span-5 bg-[#1c1b1b]/95 backdrop-blur-2xl rounded-2xl p-5 border border-white/[0.08] shadow-2xl relative flex flex-col gap-4">
+        <section className="lg:col-span-5 bg-[#1c1b1b]/95 backdrop-blur-2xl rounded-none p-5 border border-white/[0.08] shadow-2xl relative flex flex-col gap-4">
           {/* Order Header & ID Badge */}
           <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#dc143c] shadow-[0_0_8px_#dc143c]"></span>
+                <span className="w-2.5 h-2.5 rounded-none bg-[#dc143c] shadow-[0_0_8px_#dc143c]"></span>
                 <h2 className="font-headline text-base text-white tracking-tight uppercase">
                   ORDEN ACTIVA
                 </h2>
@@ -495,12 +495,12 @@ export function POSTerminal() {
           </div>
 
           {/* Customer Mode Toggle */}
-          <div className="flex flex-col gap-2 bg-[#141416] p-3 rounded-xl border border-white/[0.04]">
-            <div className="grid grid-cols-2 p-1 bg-[#1c1b1b] rounded-lg font-mono text-[11px] uppercase tracking-wider text-center">
+          <div className="flex flex-col gap-2 bg-[#141416] p-3 rounded-none border border-white/[0.04]">
+            <div className="grid grid-cols-2 p-1 bg-[#1c1b1b] rounded-none font-mono text-[11px] uppercase tracking-wider text-center">
               <button
                 type="button"
                 onClick={() => setCustomerMode('registered')}
-                className={`py-1.5 rounded-md transition-all cursor-pointer ${
+                className={`py-1.5 rounded-none transition-all cursor-pointer ${
                   customerMode === 'registered'
                     ? 'bg-[#dc143c] text-white font-bold shadow-sm'
                     : 'text-[#ac8888] hover:text-white'
@@ -511,7 +511,7 @@ export function POSTerminal() {
               <button
                 type="button"
                 onClick={() => setCustomerMode('counter')}
-                className={`py-1.5 rounded-md transition-all cursor-pointer ${
+                className={`py-1.5 rounded-none transition-all cursor-pointer ${
                   customerMode === 'counter'
                     ? 'bg-[#dc143c] text-white font-bold shadow-sm'
                     : 'text-[#ac8888] hover:text-white'
@@ -531,7 +531,7 @@ export function POSTerminal() {
                     type="text"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-[#1c1b1b] text-white font-sans text-xs rounded-lg border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
+                    className="w-full px-2.5 py-1.5 bg-[#1c1b1b] text-white font-sans text-xs rounded-none border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -542,7 +542,7 @@ export function POSTerminal() {
                     type="text"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-[#1c1b1b] text-white font-mono text-xs rounded-lg border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
+                    className="w-full px-2.5 py-1.5 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
                   />
                 </div>
               </div>
@@ -555,10 +555,10 @@ export function POSTerminal() {
               cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#141416] border border-white/[0.04]"
+                  className="flex items-center justify-between p-2.5 rounded-none bg-[#141416] border border-white/[0.04]"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-lg bg-[#201f1f] overflow-hidden flex-shrink-0 border border-white/[0.06]">
+                    <div className="w-10 h-10 rounded-none bg-[#201f1f] overflow-hidden flex-shrink-0 border border-white/[0.06]">
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex flex-col">
@@ -566,7 +566,7 @@ export function POSTerminal() {
                         {item.name}
                       </span>
                       <div className="flex items-center gap-2 font-mono text-[10px] text-[#ac8888]">
-                        <span className="px-1.5 py-0.2 bg-[#dc143c]/20 text-[#dc143c] rounded font-bold">
+                        <span className="px-1.5 py-0.2 bg-[#dc143c]/20 text-[#dc143c] rounded-none font-bold">
                           Talla {item.size}
                         </span>
                         <span>Bs {item.price.toFixed(2)} c/u</span>
@@ -575,7 +575,7 @@ export function POSTerminal() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 bg-[#1c1b1b] px-1.5 py-0.5 rounded font-mono text-xs">
+                    <div className="flex items-center gap-1 bg-[#1c1b1b] px-1.5 py-0.5 rounded-none font-mono text-xs">
                       <button
                         type="button"
                         onClick={() => handleUpdateQuantity(item.id, -1)}
@@ -623,13 +623,13 @@ export function POSTerminal() {
                 value={coupon}
                 onChange={(e) => setCoupon(e.target.value.toUpperCase())}
                 placeholder="CUPÓN DE DESCUENTO"
-                className="w-full pl-8 pr-3 py-1.5 bg-[#141416] text-white font-mono text-xs uppercase rounded-lg border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
+                className="w-full pl-8 pr-3 py-1.5 bg-[#141416] text-white font-mono text-xs uppercase rounded-none border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
               />
             </div>
             <button
               type="button"
               onClick={handleApplyCoupon}
-              className="px-3 py-1.5 rounded-lg bg-[#201f1f] hover:bg-[#dc143c] text-white font-mono text-xs font-bold transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-white font-mono text-xs font-bold transition-all cursor-pointer"
             >
               Aplicar
             </button>
@@ -644,7 +644,7 @@ export function POSTerminal() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod('QR Simple')}
-                className={`p-2 rounded-xl flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
+                className={`p-2 rounded-none flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
                   paymentMethod === 'QR Simple'
                     ? 'bg-[#dc143c]/20 text-white border border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.2)]'
                     : 'bg-[#141416] text-[#ac8888] hover:text-white'
@@ -659,7 +659,7 @@ export function POSTerminal() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod('Transferencia')}
-                className={`p-2 rounded-xl flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
+                className={`p-2 rounded-none flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
                   paymentMethod === 'Transferencia'
                     ? 'bg-[#dc143c]/20 text-white border border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.2)]'
                     : 'bg-[#141416] text-[#ac8888] hover:text-white'
@@ -674,7 +674,7 @@ export function POSTerminal() {
               <button
                 type="button"
                 onClick={() => setPaymentMethod('Efectivo')}
-                className={`p-2 rounded-xl flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
+                className={`p-2 rounded-none flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
                   paymentMethod === 'Efectivo'
                     ? 'bg-[#dc143c]/20 text-white border border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.2)]'
                     : 'bg-[#141416] text-[#ac8888] hover:text-white'
@@ -689,8 +689,8 @@ export function POSTerminal() {
 
             {/* QR Inmediato Visual Box */}
             {paymentMethod === 'QR Simple' && (
-              <div className="flex items-center gap-3 bg-[#141416] p-3 rounded-xl border border-white/[0.06] mt-1">
-                <div className="w-16 h-16 bg-white p-1 rounded-lg flex-shrink-0 flex items-center justify-center">
+              <div className="flex items-center gap-3 bg-[#141416] p-3 rounded-none border border-white/[0.06] mt-1">
+                <div className="w-16 h-16 bg-white p-1 rounded-none flex-shrink-0 flex items-center justify-center">
                   <svg className="w-full h-full text-black" fill="currentColor" viewBox="0 0 100 100">
                     <rect height="30" width="30" x="0" y="0"></rect>
                     <rect fill="white" height="20" width="20" x="5" y="5"></rect>
@@ -726,7 +726,7 @@ export function POSTerminal() {
 
             {/* Efectivo - Calculador de Cambio */}
             {paymentMethod === 'Efectivo' && (
-              <div className="bg-[#141416] p-3 rounded-xl border border-white/[0.06] space-y-2 mt-1">
+              <div className="bg-[#141416] p-3 rounded-none border border-white/[0.06] space-y-2 mt-1">
                 <div className="flex items-center justify-between">
                   <label className="font-mono text-xs text-[#ac8888] uppercase">
                     Efectivo Recibido (Bs):
@@ -735,7 +735,7 @@ export function POSTerminal() {
                     type="number"
                     value={cashGiven}
                     onChange={(e) => setCashGiven(e.target.value)}
-                    className="w-24 text-right px-2 py-1 bg-[#1c1b1b] text-white font-price text-sm rounded border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                    className="w-24 text-right px-2 py-1 bg-[#1c1b1b] text-white font-price text-sm rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                   />
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
@@ -780,7 +780,7 @@ export function POSTerminal() {
             type="button"
             onClick={handleProcessSale}
             disabled={cart.length === 0}
-            className="w-full py-3.5 px-6 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] disabled:opacity-40 text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.4)] active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full py-3.5 px-6 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] disabled:opacity-40 text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.4)] active:scale-[0.98] transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">verified</span>
             <span>CONFIRMAR Y REGISTRAR VENTA →</span>
@@ -796,7 +796,7 @@ export function POSTerminal() {
             <h3 className="font-headline text-base text-white tracking-tight uppercase">
               ÚLTIMAS VENTAS REGISTRADAS HOY
             </h3>
-            <span className="px-2 py-0.5 rounded-full bg-[#141416] font-mono text-[10px] text-[#ffb3b3]">
+            <span className="px-2 py-0.5 rounded-none bg-[#141416] font-mono text-[10px] text-[#ffb3b3]">
               {recentSales.length} REGISTROS
             </span>
           </div>
@@ -804,7 +804,7 @@ export function POSTerminal() {
           <button
             type="button"
             onClick={() => toast.success('Reporte de cierre de caja descargado')}
-            className="px-4 py-1.5 rounded-full bg-[#141416] hover:bg-[#201f1f] text-[#e5e2e1] font-mono text-xs uppercase flex items-center gap-1.5 transition-colors border border-white/[0.06] cursor-pointer"
+            className="px-4 py-1.5 rounded-none bg-[#141416] hover:bg-[#201f1f] text-[#e5e2e1] font-mono text-xs uppercase flex items-center gap-1.5 transition-colors border border-white/[0.06] cursor-pointer"
           >
             <span className="material-symbols-outlined text-[14px]">file_download</span>
             <span>Exportar Cierre</span>
@@ -812,7 +812,7 @@ export function POSTerminal() {
         </div>
 
         {/* Table */}
-        <div className="w-full overflow-x-auto rounded-2xl bg-[#1c1b1b]/80 border border-white/[0.08] shadow-lg">
+        <div className="w-full overflow-x-auto rounded-none bg-[#1c1b1b]/80 border border-white/[0.08] shadow-lg">
           <table className="w-full text-left font-sans text-xs">
             <thead className="bg-[#141416]/60 font-mono text-[10px] text-[#ac8888] uppercase tracking-wider">
               <tr>
@@ -838,7 +838,7 @@ export function POSTerminal() {
                     {sale.itemsSummary}
                   </td>
                   <td className="py-3 px-3">
-                    <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[#141416] text-[#ffb3b3] border border-white/[0.04]">
+                    <span className="font-mono text-[10px] px-2 py-0.5 rounded-none bg-[#141416] text-[#ffb3b3] border border-white/[0.04]">
                       {sale.paymentMethod}
                     </span>
                   </td>
@@ -846,7 +846,7 @@ export function POSTerminal() {
                     Bs {sale.total.toFixed(2)}
                   </td>
                   <td className="py-3 px-3 text-center">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 font-mono text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-none bg-emerald-950 text-emerald-400 font-mono text-[10px] font-bold">
                       CONFIRMADO
                     </span>
                   </td>
@@ -855,7 +855,7 @@ export function POSTerminal() {
                       <button
                         type="button"
                         onClick={() => setActiveReceipt(sale)}
-                        className="p-1.5 rounded-full bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-white transition-colors cursor-pointer"
+                        className="p-1.5 rounded-none bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-white transition-colors cursor-pointer"
                         title="Ver Comprobante Térmico"
                       >
                         <span className="material-symbols-outlined text-[16px]">print</span>
@@ -867,7 +867,7 @@ export function POSTerminal() {
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1.5 rounded-full bg-[#141416] hover:bg-emerald-600 text-[#ac8888] hover:text-white transition-colors"
+                          className="p-1.5 rounded-none bg-[#141416] hover:bg-emerald-600 text-[#ac8888] hover:text-white transition-colors"
                           title="Enviar por WhatsApp"
                         >
                           <span className="material-symbols-outlined text-[16px]">chat</span>
@@ -885,17 +885,17 @@ export function POSTerminal() {
       {/* Modal: Recibo Térmico Digital */}
       {activeReceipt && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#141416] border border-white/[0.1] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl relative text-center">
+          <div className="bg-[#141416] border border-white/[0.1] rounded-none p-6 max-w-sm w-full space-y-4 shadow-2xl relative text-center">
             <button
               type="button"
               onClick={() => setActiveReceipt(null)}
-              className="absolute top-4 right-4 w-7 h-7 rounded-full bg-[#201f1f] text-[#ac8888] hover:text-white flex items-center justify-center text-xs"
+              className="absolute top-4 right-4 w-7 h-7 rounded-none bg-[#201f1f] text-[#ac8888] hover:text-white flex items-center justify-center text-xs"
             >
               ✕
             </button>
 
             {/* Recibo formato térmico */}
-            <div className="bg-[#1c1b1b] p-5 rounded-xl border border-dashed border-white/[0.15] space-y-3 text-left font-mono text-xs">
+            <div className="bg-[#1c1b1b] p-5 rounded-none border border-dashed border-white/[0.15] space-y-3 text-left font-mono text-xs">
               <div className="text-center space-y-1 pb-3 border-b border-dashed border-white/[0.15]">
                 <h4 className="font-headline text-base font-bold text-white tracking-widest uppercase">
                   ZAIREN LAB
@@ -939,14 +939,14 @@ export function POSTerminal() {
                   window.print();
                   toast.success('Enviado a impresora térmica');
                 }}
-                className="flex-1 py-2.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase transition-all cursor-pointer"
               >
                 Imprimir Recibo
               </button>
               <button
                 type="button"
                 onClick={() => setActiveReceipt(null)}
-                className="px-4 py-2.5 rounded-full bg-[#201f1f] text-[#ac8888] hover:text-white font-mono text-xs uppercase cursor-pointer"
+                className="px-4 py-2.5 rounded-none bg-[#201f1f] text-[#ac8888] hover:text-white font-mono text-xs uppercase cursor-pointer"
               >
                 Cerrar
               </button>

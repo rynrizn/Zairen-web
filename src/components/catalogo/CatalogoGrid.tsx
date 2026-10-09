@@ -63,7 +63,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#dc143c]"></span>
+              <span className="w-2 h-2 bg-[#dc143c]"></span>
               <span className="text-xs font-mono text-[#ffb3b3] uppercase tracking-widest font-bold">
                 01 // CATÁLOGO OFICIAL
               </span>
@@ -72,24 +72,37 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
               ARCHIVE & DROPS // 2026
             </h2>
           </div>
-          <p className="text-sm font-body text-[#ac8888] max-w-md">
-            Cortes oversized diseñados en algodón pesado de alto gramaje. Disponibilidad limitada con reabastecimiento programado.
-          </p>
+          {/* Logotipo Oficial Suelto con Degradado Sutil (Sin cajas ni bordes) */}
+          <div className="flex items-center gap-3">
+            <img
+              src="/brand/zairen_logo_oficial.svg"
+              alt="Zairen Lab"
+              className="w-10 h-10 object-contain opacity-90 hover:opacity-100 transition-opacity filter drop-shadow-[0_0_12px_rgba(220,20,60,0.35)]"
+            />
+            <div className="flex flex-col">
+              <span className="font-display font-black tracking-widest text-base md:text-lg uppercase bg-gradient-to-r from-white via-[#e5e2e1] to-[#ac8888] bg-clip-text text-transparent">
+                ZAIREN
+              </span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-[#dc143c]">
+                LAB // OFFICIAL
+              </span>
+            </div>
+          </div>
         </div>
         <div className="w-full h-[1px] bg-gradient-to-r from-[#dc143c] via-[#dc143c]/30 to-transparent mt-2"></div>
       </div>
 
       {/* Barra de Filtros y Búsqueda */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
-        {/* Chips de Colección */}
+        {/* Chips de Colección Ortogonales */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none">
           <button
             type="button"
             onClick={() => setSelectedCollection('todas')}
-            className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer border ${
               selectedCollection === 'todas'
-                ? 'bg-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.5)]'
-                : 'bg-[#201f1f] text-[#ac8888] hover:text-white border border-white/[0.06]'
+                ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.5)]'
+                : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
             }`}
           >
             Todas ({initialProducts.length})
@@ -102,10 +115,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
                 key={col.id}
                 type="button"
                 onClick={() => setSelectedCollection(col.slug)}
-                className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer ${
+                className={`px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer border ${
                   isSelected
-                    ? 'bg-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.5)]'
-                    : 'bg-[#201f1f] text-[#ac8888] hover:text-white border border-white/[0.06]'
+                    ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.5)]'
+                    : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
                 }`}
               >
                 {col.nombre.split('//')[0]?.trim() || col.nombre}
@@ -116,14 +129,14 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
 
         {/* Buscador y Orden */}
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
-          {/* Campo Búsqueda */}
+          {/* Campo Búsqueda Ortogonal */}
           <div className="relative flex-1 sm:w-64">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por SKU o nombre..."
-              className="w-full bg-[#1c1b1b] border border-white/[0.08] focus:border-[#dc143c] rounded-full px-4 py-2 text-xs font-mono text-[#e5e2e1] placeholder:text-[#ac8888]/60 focus:outline-none transition-colors"
+              className="w-full bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2 text-xs font-mono text-[#e5e2e1] placeholder:text-[#ac8888]/60 focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
@@ -136,11 +149,11 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             )}
           </div>
 
-          {/* Selector de Orden */}
+          {/* Selector de Orden Ortogonal */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-[#1c1b1b] border border-white/[0.08] text-[#e5e2e1] text-xs font-mono rounded-full px-3 py-2 focus:outline-none focus:border-[#dc143c] cursor-pointer"
+            className="bg-[#141416] border border-[#201f1f] text-[#e5e2e1] text-xs font-mono rounded-none px-3 py-2 focus:outline-none focus:border-[#dc143c] cursor-pointer"
           >
             <option value="recientes">Más Recientes</option>
             <option value="precio-asc">Precio: Menor a Mayor</option>
@@ -158,10 +171,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           <button
             type="button"
             onClick={() => setCommercialFilter('todos')}
-            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border ${
               commercialFilter === 'todos'
-                ? 'bg-white text-black'
-                : 'bg-[#1c1b1b] text-[#ac8888] hover:text-white'
+                ? 'bg-[#FAF9F6] text-black border-[#FAF9F6]'
+                : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
             }`}
           >
             Todos
@@ -169,10 +182,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           <button
             type="button"
             onClick={() => setCommercialFilter('preventa')}
-            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border ${
               commercialFilter === 'preventa'
-                ? 'bg-[#6d28d9] text-white shadow-[0_0_10px_rgba(139,92,246,0.5)]'
-                : 'bg-[#1c1b1b] text-[#ddd6fe]/70 hover:text-white hover:bg-[#201f1f]'
+                ? 'bg-[#6d28d9] text-white border-[#8b5cf6] shadow-[0_0_10px_rgba(139,92,246,0.5)]'
+                : 'bg-[#141416] text-[#ddd6fe]/70 hover:text-white border-[#201f1f]'
             }`}
           >
             Pre-Order ⚡
@@ -180,10 +193,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           <button
             type="button"
             onClick={() => setCommercialFilter('nuevo')}
-            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border ${
               commercialFilter === 'nuevo'
-                ? 'bg-[#047857] text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                : 'bg-[#1c1b1b] text-[#a7f3d0]/70 hover:text-white hover:bg-[#201f1f]'
+                ? 'bg-[#047857] text-white border-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                : 'bg-[#141416] text-[#a7f3d0]/70 hover:text-white border-[#201f1f]'
             }`}
           >
             Nuevo Drop 🔥
@@ -191,10 +204,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           <button
             type="button"
             onClick={() => setCommercialFilter('promocion')}
-            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border ${
               commercialFilter === 'promocion'
-                ? 'bg-[#dc143c] text-white shadow-[0_0_10px_rgba(220,20,60,0.5)]'
-                : 'bg-[#1c1b1b] text-[#fca5a5]/70 hover:text-white hover:bg-[#201f1f]'
+                ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)]'
+                : 'bg-[#141416] text-[#fca5a5]/70 hover:text-white border-[#201f1f]'
             }`}
           >
             Promoción 🏷️
@@ -202,23 +215,23 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           <button
             type="button"
             onClick={() => setCommercialFilter('oferta')}
-            className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border ${
               commercialFilter === 'oferta'
-                ? 'bg-[#b91c1c] text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]'
-                : 'bg-[#1c1b1b] text-[#fca5a5]/70 hover:text-white hover:bg-[#201f1f]'
+                ? 'bg-[#b91c1c] text-white border-[#ef4444] shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                : 'bg-[#141416] text-[#fca5a5]/70 hover:text-white border-[#201f1f]'
             }`}
           >
             Oferta 💥
           </button>
         </div>
 
-        {/* Checkbox de Disponibilidad */}
+        {/* Checkbox de Disponibilidad Ortogonal */}
         <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors">
           <input
             type="checkbox"
             checked={onlyAvailable}
             onChange={(e) => setOnlyAvailable(e.target.checked)}
-            className="w-4 h-4 rounded accent-[#dc143c] cursor-pointer"
+            className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
           />
           <span>Solo en stock</span>
         </label>
@@ -232,8 +245,8 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 px-4 rounded-2xl bg-[#1c1b1b]/50 border border-white/[0.06]">
-          <div className="w-12 h-12 rounded-full bg-[#201f1f] text-[#dc143c] flex items-center justify-center mx-auto mb-3 font-mono text-xl">
+        <div className="text-center py-20 px-4 rounded-none bg-[#141416] border border-[#201f1f]">
+          <div className="w-12 h-12 rounded-none bg-[#201f1f] text-[#dc143c] flex items-center justify-center mx-auto mb-3 font-mono text-xl border border-[#dc143c]/30">
             ∅
           </div>
           <h3 className="text-lg font-bold font-display uppercase text-[#e5e2e1] mb-1">
@@ -248,7 +261,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
               setSelectedCollection('todas');
               setSearchQuery('');
             }}
-            className="mt-4 px-5 py-2 rounded-full bg-[#dc143c] text-white text-xs font-mono uppercase tracking-wider font-bold cursor-pointer"
+            className="mt-4 px-5 py-2 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono uppercase tracking-wider font-bold cursor-pointer border border-[#dc143c]"
           >
             Restablecer Filtros
           </button>

@@ -110,7 +110,6 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     }
   }, [product]);
 
-  // Manejador de subida directa a Cloudinary con auto-WebP
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -121,56 +120,49 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     }
 
     setIsUploading(true);
-    const toastId = toast.loading('Comprimiendo a WebP y subiendo a Cloudinary...');
+    const toastId = toast.loading('Subiendo imagen a Cloudinary...');
 
     try {
-      const uploadPromises = Array.from(files).map((file) => uploadImageToCloudinary(file));
-      const results = await Promise.all(uploadPromises);
-
-      const newUrls = results.map((r) => r.secureUrl);
-      setImagenes((prev) => [...prev, ...newUrls].slice(0, 5));
-
-      toast.success(`${results.length} imagen(es) optimizadas y subidas con éxito`, { id: toastId });
-    } catch (err: any) {
-      console.error('Error subiendo imagen:', err);
-      toast.error(`Error al subir imagen: ${err.message || 'Verifica la conexión'}`, { id: toastId });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const res = await uploadImageToCloudinary(file, 'zairen/productos');
+        if (res.success && res.url) {
+          setImagenes((prev) => [...prev, res.url]);
+        } else {
+          toast.error(`Error al subir ${file.name}: ${res.error}`);
+        }
+      }
+      toast.success('Imágenes optimizadas en WebP añadidas', { id: toastId });
+    } catch {
+      toast.error('Ocurrió un error inesperado al subir', { id: toastId });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // Añadir imagen por URL manual
   const handleAddUrl = () => {
     if (!inputUrl.trim()) return;
     if (imagenes.length >= 5) {
-      toast.error('Máximo 5 imágenes por producto');
-      return;
-    }
-    if (!inputUrl.startsWith('http://') && !inputUrl.startsWith('https://')) {
-      toast.error('La URL debe comenzar con http:// o https://');
+      toast.error('Límite de 5 imágenes alcanzado');
       return;
     }
     setImagenes((prev) => [...prev, inputUrl.trim()]);
     setInputUrl('');
-    toast.success('Imagen añadida a la galería');
+    toast.info('Imagen añadida desde URL');
   };
 
-  // Eliminar imagen de la galería
   const handleRemoveImage = (index: number) => {
-    setImagenes((prev) => prev.filter((_, idx) => idx !== index));
+    setImagenes((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Mover imagen a la primera posición (Principal)
-  const handleSetMainImage = (index: number) => {
-    if (index === 0) return;
+  const handleSetPrimary = (index: number) => {
     setImagenes((prev) => {
-      const copy = [...prev];
-      const [item] = copy.splice(index, 1);
-      copy.unshift(item);
-      return copy;
+      const selected = prev[index];
+      const rest = prev.filter((_, i) => i !== index);
+      return [selected, ...rest];
     });
-    toast.info('Imagen establecida como portada principal');
+    toast.success('Imagen principal reasignada');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -180,39 +172,31 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       return;
     }
 
-    const slug = nombre
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-
-    const finalColeccion = coleccion === 'nueva' ? seccionNueva.trim() || 'General' : coleccion;
-    const finalTipo = tipo === 'otro' ? tipoNuevo.trim() || 'Prenda' : tipo;
-
-    const parsedTallas = tallasTexto
+    const tallasArray = tallasTexto
       .split(',')
       .map((t) => t.trim().toUpperCase())
       .filter(Boolean);
 
-    const mainImage = imagenes[0] || 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop';
-    const dorsalImage = imagenes[1] || '';
+    const coleccionFinal = seccionNueva.trim() !== '' ? seccionNueva.trim() : coleccion;
+    const tipoFinal = tipoNuevo.trim() !== '' ? tipoNuevo.trim() : tipo;
 
     const updatedItem: InventarioItem = {
       id: product?.id || `prod-${Date.now()}`,
       sku,
       nombre,
-      slug,
-      coleccion: finalColeccion,
-      seccion: finalColeccion,
-      tipo: finalTipo,
-      precio: Number(precio) || 0,
-      costo: Number(costo) || 0,
+      slug: product?.slug || nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      coleccion: coleccionFinal,
+      seccion: coleccionFinal,
+      tipo: tipoFinal,
+      precio,
+      costo,
       stock,
-      imagen: mainImage,
-      imagenDorsal: dorsalImage,
-      imagenes,
       estadoComercial,
-      tallas: parsedTallas.length > 0 ? parsedTallas : ['S', 'M', 'L', 'XL'],
+      tallas: tallasArray.length > 0 ? tallasArray : ['S', 'M', 'L', 'XL'],
       descripcion,
+      imagen: imagenes[0] || 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop',
+      imagenDorsal: imagenes[1] || undefined,
+      imagenes,
       publicado,
       destacado,
     };
@@ -224,19 +208,19 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   };
 
   return (
-    <div className="bg-[#1c1b1b]/95 backdrop-blur-xl rounded-2xl p-6 border border-white/[0.08] shadow-[0_12px_40px_rgba(0,0,0,0.6)] relative overflow-hidden flex flex-col space-y-5">
+    <div className="bg-[#141416] rounded-none p-6 border border-[#2A2A2A] relative flex flex-col space-y-5 shadow-2xl">
       {/* Indicador carmesí superior */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c]"></div>
 
       {/* Header del Formulario */}
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
+          <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
             <span className="material-symbols-outlined text-[18px]">edit_document</span>
           </div>
           <div>
             <span className="font-mono text-[10px] text-[#dc143c] uppercase tracking-widest block leading-none">
-              {product ? 'EDITANDO ARTÍCULO // CATALOGO V0' : 'AGREGAR ARTÍCULO // CATALOGO V0'}
+              {product ? 'MODAL DE EDICIÓN // ZAIREN CORE' : 'NUEVO REGISTRO // ZAIREN CORE'}
             </span>
             <h2 className="font-headline text-lg font-bold text-[#e5e2e1] uppercase mt-0.5">
               {nombre || 'NUEVA PRENDA'} <span className="text-[#dc143c] font-mono text-xs">// {sku}</span>
@@ -245,14 +229,14 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full bg-[#2a2a2a] font-mono text-[11px] text-[#ffb3b3]">
+          <span className="px-2.5 py-0.5 rounded-none bg-[#2a2a2a] font-mono text-[11px] text-[#ffb3b3]">
             {product ? `ID: ${product.id}` : 'NUEVO REGISTRO'}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#2a2a2a] hover:bg-[#353534] text-[#e5e2e1] flex items-center justify-center transition-colors cursor-pointer"
-            title="Cerrar editor"
+            className="w-8 h-8 rounded-none bg-[#2a2a2a] hover:bg-[#dc143c] text-[#e5e2e1] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            title="Cerrar modal"
           >
             ✕
           </button>
@@ -261,7 +245,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Columna Izquierda: Datos Principales & Galería Cloudinary (7 cols) */}
+          {/* Columna Izquierda: Datos Principales & Galería (7 cols) */}
           <div className="md:col-span-7 space-y-4">
             {/* Nombre del Producto */}
             <div>
@@ -272,205 +256,211 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej: ZR-01 Core Tee"
-                className="w-full bg-[#141416] text-[#e5e2e1] font-sans text-sm px-3.5 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                placeholder="Ej: Samurai Mecha Kanji // Oversized Tee"
+                className="w-full bg-[#1c1b1b] text-white font-sans text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                 required
               />
             </div>
 
-            {/* Precio & SKU */}
+            {/* SKU y Código */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Precio (Bs) *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-[#dc143c] font-bold">
-                    Bs
-                  </span>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={precio}
-                    onChange={(e) => setPrecio(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs pl-9 pr-3 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Código SKU
+                  SKU / Identificador
                 </label>
                 <input
                   type="text"
                   value={sku}
-                  onChange={(e) => setSku(e.target.value.toUpperCase())}
-                  placeholder="ZR-01"
-                  className="w-full bg-[#141416] text-[#ffb3b3] font-mono text-xs uppercase px-3.5 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                  onChange={(e) => setSku(e.target.value)}
+                  className="w-full bg-[#1c1b1b] text-[#dc143c] font-mono font-bold text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none uppercase"
                   required
                 />
               </div>
-            </div>
-
-            {/* Sección / Colección & Tipo */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Sección / Colección
-                </label>
-                <select
-                  value={coleccion}
-                  onChange={(e) => setColeccion(e.target.value)}
-                  className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-                >
-                  <option value="Essentials">Essentials</option>
-                  <option value="Anime">Anime</option>
-                  <option value="Películas">Películas</option>
-                  <option value="Tokyo Archive">Tokyo Archive</option>
-                  <option value="nueva">Otra (Nueva Sección)...</option>
-                </select>
-                {coleccion === 'nueva' && (
-                  <input
-                    type="text"
-                    value={seccionNueva}
-                    onChange={(e) => setSeccionNueva(e.target.value)}
-                    placeholder="Nombre de la nueva sección"
-                    className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3 py-2 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none mt-2"
-                  />
-                )}
-              </div>
 
               <div>
                 <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Tipo de Producto
+                  Tipo / Categoría
                 </label>
                 <select
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value)}
-                  className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                  className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                 >
                   <option value="Polera">Polera</option>
-                  <option value="Ropa">Ropa</option>
-                  <option value="Servicio">Servicio</option>
-                  <option value="Zapatillas">Zapatillas</option>
-                  <option value="Figuras">Figuras</option>
-                  <option value="otro">Otro (Nuevo Tipo)...</option>
+                  <option value="Hoodie">Hoodie</option>
+                  <option value="Pantalón">Pantalón</option>
+                  <option value="Accesorio">Accesorio</option>
+                  <option value="Gorra">Gorra</option>
+                  <option value="__nuevo__">+ Crear nuevo tipo...</option>
                 </select>
-                {tipo === 'otro' && (
+                {tipo === '__nuevo__' && (
                   <input
                     type="text"
                     value={tipoNuevo}
                     onChange={(e) => setTipoNuevo(e.target.value)}
-                    placeholder="Nombre del nuevo tipo"
-                    className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3 py-2 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none mt-2"
+                    placeholder="Escribe el nuevo tipo..."
+                    className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2 rounded-none border border-[#dc143c] mt-1.5 focus:outline-none"
                   />
                 )}
               </div>
             </div>
 
-            {/* ======================================================== */}
-            {/* ZONA DE CARGA AUTOMÁTICA CLOUDINARY (1-5 FOTOS WEBP)     */}
-            {/* ======================================================== */}
+            {/* Colección */}
+            <div>
+              <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                Colección / Línea de Diseño
+              </label>
+              <select
+                value={coleccion}
+                onChange={(e) => setColeccion(e.target.value)}
+                className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+              >
+                <option value="Anime Mecha // Drop 01">Anime Mecha // Drop 01</option>
+                <option value="Cyberpunk Tokyo // Spec">Cyberpunk Tokyo // Spec</option>
+                <option value="Streetwear Zen // Core">Streetwear Zen // Core</option>
+                <option value="Essentials">Essentials</option>
+                <option value="__nueva__">+ Crear nueva colección...</option>
+              </select>
+              {coleccion === '__nueva__' && (
+                <input
+                  type="text"
+                  value={seccionNueva}
+                  onChange={(e) => setSeccionNueva(e.target.value)}
+                  placeholder="Nombre de la nueva colección..."
+                  className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2 rounded-none border border-[#dc143c] mt-1.5 focus:outline-none"
+                />
+              )}
+            </div>
+
+            {/* Precios y Costes */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  Precio Venta (Bs) *
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={precio}
+                  onChange={(e) => setPrecio(parseFloat(e.target.value))}
+                  className="w-full bg-[#1c1b1b] text-white font-price font-bold text-sm px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  Costo Fabricación (Bs)
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={costo}
+                  onChange={(e) => setCosto(parseFloat(e.target.value))}
+                  className="w-full bg-[#1c1b1b] text-[#ac8888] font-price text-sm px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Galería de Fotos */}
             <div className="space-y-2 pt-2">
               <div className="flex items-center justify-between">
                 <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider">
-                  Imágenes del Producto (Máximo 5 - La primera será la Principal)
+                  Fotos de la Prenda ({imagenes.length}/5)
                 </label>
                 <span className="font-mono text-[10px] text-[#dc143c]">
-                  {imagenes.length}/5 CARGADAS
+                  ★ La 1ra es frontal, 2da dorsal
                 </span>
               </div>
 
-              {/* Botón de subida local directa */}
+              {/* Botón Subir Cloudinary */}
               <div className="flex gap-2">
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileUpload}
-                  accept="image/*"
                   multiple
+                  accept="image/png, image/jpeg, image/webp"
                   className="hidden"
                 />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading || imagenes.length >= 5}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] text-[#FAF9F6] border border-white/[0.1] font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-2.5 px-4 bg-[#201f1f] hover:bg-[#2a2a2a] border border-white/[0.08] text-white font-mono text-xs uppercase rounded-none flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-[#dc143c]">cloud_upload</span>
-                  <span>{isUploading ? 'Subiendo a Cloudinary...' : 'Subir Fotos (Auto-WebP)'}</span>
+                  <span className="material-symbols-outlined text-[16px] text-[#dc143c]">
+                    cloud_upload
+                  </span>
+                  <span>{isUploading ? 'Procesando WebP...' : 'Subir Imágenes'}</span>
                 </button>
               </div>
 
-              {/* Input para añadir URL directa si se desea */}
-              <div className="flex gap-2 mt-2">
+              {/* Input URL Alternativo */}
+              <div className="flex gap-2">
                 <input
-                  type="text"
+                  type="url"
                   value={inputUrl}
                   onChange={(e) => setInputUrl(e.target.value)}
-                  placeholder="O pega una URL: https://..."
-                  className="flex-1 bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3 py-2 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                  placeholder="O ingresa URL externa..."
+                  className="flex-1 bg-[#1c1b1b] text-white font-mono text-xs px-3 py-2 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={handleAddUrl}
-                  className="px-3.5 py-2 rounded-xl bg-[#201f1f] hover:bg-[#dc143c] text-white border border-white/[0.1] text-xs font-mono transition-colors cursor-pointer"
-                  title="Añadir URL"
+                  className="px-4 bg-[#201f1f] hover:bg-[#2a2a2a] text-[#FAF9F6] text-xs font-mono rounded-none border border-white/[0.08] cursor-pointer"
                 >
-                  +
+                  + Añadir
                 </button>
               </div>
 
-              {/* Contenedor de Miniaturas de Galería */}
-              <div className="grid grid-cols-5 gap-2.5 p-3 rounded-xl border border-dashed border-white/[0.1] bg-[#141416]/50 min-h-[90px] items-center">
-                {imagenes.length === 0 ? (
-                  <div className="col-span-5 text-center text-xs font-mono text-[#737373] py-4">
-                    Sin imágenes cargadas aún. Selecciona hasta 5 fotos.
-                  </div>
-                ) : (
-                  imagenes.map((imgUrl, idx) => (
-                    <div
-                      key={idx}
-                      className="relative group aspect-[4/5] rounded-lg overflow-hidden border border-white/[0.15] bg-[#0e0e0e]"
-                    >
-                      <img src={imgUrl} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
-                      {idx === 0 && (
-                        <span className="absolute bottom-1 left-1 bg-[#dc143c] text-white font-mono text-[8px] font-bold px-1 py-0.5 rounded shadow">
-                          PRINCIPAL
-                        </span>
-                      )}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                        {idx > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleSetMainImage(idx)}
-                            title="Hacer principal"
-                            className="w-6 h-6 rounded-full bg-white/20 hover:bg-[#dc143c] text-white text-xs flex items-center justify-center"
-                          >
-                            ★
-                          </button>
-                        )}
+              {/* Grilla Miniaturas */}
+              <div className="grid grid-cols-5 gap-2 pt-1">
+                {imagenes.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="relative aspect-[3/4] bg-[#0E0F11] border border-white/[0.1] rounded-none overflow-hidden group"
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 bg-[#dc143c] text-white text-[9px] font-mono px-1 py-0.5 rounded-none font-bold">
+                        PORTADA
+                      </span>
+                    )}
+                    {idx === 1 && (
+                      <span className="absolute top-1 left-1 bg-blue-600 text-white text-[9px] font-mono px-1 py-0.5 rounded-none font-bold">
+                        DORSAL
+                      </span>
+                    )}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 transition-opacity">
+                      {idx !== 0 && (
                         <button
                           type="button"
-                          onClick={() => handleRemoveImage(idx)}
-                          title="Eliminar foto"
-                          className="w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center"
+                          onClick={() => handleSetPrimary(idx)}
+                          title="Hacer portada"
+                          className="w-6 h-6 rounded-none bg-white/20 hover:bg-[#dc143c] text-white text-xs flex items-center justify-center cursor-pointer"
                         >
-                          ✕
+                          ★
                         </button>
-                      </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        title="Eliminar foto"
+                        className="w-6 h-6 rounded-none bg-red-600/80 hover:bg-red-600 text-white text-xs flex items-center justify-center cursor-pointer"
+                      >
+                        ✕
+                      </button>
                     </div>
-                  ))
-                )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Columna Derecha: Estado, Tallas, Descripción y Visibilidad (5 cols) */}
+          {/* Columna Derecha: Estado, Tallas, Descripción y Stock (5 cols) */}
           <div className="md:col-span-5 space-y-4">
-            {/* Estado Inicial */}
+            {/* Estado Comercial */}
             <div>
               <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
                 Estado Comercial
@@ -478,7 +468,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
               <select
                 value={estadoComercial}
                 onChange={(e) => setEstadoComercial(e.target.value as any)}
-                className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
               >
                 <option value="nuevo">NUEVO (Verde)</option>
                 <option value="disponible">DISPONIBLE (Azul)</option>
@@ -498,7 +488,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                 value={tallasTexto}
                 onChange={(e) => setTallasTexto(e.target.value)}
                 placeholder="S, M, L, XL"
-                className="w-full bg-[#141416] text-[#e5e2e1] font-mono text-xs px-3.5 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                 required
               />
             </div>
@@ -511,19 +501,19 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
             {/* Descripción Corta */}
             <div>
               <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                Descripción del Producto
+                Descripción de la Prenda
               </label>
               <textarea
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 rows={3}
                 placeholder="Detalla los aspectos clave de la prenda..."
-                className="w-full bg-[#141416] text-[#e5e2e1] font-sans text-xs px-3.5 py-2.5 rounded-xl border border-white/[0.08] focus:border-[#dc143c] focus:outline-none resize-none"
+                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-sans text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none resize-none"
               />
             </div>
 
             {/* Interruptor de Visibilidad */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#141416] border border-white/[0.08]">
+            <div className="flex items-center justify-between p-3 rounded-none bg-[#1c1b1b] border border-white/[0.08]">
               <div>
                 <span className="text-xs font-mono font-bold text-white block">Producto Visible</span>
                 <span className="text-[10px] font-mono text-[#ac8888]">¿Mostrar este producto en el catálogo?</span>
@@ -535,7 +525,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                   onChange={(e) => setPublicado(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-10 h-5 bg-[#2a2a2a] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#dc143c]"></div>
+                <div className="w-10 h-5 bg-[#2a2a2a] peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-4 after:w-4 after:transition-all peer-checked:bg-[#dc143c]"></div>
               </label>
             </div>
           </div>
@@ -546,13 +536,13 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/[0.08]"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.4)] transition-all cursor-pointer"
+            className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
           >
             Guardar Producto
           </button>

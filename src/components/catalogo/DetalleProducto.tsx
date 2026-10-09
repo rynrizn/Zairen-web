@@ -410,14 +410,14 @@ export function DetalleProducto({
             type="button"
             onClick={() => setIsFullscreen(false)}
             aria-label="Cerrar pantalla completa"
-            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-[#1c1b1b] text-white flex items-center justify-center text-xl hover:bg-[#dc143c] transition-colors cursor-pointer"
+            className="absolute top-6 right-6 w-12 h-12 rounded-none bg-[#1c1b1b] text-white flex items-center justify-center text-xl hover:bg-[#dc143c] transition-colors cursor-pointer border border-white/[0.1]"
           >
             ✕
           </button>
           <img
             src={currentImage}
             alt={nombre}
-            className="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+            className="max-w-[95vw] max-h-[90vh] object-contain rounded-none shadow-2xl"
           />
         </div>
       )}

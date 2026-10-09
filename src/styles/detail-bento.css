@@ -1,6 +1,6 @@
 /* ============================================================ */
 /* ⛩️ ZAIREN LAB // PRODUCT DETAIL BENTO GRID (CATALOGO V0)      */
-/* Zen-inspired glass card layout with Tokyo experimental accent */
+/* Zen-inspired glass card layout with orthogonal brutalist accent */
 /* ============================================================ */
 
 .detail-bento-container {
@@ -27,13 +27,13 @@
 .bento-sizes        { grid-column: 3 / 4; grid-row: 2 / 3; }
 .bento-actions      { grid-column: 2 / 4; grid-row: 3 / 4; }
 
-/* Celda Vidrio (Glass Card) */
+/* Celda Vidrio (Glass Card Ortogonal) */
 .bento-cell {
   background: rgba(20, 20, 22, 0.75);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+  border-radius: 0px !important;
   overflow: hidden;
   position: relative;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -68,7 +68,7 @@
   top: 16px;
   left: 16px;
   padding: 6px 14px;
-  border-radius: 9999px;
+  border-radius: 0px !important;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   font-weight: 700;
@@ -86,7 +86,7 @@
   right: 16px;
   width: 38px;
   height: 38px;
-  border-radius: 50%;
+  border-radius: 0px !important;
   background: rgba(14, 14, 16, 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -116,7 +116,7 @@
   z-index: 20;
   background: rgba(10, 10, 12, 0.65);
   padding: 6px 10px;
-  border-radius: 16px;
+  border-radius: 0px !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -127,7 +127,7 @@
 .detail-thumbnail {
   width: 40px;
   height: 52px;
-  border-radius: 8px;
+  border-radius: 0px !important;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -256,7 +256,7 @@
   color: #dc143c;
   background: rgba(220, 20, 60, 0.12);
   padding: 2px 10px;
-  border-radius: 9999px;
+  border-radius: 0px !important;
   border: 1px solid rgba(220, 20, 60, 0.3);
 }
 
@@ -268,7 +268,7 @@
 
 .talla-btn {
   height: 44px;
-  border-radius: 12px;
+  border-radius: 0px !important;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   font-weight: 600;
@@ -334,7 +334,7 @@
   gap: 8px;
   flex: 1;
   height: 48px;
-  border-radius: 9999px;
+  border-radius: 0px !important;
   background: #25D366;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;
@@ -362,7 +362,7 @@
   gap: 8px;
   flex: 1;
   height: 48px;
-  border-radius: 9999px;
+  border-radius: 0px !important;
   background: #dc143c;
   color: #fff;
   font-family: 'JetBrains Mono', monospace;

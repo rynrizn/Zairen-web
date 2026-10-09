@@ -58,7 +58,7 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm sm:max-w-md max-h-[92vh] overflow-y-auto bg-[#141416] border border-white/[0.12] rounded-3xl p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-4 my-auto"
+        className="relative w-full max-w-sm sm:max-w-md max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#201f1f] rounded-none p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botón Cerrar */}
@@ -66,7 +66,7 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
           type="button"
           onClick={onClose}
           aria-label="Cerrar modal"
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#201f1f] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 w-8 h-8 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer z-10 border border-white/[0.08]"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -75,8 +75,8 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
 
         {/* Encabezado */}
         <div className="space-y-1 pt-1">
-          <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-[10px] font-mono uppercase tracking-widest font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#dc143c] animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-none bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-[10px] font-mono uppercase tracking-widest font-bold">
+            <span className="w-1.5 h-1.5 bg-[#dc143c] animate-pulse"></span>
             COMPARTIR TIENDA OFICIAL
           </div>
           <h3 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight text-[#FAF9F6] pt-1">
@@ -87,12 +87,12 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
           </p>
         </div>
 
-        {/* Contenedor Código QR Responsivo */}
-        <div className="relative p-2.5 rounded-2xl bg-[#0a0a0a] border border-white/[0.08] shadow-inner shrink-0">
+        {/* Contenedor Código QR Responsivo Ortogonal */}
+        <div className="relative p-3 rounded-none bg-[#0a0a0a] border border-[#201f1f] shadow-inner shrink-0">
           <img
             src={qrImageUrl}
             alt="Código QR de la tienda oficial"
-            className="w-40 h-40 sm:w-48 sm:h-48 object-contain rounded-xl"
+            className="w-40 h-40 sm:w-48 sm:h-48 object-contain rounded-none"
             loading="lazy"
           />
           <div className="py-1 text-[10px] font-mono text-[#ac8888] tracking-wider uppercase flex items-center justify-center">
@@ -102,17 +102,17 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
 
         {/* Input con URL & Botón Copiar */}
         <div className="w-full space-y-2.5">
-          <div className="flex items-center gap-2 p-1.5 pl-3 rounded-2xl bg-[#1c1b1b] border border-white/[0.08]">
+          <div className="flex items-center gap-2 p-1.5 pl-3 rounded-none bg-[#1c1b1b] border border-[#201f1f]">
             <span className="text-[11px] font-mono text-[#ac8888] truncate flex-1 text-left">
               {shareUrl}
             </span>
             <button
               type="button"
               onClick={handleCopy}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-none text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer shrink-0 border ${
                 copied
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-[#dc143c] hover:bg-[#ff2d55] text-white shadow-[0_2px_12px_rgba(220,20,60,0.4)]'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-[#dc143c] hover:bg-[#ff2d55] text-white border-[#dc143c] shadow-[0_2px_12px_rgba(220,20,60,0.4)]'
               }`}
             >
               {copied ? '¡Copiado!' : 'Copiar'}
@@ -127,7 +127,7 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 px-2.5 rounded-xl bg-[#1c1b1b] hover:bg-[#25D366]/20 hover:text-[#25D366] text-[#e5e2e1] border border-white/[0.06] text-[10px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center"
+              className="py-2 px-2.5 rounded-none bg-[#1c1b1b] hover:bg-[#25D366]/20 hover:text-[#25D366] text-[#e5e2e1] border border-white/[0.06] text-[10px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center"
             >
               <span>WhatsApp</span>
             </a>
@@ -138,7 +138,7 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
               )}&url=${encodeURIComponent(shareUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 px-2.5 rounded-xl bg-[#1c1b1b] hover:bg-[#1DA1F2]/20 hover:text-[#1DA1F2] text-[#e5e2e1] border border-white/[0.06] text-[10px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center"
+              className="py-2 px-2.5 rounded-none bg-[#1c1b1b] hover:bg-[#1DA1F2]/20 hover:text-[#1DA1F2] text-[#e5e2e1] border border-white/[0.06] text-[10px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center"
             >
               <span>X / Twitter</span>
             </a>
@@ -146,7 +146,7 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
             <button
               type="button"
               onClick={handleNativeShare}
-              className="py-2 px-2.5 rounded-xl bg-[#1c1b1b] hover:bg-white/10 text-[#e5e2e1] border border-white/[0.06] text-[10px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center cursor-pointer"
+              className="py-2 px-2.5 rounded-none bg-[#1c1b1b] hover:bg-white/10 text-[#e5e2e1] border border-white/[0.06] text-[10px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center cursor-pointer"
             >
               <span>Más...</span>
             </button>

@@ -43,10 +43,10 @@ export function MatrizStock({ stock, onChange, readOnly = false }: MatrizStockPr
   };
 
   return (
-    <div className="bg-[#141416] p-4 rounded-xl space-y-3 border border-white/[0.06] shadow-inner">
+    <div className="bg-[#141416] p-4 rounded-none space-y-3 border border-white/[0.06] shadow-inner">
       <div className="flex items-center justify-between pb-1 border-b border-white/[0.04]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#dc143c] animate-pulse"></span>
+          <span className="w-2 h-2 rounded-none bg-[#dc143c] animate-pulse"></span>
           <span className="font-mono text-xs text-[#dc143c] uppercase font-bold tracking-wider">
             Matriz de Stock x Talla
           </span>
@@ -62,10 +62,10 @@ export function MatrizStock({ stock, onChange, readOnly = false }: MatrizStockPr
           return (
             <div
               key={size}
-              className="flex items-center justify-between bg-[#1c1b1b] hover:bg-[#201f1f] px-3 py-2 rounded-lg border border-white/[0.04] transition-colors"
+              className="flex items-center justify-between bg-[#1c1b1b] hover:bg-[#201f1f] px-3 py-2 rounded-none border border-white/[0.04] transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded bg-[#2a2a2a] font-mono text-xs font-bold text-white flex items-center justify-center border border-white/[0.06]">
+                <span className="w-7 h-7 rounded-none bg-[#2a2a2a] font-mono text-xs font-bold text-white flex items-center justify-center border border-white/[0.06]">
                   {size}
                 </span>
                 <span className={`font-mono text-[11px] ${status.color}`}>
@@ -79,7 +79,7 @@ export function MatrizStock({ stock, onChange, readOnly = false }: MatrizStockPr
                     type="button"
                     onClick={() => handleUpdate(size, -1)}
                     disabled={count <= 0}
-                    className="w-7 h-7 rounded bg-[#2a2a2a] hover:bg-[#353534] disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
+                    className="w-7 h-7 rounded-none bg-[#2a2a2a] hover:bg-[#353534] disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
                     aria-label={`Disminuir stock talla ${size}`}
                   >
                     −
@@ -89,19 +89,19 @@ export function MatrizStock({ stock, onChange, readOnly = false }: MatrizStockPr
                     min="0"
                     value={count}
                     onChange={(e) => handleSetDirect(size, parseInt(e.target.value, 10))}
-                    className="w-12 text-center font-price text-sm bg-[#141416] text-white font-bold py-1 rounded border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                    className="w-12 text-center font-price text-sm bg-[#141416] text-white font-bold py-1 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => handleUpdate(size, 1)}
-                    className="w-7 h-7 rounded bg-[#2a2a2a] hover:bg-[#353534] text-white flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
+                    className="w-7 h-7 rounded-none bg-[#2a2a2a] hover:bg-[#353534] text-white flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
                     aria-label={`Aumentar stock talla ${size}`}
                   >
                     +
                   </button>
                 </div>
               ) : (
-                <span className="font-price text-sm font-bold text-white px-2">
+                <span className="font-price text-sm font-bold text-[#e5e2e1]">
                   {count} uds
                 </span>
               )}
@@ -110,14 +110,9 @@ export function MatrizStock({ stock, onChange, readOnly = false }: MatrizStockPr
         })}
       </div>
 
-      {/* Stock Total */}
-      <div className="flex items-center justify-between pt-2 px-1 border-t border-white/[0.06] text-[#e5e2e1]">
-        <span className="font-mono text-xs uppercase tracking-wider text-[#ac8888]">
-          Stock Total Calculado:
-        </span>
-        <span className="font-headline text-lg font-bold text-[#dc143c]">
-          {total} <span className="font-mono text-xs text-[#e5e2e1] font-normal">UDS</span>
-        </span>
+      <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between font-mono text-xs">
+        <span className="text-[#ac8888] uppercase">Stock Total Prenda</span>
+        <span className="font-bold text-white">{total} UDS</span>
       </div>
     </div>
   );

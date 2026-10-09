@@ -357,13 +357,13 @@ export function PedidosTable() {
       <div className="flex flex-col gap-2 relative">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="inline-flex w-2.5 h-2.5 rounded-full bg-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.8)] animate-pulse"></span>
+            <span className="inline-flex w-2.5 h-2.5 rounded-none bg-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.8)] animate-pulse"></span>
             <p className="font-mono text-xs text-[#dc143c] uppercase tracking-widest font-bold">
               LOGÍSTICA URBANA // NODO CENTRAL
             </p>
           </div>
           <div className="flex items-center gap-3 font-mono text-xs text-[#ac8888]">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#201f1f] text-white border border-white/[0.04]">
+            <span className="px-2.5 py-0.5 rounded-none bg-[#201f1f] text-white border border-white/[0.04]">
               SYS.TIME: 14:38:09 BOT
             </span>
             <span className="hidden sm:inline-block text-[#5c3f3f]">•</span>
@@ -382,7 +382,7 @@ export function PedidosTable() {
       </div>
 
       {/* 2. Filtros, Pestañas de Estado & Consola de Búsqueda */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#1c1b1b]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/[0.08] shadow-xl">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#1c1b1b]/90 backdrop-blur-xl p-4 rounded-none border border-white/[0.08] shadow-xl">
         {/* Pestañas de Estado */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
           {(['Todos', 'Pendientes', 'Confirmados', 'Entregados', 'Cancelados'] as const).map(
@@ -396,14 +396,14 @@ export function PedidosTable() {
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full font-mono text-xs uppercase transition-all cursor-pointer whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-none font-mono text-xs uppercase transition-all cursor-pointer whitespace-nowrap ${
                     isActive
                       ? 'bg-[#dc143c] text-white font-bold shadow-[0_0_16px_rgba(220,20,60,0.4)]'
                       : 'bg-[#141416] text-[#ac8888] hover:text-white hover:bg-[#2a2a2a]'
                   }`}
                 >
                   {tab === 'Pendientes' && count > 0 && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                    <span className="w-1.5 h-1.5 rounded-none bg-white animate-ping"></span>
                   )}
                   <span>{tab}</span>
                   <span className={isActive ? 'font-bold' : 'opacity-60'}>({count})</span>
@@ -424,14 +424,14 @@ export function PedidosTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar cliente, #ID, tel..."
-              className="w-full bg-[#141416] text-white font-sans text-xs pl-9 pr-3 py-2 rounded-full border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
+              className="w-full bg-[#141416] text-white font-sans text-xs pl-9 pr-3 py-2 rounded-none border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
             />
           </div>
 
           <button
             type="button"
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#141416] hover:bg-[#dc143c] hover:text-white text-[#e5e2e1] font-mono text-xs uppercase transition-all border border-white/[0.06] cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-none bg-[#141416] hover:bg-[#dc143c] hover:text-white text-[#e5e2e1] font-mono text-xs uppercase transition-all border border-white/[0.06] cursor-pointer shadow-sm"
           >
             <span className="material-symbols-outlined text-[16px]">download</span>
             <span>CSV</span>
@@ -443,11 +443,11 @@ export function PedidosTable() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Column: Master Orders Table (7 cols) */}
         <div className="xl:col-span-7 flex flex-col gap-4">
-          <div className="bg-[#1c1b1b]/80 backdrop-blur-2xl rounded-2xl p-4 sm:p-5 border border-white/[0.08] shadow-2xl flex flex-col">
+          <div className="bg-[#1c1b1b]/80 backdrop-blur-2xl rounded-none p-4 sm:p-5 border border-white/[0.08] shadow-2xl flex flex-col">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="text-[#ac8888] font-mono text-[10px] tracking-widest uppercase bg-[#141416]/60 rounded-lg">
+                  <tr className="text-[#ac8888] font-mono text-[10px] tracking-widest uppercase bg-[#141416]/60 rounded-none">
                     <th className="py-2.5 px-3 font-medium">#ID</th>
                     <th className="py-2.5 px-3 font-medium">Cliente</th>
                     <th className="py-2.5 px-3 font-medium hidden sm:table-cell">Prendas</th>
@@ -477,7 +477,7 @@ export function PedidosTable() {
                           </td>
                           <td className="py-3 px-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-full bg-[#dc143c] text-white font-headline text-[11px] font-bold flex items-center justify-center shrink-0">
+                              <div className="w-7 h-7 rounded-none bg-[#dc143c] text-white font-headline text-[11px] font-bold flex items-center justify-center shrink-0">
                                 {order.clientInitials}
                               </div>
                               <div className="flex flex-col min-w-0">
@@ -504,13 +504,13 @@ export function PedidosTable() {
                             Bs {order.total.toFixed(0)}
                           </td>
                           <td className="py-3 px-3 hidden md:table-cell">
-                            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[#141416] text-[#ffb3b3] uppercase border border-white/[0.04]">
+                            <span className="font-mono text-[10px] px-2 py-0.5 rounded-none bg-[#141416] text-[#ffb3b3] uppercase border border-white/[0.04]">
                               {order.paymentMethod.includes('QR') ? 'QR Pago' : 'Efectivo'}
                             </span>
                           </td>
                           <td className="py-3 px-3">
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-bold tracking-wider ${
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-none font-mono text-[10px] uppercase font-bold tracking-wider ${
                                 order.status === 'Pendiente'
                                   ? 'bg-amber-950/80 text-amber-300 border border-amber-800/40'
                                   : order.status === 'Confirmado'
@@ -521,7 +521,7 @@ export function PedidosTable() {
                               }`}
                             >
                               {order.status === 'Pendiente' && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                <span className="w-1.5 h-1.5 rounded-none bg-amber-400 animate-pulse"></span>
                               )}
                               {order.status}
                             </span>
@@ -532,7 +532,7 @@ export function PedidosTable() {
                           <td className="py-3 px-3 text-right">
                             <button
                               type="button"
-                              className="w-7 h-7 rounded-full bg-[#141416] hover:bg-[#dc143c] hover:text-white inline-flex items-center justify-center transition-colors text-[#ac8888]"
+                              className="w-7 h-7 rounded-none bg-[#141416] hover:bg-[#dc143c] hover:text-white inline-flex items-center justify-center transition-colors text-[#ac8888]"
                             >
                               <span className="material-symbols-outlined text-[16px]">chevron_right</span>
                             </button>
@@ -561,9 +561,9 @@ export function PedidosTable() {
           </div>
 
           {/* Mini KPI / Despachos Express */}
-          <div className="bg-[#1c1b1b]/80 backdrop-blur-md p-4 rounded-2xl border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+          <div className="bg-[#1c1b1b]/80 backdrop-blur-md p-4 rounded-none border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#dc143c]/15 flex items-center justify-center text-[#dc143c]">
+              <div className="w-10 h-10 rounded-none bg-[#dc143c]/15 flex items-center justify-center text-[#dc143c]">
                 <span className="material-symbols-outlined text-[20px]">local_shipping</span>
               </div>
               <div>
@@ -576,7 +576,7 @@ export function PedidosTable() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="inline-block w-2 h-2 rounded-none bg-emerald-400 animate-pulse"></span>
               <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest font-bold">
                 Motorizados en Ruta: 3
               </span>
@@ -586,9 +586,9 @@ export function PedidosTable() {
 
         {/* Right Column: Inspector Panel - Order Detail (5 cols) */}
         <div className="xl:col-span-5 flex flex-col gap-4">
-          <div className="bg-[#1c1b1b]/95 backdrop-blur-2xl p-6 rounded-2xl border border-white/[0.08] shadow-2xl relative overflow-hidden flex flex-col gap-5">
+          <div className="bg-[#1c1b1b]/95 backdrop-blur-2xl p-6 rounded-none border border-white/[0.08] shadow-2xl relative overflow-hidden flex flex-col gap-5">
             {/* Ambient Accent Glow */}
-            <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#dc143c]/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#dc143c]/10 rounded-none blur-3xl pointer-events-none"></div>
 
             {/* Header Detail */}
             <div className="flex items-start justify-between gap-3 relative">
@@ -597,7 +597,7 @@ export function PedidosTable() {
                   <span className="font-mono text-[10px] text-[#ac8888] tracking-wider uppercase">
                     INSPECTOR DE ORDEN
                   </span>
-                  <span className="px-1.5 py-0.2 bg-[#dc143c] text-white text-[9px] font-mono rounded uppercase font-bold">
+                  <span className="px-1.5 py-0.2 bg-[#dc143c] text-white text-[9px] font-mono rounded-none uppercase font-bold">
                     LIVE
                   </span>
                 </div>
@@ -607,7 +607,7 @@ export function PedidosTable() {
               </div>
 
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-mono text-xs uppercase font-bold tracking-widest ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-none font-mono text-xs uppercase font-bold tracking-widest ${
                   selectedOrder.status === 'Pendiente'
                     ? 'bg-amber-950 text-amber-300 border border-amber-800/40'
                     : selectedOrder.status === 'Confirmado'
@@ -618,14 +618,14 @@ export function PedidosTable() {
                 }`}
               >
                 {selectedOrder.status === 'Pendiente' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                  <span className="w-1.5 h-1.5 rounded-none bg-amber-400 animate-ping"></span>
                 )}
                 {selectedOrder.status}
               </span>
             </div>
 
             {/* Customer Data Bento Card */}
-            <div className="bg-[#141416] p-4 rounded-xl border border-white/[0.06] flex flex-col gap-3">
+            <div className="bg-[#141416] p-4 rounded-none border border-white/[0.06] flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] text-[#ac8888] uppercase tracking-wider">
                   Información del Cliente
@@ -633,7 +633,7 @@ export function PedidosTable() {
                 <span className="material-symbols-outlined text-[18px] text-[#ac8888]">badge</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-[#201f1f] text-white font-headline text-sm font-bold flex items-center justify-center shrink-0 border border-white/[0.08]">
+                <div className="w-11 h-11 rounded-none bg-[#201f1f] text-white font-headline text-sm font-bold flex items-center justify-center shrink-0 border border-white/[0.08]">
                   {selectedOrder.clientInitials}
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -646,7 +646,7 @@ export function PedidosTable() {
                 </div>
               </div>
 
-              <div className="pt-2 flex flex-col gap-1 text-xs bg-[#1c1b1b]/80 p-3 rounded-lg border border-white/[0.04]">
+              <div className="pt-2 flex flex-col gap-1 text-xs bg-[#1c1b1b]/80 p-3 rounded-none border border-white/[0.04]">
                 <div className="flex items-center gap-2 text-white">
                   <span className="material-symbols-outlined text-[16px] text-[#dc143c]">
                     location_on
@@ -675,9 +675,9 @@ export function PedidosTable() {
                 {selectedOrder.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 bg-[#141416] p-3 rounded-xl border border-white/[0.04]"
+                    className="flex items-center gap-3 bg-[#141416] p-3 rounded-none border border-white/[0.04]"
                   >
-                    <div className="w-14 h-16 rounded-lg overflow-hidden bg-[#201f1f] shrink-0 border border-white/[0.06]">
+                    <div className="w-14 h-16 rounded-none overflow-hidden bg-[#201f1f] shrink-0 border border-white/[0.06]">
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col">
@@ -685,7 +685,7 @@ export function PedidosTable() {
                         {item.name}
                       </span>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1 font-mono text-[11px]">
-                        <span className="px-2 py-0.5 rounded-full bg-[#201f1f] text-white font-bold border border-white/[0.06]">
+                        <span className="px-2 py-0.5 rounded-none bg-[#201f1f] text-white font-bold border border-white/[0.06]">
                           {item.size}
                         </span>
                         <span className="text-[#ac8888]">•</span>
@@ -705,7 +705,7 @@ export function PedidosTable() {
             </div>
 
             {/* Financial Breakdown */}
-            <div className="flex flex-col gap-2 bg-[#141416] p-4 rounded-xl border border-white/[0.06]">
+            <div className="flex flex-col gap-2 bg-[#141416] p-4 rounded-none border border-white/[0.06]">
               <div className="flex justify-between items-center text-xs text-[#ac8888]">
                 <span>Subtotal Productos</span>
                 <span className="font-price text-xs text-white">Bs {selectedOrder.subtotal.toFixed(2)}</span>
@@ -713,7 +713,7 @@ export function PedidosTable() {
               <div className="flex justify-between items-center text-xs text-[#ac8888]">
                 <span className="flex items-center gap-1.5">
                   <span>Envío Express Urbano</span>
-                  <span className="px-1.5 py-0.2 bg-emerald-950 text-emerald-300 font-mono text-[10px] rounded uppercase font-bold">
+                  <span className="px-1.5 py-0.2 bg-emerald-950 text-emerald-300 font-mono text-[10px] rounded-none uppercase font-bold">
                     Cortesía
                   </span>
                 </span>
@@ -737,7 +737,7 @@ export function PedidosTable() {
                 <button
                   type="button"
                   onClick={() => updateOrderStatus(selectedOrder.id, 'Confirmado')}
-                  className="w-full py-3 px-6 rounded-full bg-[#dc143c] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.35)] hover:bg-[#ff2d55] transition-all cursor-pointer"
+                  className="w-full py-3 px-6 rounded-none bg-[#dc143c] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.35)] hover:bg-[#ff2d55] transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">verified</span>
                   <span>Confirmar Pedido & Validar Pago</span>
@@ -748,7 +748,7 @@ export function PedidosTable() {
                 <button
                   type="button"
                   onClick={() => updateOrderStatus(selectedOrder.id, 'En Despacho')}
-                  className="w-full py-3 px-6 rounded-full bg-blue-600 text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
+                  className="w-full py-3 px-6 rounded-none bg-blue-600 text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-blue-500 transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">two_wheeler</span>
                   <span>Despachar con Motorizado</span>
@@ -760,7 +760,7 @@ export function PedidosTable() {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2.5 px-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(16,185,129,0.25)]"
+                className="w-full py-2.5 px-6 rounded-none bg-emerald-600 hover:bg-emerald-500 text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(16,185,129,0.25)]"
               >
                 <span className="material-symbols-outlined text-[18px]">chat</span>
                 <span>Contactar por WhatsApp</span>
@@ -771,7 +771,7 @@ export function PedidosTable() {
                 <button
                   type="button"
                   onClick={() => updateOrderStatus(selectedOrder.id, 'Entregado')}
-                  className="py-2.5 px-3 rounded-full bg-[#141416] hover:bg-[#201f1f] text-[#e5e2e1] font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors border border-white/[0.06] cursor-pointer"
+                  className="py-2.5 px-3 rounded-none bg-[#141416] hover:bg-[#201f1f] text-[#e5e2e1] font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors border border-white/[0.06] cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[15px] text-emerald-400">
                     check_circle
@@ -785,7 +785,7 @@ export function PedidosTable() {
                       updateOrderStatus(selectedOrder.id, 'Cancelado');
                     }
                   }}
-                  className="py-2.5 px-3 rounded-full bg-[#141416] hover:bg-[#93000a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors border border-white/[0.06] cursor-pointer"
+                  className="py-2.5 px-3 rounded-none bg-[#141416] hover:bg-[#93000a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors border border-white/[0.06] cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[15px]">cancel</span>
                   <span>Cancelar</span>

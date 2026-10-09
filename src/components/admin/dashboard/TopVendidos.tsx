@@ -37,7 +37,7 @@ const topProducts = [
 
 export function TopVendidos() {
   return (
-    <div className="p-6 rounded-2xl bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl space-y-4">
+    <div className="p-6 rounded-none bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
         <div>
           <span className="text-[10px] font-mono text-[#dc143c] uppercase tracking-widest font-bold block">
@@ -54,7 +54,7 @@ export function TopVendidos() {
         {topProducts.map((p) => (
           <div
             key={p.sku}
-            className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] transition-all border border-white/[0.03]"
+            className="flex items-center justify-between gap-3 p-3 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] transition-all border border-white/[0.03]"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span className="font-mono text-xs font-bold text-[#dc143c] w-6 shrink-0">
@@ -63,7 +63,7 @@ export function TopVendidos() {
               <img
                 src={p.image}
                 alt={p.name}
-                className="w-10 h-12 object-cover rounded-lg bg-[#141416] shrink-0 border border-white/[0.06]"
+                className="w-10 h-12 object-cover rounded-none bg-[#141416] shrink-0 border border-white/[0.06]"
               />
               <div className="min-w-0">
                 <h4 className="font-display text-xs font-bold uppercase text-[#e5e2e1] truncate">

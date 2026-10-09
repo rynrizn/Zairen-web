@@ -27,7 +27,7 @@ export function VentasChart() {
   const maxVal = Math.max(...current.values);
 
   return (
-    <div className="p-6 rounded-2xl bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl flex flex-col justify-between">
+    <div className="p-6 rounded-none bg-[#1c1b1b]/90 backdrop-blur-md border border-white/[0.08] shadow-xl flex flex-col justify-between">
       {/* Cabecera del Gráfico */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -38,20 +38,20 @@ export function VentasChart() {
             <h3 className="font-mono text-2xl md:text-3xl font-bold text-white tracking-tight">
               {current.total}
             </h3>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 font-mono text-xs font-bold border border-emerald-800/40">
+            <span className="px-2 py-0.5 rounded-none bg-emerald-950/80 text-emerald-400 font-mono text-xs font-bold border border-emerald-800/40">
               {current.percent}
             </span>
           </div>
         </div>
 
         {/* Selector de Período */}
-        <div className="flex items-center gap-1 bg-[#141416] p-1 rounded-full border border-white/[0.06] w-fit">
+        <div className="flex items-center gap-1 bg-[#141416] p-1 rounded-none border border-white/[0.06] w-fit">
           {(['7D', '30D', '12M'] as const).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setPeriod(p)}
-              className={`px-3 py-1 rounded-full font-mono text-xs uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-none font-mono text-xs uppercase tracking-wider font-bold transition-all cursor-pointer ${
                 period === p
                   ? 'bg-[#dc143c] text-white shadow-[0_0_8px_rgba(220,20,60,0.5)]'
                   : 'text-[#ac8888] hover:text-white'

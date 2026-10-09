@@ -78,7 +78,7 @@ export function ShareProductModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm sm:max-w-md max-h-[92vh] overflow-y-auto bg-[#141416] border border-white/[0.12] rounded-3xl p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-4 my-auto"
+        className="relative w-full max-w-sm sm:max-w-md max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#201f1f] rounded-none p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.85)] flex flex-col items-center text-center space-y-4 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botón Cerrar */}
@@ -86,7 +86,7 @@ export function ShareProductModal({
           type="button"
           onClick={onClose}
           aria-label="Cerrar modal"
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[#201f1f] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+          className="absolute top-5 right-5 w-8 h-8 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer border border-white/[0.08]"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -95,7 +95,7 @@ export function ShareProductModal({
 
         {/* Encabezado */}
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-[10px] font-mono uppercase tracking-widest font-bold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-[10px] font-mono uppercase tracking-widest font-bold">
             COMPARTIR PRENDA
           </div>
           <h3 className="font-display text-lg font-bold uppercase tracking-tight text-[#FAF9F6] pt-1 line-clamp-1">
@@ -107,11 +107,11 @@ export function ShareProductModal({
         </div>
 
         {/* Preview Prenda Card */}
-        <div className="flex items-center gap-3 w-full p-2.5 rounded-2xl bg-[#0a0a0a] border border-white/[0.08] text-left">
+        <div className="flex items-center gap-3 w-full p-2.5 rounded-none bg-[#0a0a0a] border border-[#201f1f] text-left">
           <img
             src={imagen}
             alt={nombre}
-            className="w-16 h-20 object-cover rounded-xl shrink-0"
+            className="w-16 h-20 object-cover rounded-none shrink-0"
           />
           <div className="overflow-hidden">
             <span className="text-[10px] font-mono text-[#ac8888] uppercase block">
@@ -128,30 +128,30 @@ export function ShareProductModal({
 
         {/* Input Enlace & Botón Copiar */}
         <div className="w-full space-y-3">
-          <div className="flex items-center gap-2 p-1.5 pl-3 rounded-2xl bg-[#1c1b1b] border border-white/[0.08]">
+          <div className="flex items-center gap-2 p-1.5 pl-3 rounded-none bg-[#1c1b1b] border border-[#201f1f]">
             <span className="text-xs font-mono text-[#ac8888] truncate flex-1 text-left">
               {shareUrl}
             </span>
             <button
               type="button"
               onClick={handleCopy}
-              className={`px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-none text-xs font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border ${
                 copied
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-[#dc143c] hover:bg-[#ff2d55] text-white shadow-[0_2px_12px_rgba(220,20,60,0.4)]'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-[#dc143c] hover:bg-[#ff2d55] text-white border-[#dc143c] shadow-[0_2px_12px_rgba(220,20,60,0.4)]'
               }`}
             >
               {copied ? '¡Copiado!' : 'Copiar'}
             </button>
           </div>
 
-          {/* Redes Sociales (Sin QR para productos según directiva del usuario) */}
+          {/* Redes Sociales */}
           <div className="grid grid-cols-3 gap-2 pt-1">
             <a
               href={whatsappShareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-2 rounded-xl bg-[#1c1b1b] hover:bg-[#25D366]/20 hover:text-[#25D366] text-[#e5e2e1] border border-white/[0.06] text-[11px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1"
+              className="py-2.5 px-2 rounded-none bg-[#1c1b1b] hover:bg-[#25D366]/20 hover:text-[#25D366] text-[#e5e2e1] border border-white/[0.06] text-[11px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1"
             >
               <span>WhatsApp</span>
             </a>
@@ -160,7 +160,7 @@ export function ShareProductModal({
               href={twitterShareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-2 rounded-xl bg-[#1c1b1b] hover:bg-[#1DA1F2]/20 hover:text-[#1DA1F2] text-[#e5e2e1] border border-white/[0.06] text-[11px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1"
+              className="py-2.5 px-2 rounded-none bg-[#1c1b1b] hover:bg-[#1DA1F2]/20 hover:text-[#1DA1F2] text-[#e5e2e1] border border-white/[0.06] text-[11px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1"
             >
               <span>X (Twitter)</span>
             </a>
@@ -169,7 +169,7 @@ export function ShareProductModal({
               href={facebookShareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-2 rounded-xl bg-[#1c1b1b] hover:bg-[#1877F2]/20 hover:text-[#1877F2] text-[#e5e2e1] border border-white/[0.06] text-[11px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1"
+              className="py-2.5 px-2 rounded-none bg-[#1c1b1b] hover:bg-[#1877F2]/20 hover:text-[#1877F2] text-[#e5e2e1] border border-white/[0.06] text-[11px] font-mono uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1"
             >
               <span>Facebook</span>
             </a>
@@ -178,7 +178,7 @@ export function ShareProductModal({
           <button
             type="button"
             onClick={handleNativeShare}
-            className="w-full py-2 rounded-xl bg-[#201f1f] hover:bg-[#2a2a2a] text-[#FAF9F6] border border-white/[0.08] text-xs font-mono uppercase tracking-wider font-semibold transition-all cursor-pointer"
+            className="w-full py-2 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#FAF9F6] border border-white/[0.08] text-xs font-mono uppercase tracking-wider font-semibold transition-all cursor-pointer"
           >
             Más opciones de compartir...
           </button>
