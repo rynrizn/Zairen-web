@@ -132,9 +132,46 @@ export function getActiveSocialNetworks(): SocialNetwork[] {
   );
 }
 
+export interface CurrencyConfig {
+  currency: 'BOB' | 'USD';
+  rate: number; // Tasa manual: 1 USD = X BOB (ej: 6.96)
+}
+
+export const defaultCurrencyConfig: CurrencyConfig = {
+  currency: 'BOB',
+  rate: 6.96,
+};
+
+export function getCurrencyConfig(): CurrencyConfig {
+  if (typeof window === 'undefined') return defaultCurrencyConfig;
+  try {
+    const raw = localStorage.getItem('zairen_currency_config');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.currency === 'BOB' || parsed.currency === 'USD') && Number(parsed.rate) > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return defaultCurrencyConfig;
+}
+
+export function setCurrencyConfig(config: CurrencyConfig) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('zairen_currency_config', JSON.stringify(config));
+    window.dispatchEvent(new Event('zairen-currency-changed'));
+  }
+}
+
 /**
  * Formateador de moneda uniforme para toda la aplicación
  */
 export function formatCurrency(amount: number): string {
-  return `${siteConfig.currency.symbol} ${amount.toFixed(2)}`;
+  const config = getCurrencyConfig();
+  if (config.currency === 'USD' && config.rate > 0) {
+    const inUsd = amount / config.rate;
+    return `$ ${inUsd.toFixed(2)} USD`;
+  }
+  return `${siteConfig.currency.symbol} ${amount.toFixed(0)}`;
 }
+

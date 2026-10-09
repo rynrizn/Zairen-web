@@ -1,44 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { siteConfig, type SocialNetwork } from '../../../config/site';
+import {
+  siteConfig,
+  getCurrencyConfig,
+  setCurrencyConfig,
+  type CurrencyConfig,
+  type SocialNetwork,
+} from '../../../config/site';
+
+export interface Sucursal {
+  id: string;
+  nombre: string;
+  ciudad: string;
+  direccion: string;
+  activa: boolean;
+}
+
+const defaultSucursales: Sucursal[] = [
+  {
+    id: 'suc-1',
+    nombre: 'Nodo Central',
+    ciudad: 'La Paz',
+    direccion: 'Centro Operativo Zairen Lab',
+    activa: true,
+  },
+];
 
 export function ConfiguracionWeb() {
+  // 1. Moneda & Tasa de Cambio
+  const [currency, setCurrency] = useState<'BOB' | 'USD'>('BOB');
+  const [exchangeRate, setExchangeRate] = useState<number>(6.96);
+
+  // 2. Políticas de Envío & Envío Gratis
+  const [shippingCost, setShippingCost] = useState<number>(siteConfig.shipping.expressShippingCost);
+  const [freeShippingEnabled, setFreeShippingEnabled] = useState<boolean>(false);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(
+    siteConfig.shipping.freeShippingThreshold
+  );
+  const [deliveryTime, setDeliveryTime] = useState<string>(siteConfig.shipping.deliveryTimeExpress);
+
+  // 3. Marca & WhatsApp
   const [brandName, setBrandName] = useState(siteConfig.name);
   const [brandSlogan, setBrandSlogan] = useState(siteConfig.slogan);
   const [whatsappNumber, setWhatsappNumber] = useState(siteConfig.whatsapp.number);
   const [whatsappDisplay, setWhatsappDisplay] = useState(siteConfig.whatsapp.displayNumber);
   const [whatsappTemplate, setWhatsappTemplate] = useState(siteConfig.whatsapp.messageTemplate);
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(
-    siteConfig.shipping.freeShippingThreshold
-  );
-  const [expressShippingCost, setExpressShippingCost] = useState(
-    siteConfig.shipping.expressShippingCost
-  );
-  const [deliveryTime, setDeliveryTime] = useState(siteConfig.shipping.deliveryTimeExpress);
-  const [bannerText, setBannerText] = useState(
-    'FREE SHIPPING EN PEDIDOS > BS 250 // ENVÍOS EXPRESS A TODA BOLIVIA'
-  );
-  const [bannerActive, setBannerActive] = useState(true);
-  const [cartPromoActive, setCartPromoActive] = useState(false);
 
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedPromo = localStorage.getItem('zairen_cart_promo_enabled');
-      if (savedPromo !== null) {
-        setCartPromoActive(savedPromo === 'true');
-      }
-    }
-  }, []);
+  // 4. Sucursales / Nodos
+  const [sucursales, setSucursales] = useState<Sucursal[]>(defaultSucursales);
+  const [showAddSucursal, setShowAddSucursal] = useState<boolean>(false);
+  const [newSucNombre, setNewSucNombre] = useState<string>('');
+  const [newSucCiudad, setNewSucCiudad] = useState<string>('');
+  const [newSucDireccion, setNewSucDireccion] = useState<string>('');
 
-  // Redes sociales dinámicas
+  // 5. Redes Sociales Dinámicas
   const [socials, setSocials] = useState<SocialNetwork[]>([
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      url: 'https://instagram.com/zairenlab',
-      enabled: true,
-      icon: 'Instagram',
-    },
     {
       id: 'tiktok',
       name: 'TikTok',
@@ -47,27 +63,71 @@ export function ConfiguracionWeb() {
       icon: 'Video',
     },
     {
+      id: 'instagram',
+      name: 'Instagram',
+      url: 'https://instagram.com/zairenlab',
+      enabled: true,
+      icon: 'Instagram',
+    },
+    {
+      id: 'whatsapp',
+      name: 'WhatsApp',
+      url: `https://wa.me/${siteConfig.whatsapp.number}`,
+      enabled: true,
+      icon: 'MessageSquare',
+    },
+    {
+      id: 'twitter',
+      name: 'X (Twitter)',
+      url: 'https://x.com/zairenlab',
+      enabled: true,
+      icon: 'Twitter',
+    },
+    {
       id: 'facebook',
       name: 'Facebook',
       url: '',
       enabled: false,
       icon: 'Facebook',
     },
-    {
-      id: 'youtube',
-      name: 'YouTube',
-      url: '',
-      enabled: false,
-      icon: 'Youtube',
-    },
-    {
-      id: 'twitter',
-      name: 'X (Twitter)',
-      url: '',
-      enabled: false,
-      icon: 'Twitter',
-    },
   ]);
+
+  // Cargar configuraciones guardadas al iniciar
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Moneda
+      const curConfig = getCurrencyConfig();
+      setCurrency(curConfig.currency);
+      setExchangeRate(curConfig.rate);
+
+      // Envío
+      const savedPromo = localStorage.getItem('zairen_cart_promo_enabled');
+      if (savedPromo !== null) {
+        setFreeShippingEnabled(savedPromo === 'true');
+      }
+
+      const savedCost = localStorage.getItem('zairen_shipping_cost');
+      if (savedCost !== null && !isNaN(Number(savedCost))) {
+        setShippingCost(Number(savedCost));
+      }
+
+      const savedThreshold = localStorage.getItem('zairen_shipping_threshold');
+      if (savedThreshold !== null && !isNaN(Number(savedThreshold))) {
+        setFreeShippingThreshold(Number(savedThreshold));
+      }
+
+      // Sucursales
+      const savedSuc = localStorage.getItem('zairen_sucursales');
+      if (savedSuc) {
+        try {
+          const parsed = JSON.parse(savedSuc);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSucursales(parsed);
+          }
+        } catch (e) {}
+      }
+    }
+  }, []);
 
   const handleToggleSocial = (id: string) => {
     setSocials((prev) =>
@@ -81,13 +141,71 @@ export function ConfiguracionWeb() {
     );
   };
 
+  const handleAddSucursal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSucNombre.trim() || !newSucCiudad.trim()) {
+      toast.error('Nombre y ciudad de la sucursal son requeridos');
+      return;
+    }
+    const nueva: Sucursal = {
+      id: `suc-${Date.now()}`,
+      nombre: newSucNombre.trim(),
+      ciudad: newSucCiudad.trim(),
+      direccion: newSucDireccion.trim() || 'Dirección por coordinar',
+      activa: true,
+    };
+    const updated = [...sucursales, nueva];
+    setSucursales(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('zairen_sucursales', JSON.stringify(updated));
+    }
+    setNewSucNombre('');
+    setNewSucCiudad('');
+    setNewSucDireccion('');
+    setShowAddSucursal(false);
+    toast.success(`Sucursal ${nueva.nombre} añadida con éxito`);
+  };
+
+  const handleToggleSucursal = (id: string) => {
+    const updated = sucursales.map((s) =>
+      s.id === id ? { ...s, activa: !s.activa } : s
+    );
+    setSucursales(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('zairen_sucursales', JSON.stringify(updated));
+    }
+  };
+
+  const handleDeleteSucursal = (id: string) => {
+    if (sucursales.length <= 1) {
+      toast.error('Debe mantenerse al menos una sucursal registrada');
+      return;
+    }
+    const updated = sucursales.filter((s) => s.id !== id);
+    setSucursales(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('zairen_sucursales', JSON.stringify(updated));
+    }
+    toast.info('Sucursal eliminada');
+  };
+
   const handleSaveAll = (e: React.FormEvent) => {
     e.preventDefault();
     if (typeof window !== 'undefined') {
-      localStorage.setItem('zairen_cart_promo_enabled', String(cartPromoActive));
+      // 1. Guardar Moneda
+      setCurrencyConfig({ currency, rate: exchangeRate > 0 ? exchangeRate : 6.96 });
+
+      // 2. Guardar Envíos
+      localStorage.setItem('zairen_cart_promo_enabled', String(freeShippingEnabled));
+      localStorage.setItem('zairen_shipping_cost', String(shippingCost));
+      localStorage.setItem('zairen_shipping_threshold', String(freeShippingThreshold));
+
+      // 3. Guardar Sucursales
+      localStorage.setItem('zairen_sucursales', JSON.stringify(sucursales));
     }
-    toast.success('Configuración de la tienda guardada con éxito', {
-      description: 'Los cambios se reflejarán en toda la web pública y en el canal de WhatsApp.',
+
+    toast.success('Configuración guardada exitosamente', {
+      description: `Moneda: ${currency} (1 USD = ${exchangeRate} Bs) // Envíos: ${shippingCost} Bs (Envío gratis: ${freeShippingEnabled ? 'ACTIVO' : 'DESACTIVADO'})`,
     });
   };
 
@@ -99,13 +217,13 @@ export function ConfiguracionWeb() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#dc143c] animate-pulse"></span>
+            <span className="w-2 h-2 bg-[#dc143c] animate-pulse"></span>
             <span className="font-mono text-xs text-[#dc143c] uppercase tracking-wider font-bold">
-              CMS // AJUSTES DE MARCA Y REDES
+              CMS // AJUSTES DE MARCA, MONEDA Y ENVÍOS
             </span>
           </div>
           <h1 className="font-headline text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight">
-            INTERFAZ WEB <span className="text-[#dc143c] text-xl font-mono font-normal">// BRAND & SOCIAL CHANNELS</span>
+            CONFIGURACIÓN WEB <span className="text-[#dc143c] text-xl font-mono font-normal">// STORE ENGINE</span>
           </h1>
           <div className="h-0.5 w-72 bg-gradient-to-r from-[#dc143c] via-[#dc143c]/40 to-transparent mt-2"></div>
         </div>
@@ -113,177 +231,384 @@ export function ConfiguracionWeb() {
         <button
           type="button"
           onClick={handleSaveAll}
-          className="px-6 py-2.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_4px_20px_rgba(220,20,60,0.35)] transition-all cursor-pointer"
+          className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_4px_20px_rgba(220,20,60,0.35)] transition-all cursor-pointer border border-[#dc143c]"
         >
           <span className="material-symbols-outlined text-[18px]">save</span>
           <span>Guardar Configuración</span>
         </button>
       </div>
 
-      {/* 2. Banner de Información de Archivos de Código */}
-      <div className="p-4 rounded-2xl bg-[#141416] border border-white/[0.08] flex items-start gap-3">
-        <span className="material-symbols-outlined text-[#dc143c] text-[24px] mt-0.5">info</span>
-        <div className="space-y-1 text-xs">
-          <h4 className="font-headline text-white font-bold uppercase">
-            ¿DÓNDE SE EDITAN LAS VARIABLES EN EL CÓDIGO?
-          </h4>
-          <p className="text-[#ac8888] font-sans">
-            Para editar el número de celular o redes directamente en el proyecto, puedes modificar:
-          </p>
-          <div className="flex flex-wrap gap-2 pt-1 font-mono text-[11px]">
-            <span className="px-2.5 py-1 rounded-md bg-[#201f1f] text-[#ffb3b3] border border-white/[0.06]">
-              📄 src/config/site.ts
-            </span>
-            <span className="px-2.5 py-1 rounded-md bg-[#201f1f] text-[#ffb3b3] border border-white/[0.06]">
-              📄 .env
-            </span>
-          </div>
-          <p className="text-[#e5e2e1] font-mono text-[11px] pt-1">
-            ✓ <strong>Comportamiento dinámico:</strong> Si solo dejas configurado Instagram, o Instagram y TikTok, solo aparecerán las que tengan URL válida. Las demás se ocultan automáticamente en el Navbar, Footer y Carrito.
-          </p>
-        </div>
-      </div>
-
       <form onSubmit={handleSaveAll} className="space-y-8">
-        {/* 3. Sección: Identidad de Marca y WhatsApp */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Identidad */}
-          <div className="bg-[#1c1b1b]/90 p-6 rounded-2xl border border-white/[0.08] shadow-xl space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06]">
-              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">storefront</span>
-              <h3 className="font-headline text-sm font-bold text-white uppercase">
-                Identidad de Marca
+        
+        {/* ======================================================== */}
+        {/* SECCIÓN 1: SISTEMA DE MONEDA UNIFICADA (BOB vs USD)      */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">currency_exchange</span>
+              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                Sistema de Moneda de la Tienda (BOB / USD)
               </h3>
             </div>
-
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Nombre de la Marca
-              </label>
-              <input
-                type="text"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[#141416] text-white font-sans text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Eslogan Oficial
-              </label>
-              <input
-                type="text"
-                value={brandSlogan}
-                onChange={(e) => setBrandSlogan(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[#141416] text-white font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-
-            <div className="pt-2">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Banner de Anuncio Promocional (Top Bar)
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={bannerText}
-                  onChange={(e) => setBannerText(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-[#141416] text-white font-sans text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-                />
-                <label className="flex items-center gap-2 cursor-pointer font-mono text-xs text-[#e5e2e1]">
-                  <input
-                    type="checkbox"
-                    checked={bannerActive}
-                    onChange={(e) => setBannerActive(e.target.checked)}
-                    className="w-4 h-4 accent-[#dc143c]"
-                  />
-                  <span>Mostrar banner animado en la parte superior del catálogo</span>
-                </label>
-              </div>
-            </div>
+            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
+              ACTIVO: {currency}
+            </span>
           </div>
 
-          {/* WhatsApp & Checkout */}
-          <div className="bg-[#1c1b1b]/90 p-6 rounded-2xl border border-white/[0.08] shadow-xl space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06]">
-              <span className="material-symbols-outlined text-emerald-400 text-[20px]">chat</span>
-              <h3 className="font-headline text-sm font-bold text-white uppercase">
-                WhatsApp Oficial & Checkout
-              </h3>
-            </div>
+          <p className="text-xs text-[#ac8888] font-sans">
+            Elige en qué moneda deseas mostrar todos los productos del catálogo y checkout. Puedes alternar entre Bolivianos (Bs) y Dólares (USD) definiendo manualmente el tipo de cambio oficial.
+          </p>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                  Número Internacional (Sin +)
-                </label>
-                <input
-                  type="text"
-                  value={whatsappNumber}
-                  onChange={(e) => setWhatsappNumber(e.target.value)}
-                  placeholder="59174522654"
-                  className="w-full px-3.5 py-2 bg-[#141416] text-[#ffb3b3] font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                  Número Formato Visible
-                </label>
-                <input
-                  type="text"
-                  value={whatsappDisplay}
-                  onChange={(e) => setWhatsappDisplay(e.target.value)}
-                  placeholder="+591 74522654"
-                  className="w-full px-3.5 py-2 bg-[#141416] text-white font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Plantilla Mensaje de Pedido WhatsApp
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {/* Selector de Moneda */}
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-2">
+                Moneda Activa en Pantalla
               </label>
-              <textarea
-                rows={3}
-                value={whatsappTemplate}
-                onChange={(e) => setWhatsappTemplate(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[#141416] text-white font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-              />
-              <span className="font-mono text-[10px] text-[#ac8888] block mt-1">
-                Variables disponibles: <code>{'{items}'}</code>, <code>{'{total}'}</code>, <code>{'{moneda}'}</code>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrency('BOB')}
+                  className={`py-2 px-3 text-xs font-mono uppercase font-bold transition-all border cursor-pointer ${
+                    currency === 'BOB'
+                      ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.4)]'
+                      : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
+                  }`}
+                >
+                  🇧🇴 Bolivianos (Bs)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrency('USD')}
+                  className={`py-2 px-3 text-xs font-mono uppercase font-bold transition-all border cursor-pointer ${
+                    currency === 'USD'
+                      ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.4)]'
+                      : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
+                  }`}
+                >
+                  🇺🇸 Dólares ($ USD)
+                </button>
+              </div>
+            </div>
+
+            {/* Tasa de Cambio Manual */}
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Tasa de Cambio Manual (1 USD = X BOB)
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs text-white font-bold">$ 1.00 USD =</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  value={exchangeRate}
+                  onChange={(e) => setExchangeRate(parseFloat(e.target.value) || 6.96)}
+                  className="flex-1 px-3 py-1.5 bg-[#141416] text-[#FAF9F6] font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                />
+                <span className="font-mono text-xs text-[#ac8888]">BOB</span>
+              </div>
+              <span className="text-[10px] font-mono text-[#ac8888] block mt-1.5">
+                {currency === 'USD'
+                  ? `Prenda de Bs 180 se mostrará como $ ${(180 / (exchangeRate || 6.96)).toFixed(2)} USD`
+                  : 'Prenda de Bs 180 se mostrará como Bs 180'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* 4. Sección: Redes Sociales Dinámicas */}
-        <div className="bg-[#1c1b1b]/90 p-6 rounded-2xl border border-white/[0.08] shadow-xl space-y-4">
+        {/* ======================================================== */}
+        {/* SECCIÓN 2: POLÍTICAS DE ENVÍO & TOGGLE ENVÍO GRATIS       */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">local_shipping</span>
+              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                Políticas de Envío & Tarifas
+              </h3>
+            </div>
+            <span
+              className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] uppercase font-bold border ${
+                freeShippingEnabled
+                  ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
+                  : 'bg-[#1c1b1b] text-[#ac8888] border-[#201f1f]'
+              }`}
+            >
+              ENVÍO GRATIS: {freeShippingEnabled ? 'ACTIVADO' : 'DESACTIVADO'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Precio de Envío Estándar (Bs)
+              </label>
+              <input
+                type="number"
+                value={shippingCost}
+                onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
+                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-sm rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+              />
+              <span className="text-[10px] font-mono text-[#ac8888] block mt-1">
+                Tarifa cobrada en la bolsa de compras.
+              </span>
+            </div>
+
+            <div>
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Monto Mínimo para Envío Gratis (Bs)
+              </label>
+              <input
+                type="number"
+                value={freeShippingThreshold}
+                onChange={(e) => setFreeShippingThreshold(parseFloat(e.target.value) || 0)}
+                disabled={!freeShippingEnabled}
+                className={`w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-sm rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none ${
+                  !freeShippingEnabled ? 'opacity-40 cursor-not-allowed' : ''
+                }`}
+              />
+              <span className="text-[10px] font-mono text-[#ac8888] block mt-1">
+                Sólo aplicable si activas la opción abajo.
+              </span>
+            </div>
+
+            <div>
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Tiempo de Entrega Estimado
+              </label>
+              <input
+                type="text"
+                value={deliveryTime}
+                onChange={(e) => setDeliveryTime(e.target.value)}
+                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+              />
+              <span className="text-[10px] font-mono text-[#ac8888] block mt-1">
+                Ej: Coordinación directa por WhatsApp.
+              </span>
+            </div>
+          </div>
+
+          {/* Toggle de Envío Gratis */}
+          <div className="pt-3 border-t border-white/[0.06]">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={freeShippingEnabled}
+                onChange={(e) => setFreeShippingEnabled(e.target.checked)}
+                className="w-4 h-4 mt-0.5 rounded-none accent-[#dc143c] cursor-pointer"
+              />
+              <div>
+                <span className="font-mono text-xs uppercase font-bold text-white block">
+                  Activar Promoción de Envío Gratis en Carrito
+                </span>
+                <span className="text-[11px] font-body text-[#ac8888] block mt-0.5">
+                  (Si está desactivada, el carrito NUNCA mostrará la barra de envío gratis ni prometerá envíos gratis).
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN 3: GESTIÓN DE SUCURSALES / NODOS                  */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">store</span>
+              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                Sucursales & Puntos de Despacho ({sucursales.length})
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAddSucursal((prev) => !prev)}
+              className="px-3 py-1 bg-[#1c1b1b] hover:bg-[#dc143c] text-[#FAF9F6] text-xs font-mono uppercase font-bold transition-colors border border-[#201f1f] hover:border-[#dc143c] cursor-pointer"
+            >
+              {showAddSucursal ? 'Cancelar' : '+ Añadir Sucursal'}
+            </button>
+          </div>
+
+          <p className="text-xs text-[#ac8888] font-sans">
+            Gestiona las ubicaciones de despacho de Zairen Lab. Puedes tener una única sucursal o registrar más sucursales a medida que la tienda crezca.
+          </p>
+
+          {/* Formulario Agregar Sucursal */}
+          {showAddSucursal && (
+            <div className="p-4 bg-[#1c1b1b] border border-[#dc143c]/40 space-y-3 animate-in fade-in duration-200">
+              <h4 className="font-mono text-xs text-[#ffb3b3] uppercase font-bold">
+                Registrar Nueva Sucursal
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  placeholder="Nombre (Ej: Showroom Zona Sur)"
+                  value={newSucNombre}
+                  onChange={(e) => setNewSucNombre(e.target.value)}
+                  className="px-3 py-2 bg-[#141416] text-white font-sans text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Ciudad (Ej: La Paz, Santa Cruz)"
+                  value={newSucCiudad}
+                  onChange={(e) => setNewSucCiudad(e.target.value)}
+                  className="px-3 py-2 bg-[#141416] text-white font-sans text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Dirección / Referencia"
+                  value={newSucDireccion}
+                  onChange={(e) => setNewSucDireccion(e.target.value)}
+                  className="px-3 py-2 bg-[#141416] text-white font-sans text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                />
+              </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={handleAddSucursal}
+                  className="px-4 py-1.5 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold transition-colors cursor-pointer"
+                >
+                  Guardar Sucursal
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Tabla de Sucursales */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <thead className="bg-[#1c1b1b] text-[#ac8888] uppercase text-[10px] border-b border-[#201f1f]">
+                <tr>
+                  <th className="py-2.5 px-3">Nombre</th>
+                  <th className="py-2.5 px-3">Ciudad</th>
+                  <th className="py-2.5 px-3">Dirección</th>
+                  <th className="py-2.5 px-3 text-center">Estado</th>
+                  <th className="py-2.5 px-3 text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04]">
+                {sucursales.map((suc) => (
+                  <tr key={suc.id} className="hover:bg-[#1c1b1b]/50">
+                    <td className="py-3 px-3 font-bold text-white">{suc.nombre}</td>
+                    <td className="py-3 px-3 text-[#ffb3b3]">{suc.ciudad}</td>
+                    <td className="py-3 px-3 text-[#ac8888]">{suc.direccion}</td>
+                    <td className="py-3 px-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSucursal(suc.id)}
+                        className={`px-2 py-0.5 text-[10px] font-bold uppercase transition-all cursor-pointer border ${
+                          suc.activa
+                            ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
+                            : 'bg-red-950 text-red-400 border-red-800'
+                        }`}
+                      >
+                        {suc.activa ? 'Activa' : 'Inactiva'}
+                      </button>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSucursal(suc.id)}
+                        className="text-[#ac8888] hover:text-[#ff5449] transition-colors p-1 cursor-pointer"
+                        title="Eliminar sucursal"
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN 4: WHATSAPP OFICIAL & CHECKOUT                    */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06]">
+            <span className="material-symbols-outlined text-emerald-400 text-[20px]">chat</span>
+            <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+              WhatsApp Oficial & Checkout
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Número Internacional (Sin +)
+              </label>
+              <input
+                type="text"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                placeholder="59170000000"
+                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-[#ffb3b3] font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Número Formato Visible
+              </label>
+              <input
+                type="text"
+                value={whatsappDisplay}
+                onChange={(e) => setWhatsappDisplay(e.target.value)}
+                placeholder="+591 70000000"
+                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+              Plantilla Mensaje de Pedido WhatsApp
+            </label>
+            <textarea
+              rows={3}
+              value={whatsappTemplate}
+              onChange={(e) => setWhatsappTemplate(e.target.value)}
+              className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+            />
+            <span className="font-mono text-[10px] text-[#ac8888] block mt-1">
+              Variables disponibles: <code>{'{items}'}</code>, <code>{'{total}'}</code>, <code>{'{moneda}'}</code>
+            </span>
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN 5: REDES SOCIALES DINÁMICAS                       */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#dc143c] text-[20px]">share</span>
-              <h3 className="font-headline text-sm font-bold text-white uppercase">
+              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
                 Redes Sociales Dinámicas
               </h3>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#141416] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold">
-              {activeSocialsCount} REDES VISIBLES EN TIENDA
+            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
+              {activeSocialsCount} REDES VISIBLES
             </span>
           </div>
 
           <p className="text-xs text-[#ac8888] font-sans">
-            Activa solo las redes sociales que utilizas. Si dejas el interruptor apagado o dejas el enlace vacío, la red desaparecerá por completo de los menús y pie de página sin romper el diseño.
+            Activa las redes sociales de Zairen Lab. Se renderizarán con sus iconos oficiales en el pie de página y botones de compartir.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
             {socials.map((social) => (
               <div
                 key={social.id}
-                className={`p-4 rounded-xl border transition-all ${
+                className={`p-4 border transition-all rounded-none ${
                   social.enabled && social.url
-                    ? 'bg-[#141416] border-[#dc143c]/40 shadow-[0_0_12px_rgba(220,20,60,0.1)]'
-                    : 'bg-[#141416]/50 border-white/[0.04] opacity-60'
+                    ? 'bg-[#1c1b1b] border-[#dc143c]/40 shadow-[0_0_12px_rgba(220,20,60,0.1)]'
+                    : 'bg-[#1c1b1b]/50 border-white/[0.04] opacity-60'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -298,7 +623,7 @@ export function ConfiguracionWeb() {
                       type="checkbox"
                       checked={social.enabled}
                       onChange={() => handleToggleSocial(social.id)}
-                      className="w-4 h-4 accent-[#dc143c] cursor-pointer"
+                      className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
                     />
                   </label>
                 </div>
@@ -307,79 +632,11 @@ export function ConfiguracionWeb() {
                   type="url"
                   value={social.url}
                   onChange={(e) => handleUpdateSocialUrl(social.id, e.target.value)}
-                  placeholder={`https://${social.id}.com/tu-marca`}
-                  className="w-full px-3 py-1.5 bg-[#1c1b1b] text-white font-mono text-xs rounded-lg border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
+                  placeholder={`https://${social.id}.com/zairenlab`}
+                  className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
                 />
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* 5. Sección: Envíos & Políticas */}
-        <div className="bg-[#1c1b1b]/90 p-6 rounded-2xl border border-white/[0.08] shadow-xl space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06]">
-            <span className="material-symbols-outlined text-[#dc143c] text-[20px]">local_shipping</span>
-            <h3 className="font-headline text-sm font-bold text-white uppercase">
-              Políticas de Envío y Tarifas
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Umbral Envío Gratis (Bs)
-              </label>
-              <input
-                type="number"
-                value={freeShippingThreshold}
-                onChange={(e) => setFreeShippingThreshold(parseFloat(e.target.value))}
-                className="w-full px-3.5 py-2 bg-[#141416] text-white font-price text-sm rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Costo Envío Express (Bs)
-              </label>
-              <input
-                type="number"
-                value={expressShippingCost}
-                onChange={(e) => setExpressShippingCost(parseFloat(e.target.value))}
-                className="w-full px-3.5 py-2 bg-[#141416] text-white font-price text-sm rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Tiempo de Entrega
-              </label>
-              <input
-                type="text"
-                value={deliveryTime}
-                onChange={(e) => setDeliveryTime(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[#141416] text-white font-mono text-xs rounded-xl border border-white/[0.06] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Toggle Opcional: Promoción en Carrito */}
-          <div className="pt-3 border-t border-white/[0.06]">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={cartPromoActive}
-                onChange={(e) => setCartPromoActive(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded accent-[#dc143c] cursor-pointer"
-              />
-              <div>
-                <span className="font-mono text-xs uppercase font-bold text-white block">
-                  Mostrar Barra de Promoción de Envío Gratis en Carrito
-                </span>
-                <span className="text-[11px] font-body text-[#ac8888] block mt-0.5">
-                  (Desactivada por defecto. Si la activas, los clientes verán cuánto les falta para envío gratis en su bolsa).
-                </span>
-              </div>
-            </label>
           </div>
         </div>
 
@@ -387,7 +644,7 @@ export function ConfiguracionWeb() {
         <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="px-8 py-3 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.4)] transition-all cursor-pointer"
+            className="px-8 py-3 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
           >
             <span className="material-symbols-outlined text-[18px]">save</span>
             <span>Guardar Todos los Cambios</span>

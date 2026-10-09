@@ -112,12 +112,26 @@ export function getCartSubtotal(items: CartItem[]): number {
 }
 
 export function isFreeShippingEligible(items: CartItem[]): boolean {
-  return getCartSubtotal(items) >= siteConfig.shipping.freeShippingThreshold;
+  if (typeof window !== 'undefined') {
+    const promoEnabled = localStorage.getItem('zairen_cart_promo_enabled') === 'true';
+    if (!promoEnabled) return false;
+    const customThreshold = localStorage.getItem('zairen_shipping_threshold');
+    const threshold = customThreshold ? Number(customThreshold) : siteConfig.shipping.freeShippingThreshold;
+    return getCartSubtotal(items) >= threshold;
+  }
+  return false;
 }
 
 export function getCartShippingCost(items: CartItem[]): number {
   if (items.length === 0) return 0;
-  return isFreeShippingEligible(items) ? 0 : siteConfig.shipping.expressShippingCost;
+  if (isFreeShippingEligible(items)) return 0;
+  if (typeof window !== 'undefined') {
+    const customCost = localStorage.getItem('zairen_shipping_cost');
+    if (customCost !== null && !isNaN(Number(customCost))) {
+      return Number(customCost);
+    }
+  }
+  return siteConfig.shipping.expressShippingCost;
 }
 
 export function getCartTotal(items: CartItem[]): number {
