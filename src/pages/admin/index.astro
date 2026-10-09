@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { siteConfig } from '../../config/site';
 import { PedidosPendientes } from '../../components/admin/dashboard/PedidosPendientes';
@@ -9,17 +11,17 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
 ---
 
 <AdminLayout title={`Panel // ${siteConfig.name}`} activePath="panel">
-  <div class="max-w-[1440px] mx-auto px-4 md:px-12 flex flex-col gap-8 pb-12">
-    <!-- Encabezado de Bienvenida -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div class="max-w-[1440px] mx-auto px-4 md:px-8 flex flex-col gap-8 pb-12">
+    <!-- Encabezado de Bienvenida // Estilo Geométrico DESING.md -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#1C1B1B]">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
-          <span class="text-xs font-mono text-[#ffb3b3] uppercase tracking-wider">
-            NODO ACTIVO // V2.4 OS
+          <span class="w-1.5 h-1.5 bg-emerald-400"></span>
+          <span class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest">
+            SISTEMA OPERATIVO // CORE V2.6
           </span>
         </div>
-        <h1 class="text-2xl md:text-4xl font-bold font-headline uppercase text-[#e5e2e1]">
+        <h1 class="text-2xl md:text-4xl font-extrabold font-display uppercase tracking-tight text-[#FAF9F6]">
           PANEL DE CONTROL <span class="text-[#dc143c] text-xl font-normal font-mono">// ADMIN CORE</span>
         </h1>
       </div>
@@ -27,7 +29,7 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
       <div class="flex items-center gap-3">
         <a
           href="/admin/inventario"
-          class="px-5 py-2.5 rounded-full bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono uppercase tracking-wider font-bold shadow-[0_4px_20px_rgba(220,20,60,0.35)] transition-all flex items-center gap-2"
+          class="px-5 py-2.5 bg-[#dc143c] hover:bg-[#FAF9F6] text-white hover:text-[#0A0A0A] text-xs font-mono uppercase tracking-wider font-bold transition-all flex items-center gap-2 border border-[#dc143c]"
         >
           <span class="material-symbols-outlined text-[16px]">inventory_2</span>
           <span>Gestionar Stock</span>
@@ -36,7 +38,7 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          class="px-4 py-2.5 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] text-xs font-mono uppercase tracking-wider border border-white/[0.08] transition-all flex items-center gap-2"
+          class="px-4 py-2.5 bg-[#141416] hover:bg-[#201f1f] text-[#FAF9F6] text-xs font-mono uppercase tracking-wider border border-[#2A2A2A] transition-all flex items-center gap-2"
         >
           <span class="material-symbols-outlined text-[16px]">visibility</span>
           <span>Ver Tienda</span>
@@ -44,43 +46,40 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
       </div>
     </div>
 
-    <!-- 4 KPI Cards -->
+    <!-- 4 KPI Cards // Retícula Ortogonal DESING.md -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="p-6 rounded-2xl bg-[#1c1b1b]/90 border border-white/[0.08] backdrop-blur-md shadow-lg relative overflow-hidden">
-        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Ventas del Mes</div>
-        <div class="text-2xl md:text-3xl font-bold font-price text-[#e5e2e1]">Bs 18,450.00</div>
+      <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
+        <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Ventas del Mes</div>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">Bs 18,450.00</div>
         <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
           <span>↑ +14.2%</span>
-          <span class="text-[#ac8888]">vs mes anterior</span>
+          <span class="text-[#8F8F8C]">vs mes anterior</span>
         </div>
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl pointer-events-none"></div>
       </div>
 
-      <div class="p-6 rounded-2xl bg-[#1c1b1b]/90 border border-white/[0.08] backdrop-blur-md shadow-lg relative overflow-hidden">
-        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Pedidos Pendientes</div>
-        <div class="text-2xl md:text-3xl font-bold font-price text-[#ffb3b3]">3 Órdenes</div>
+      <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
+        <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Pedidos Pendientes</div>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">3 Órdenes</div>
         <div class="text-xs font-mono text-amber-400 mt-2 flex items-center gap-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="w-1.5 h-1.5 bg-amber-400"></span>
           <span>Requieren atención inmediata</span>
         </div>
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-amber-500/5 rounded-full blur-xl pointer-events-none"></div>
       </div>
 
-      <div class="p-6 rounded-2xl bg-[#1c1b1b]/90 border border-white/[0.08] backdrop-blur-md shadow-lg relative overflow-hidden">
-        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Prendas en Stock</div>
-        <div class="text-2xl md:text-3xl font-bold font-price text-[#e5e2e1]">340 uds</div>
-        <div class="text-xs font-mono text-[#ac8888] mt-2">
+      <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
+        <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Prendas en Stock</div>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">340 uds</div>
+        <div class="text-xs font-mono text-[#8F8F8C] mt-2">
           <span>8 SKUs activos en catálogo</span>
         </div>
       </div>
 
-      <div class="p-6 rounded-2xl bg-[#1c1b1b]/90 border border-white/[0.08] backdrop-blur-md shadow-lg relative overflow-hidden">
-        <div class="text-xs font-mono text-[#ac8888] uppercase tracking-wider mb-2">Bajo Stock Crítico</div>
-        <div class="text-2xl md:text-3xl font-bold font-price text-[#f87171]">2 Variantes</div>
-        <div class="text-xs font-mono text-[#f87171] mt-2">
+      <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
+        <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Bajo Stock Crítico</div>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#f87171]">2 Variantes</div>
+        <div class="text-xs font-mono text-[#8F8F8C] mt-2">
           <span>Alerta: Tallas S y XL</span>
         </div>
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-[#dc143c]/10 rounded-full blur-xl pointer-events-none"></div>
       </div>
     </div>
 
@@ -104,4 +103,3 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
     </div>
   </div>
 </AdminLayout>
-

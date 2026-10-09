@@ -37,3 +37,25 @@ export function getServiceSupabase() {
     },
   });
 }
+
+/**
+ * Cliente de Supabase específico para servidor (SSR / Middleware / Endpoints)
+ * Sin almacenamiento local ni auto-refresco para evitar deadlocks en Node.js y Cloudflare Workers
+ */
+export function getServerSupabase(accessToken?: string) {
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: accessToken
+      ? {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      : undefined,
+  });
+}
+

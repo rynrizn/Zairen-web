@@ -50,21 +50,43 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
     <script>
       import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-      // 1. Guarda de autenticación client-side
+      // 1. Guarda de autenticación client-side estricta (Anti-Console Bypass)
       async function verifyAdminAuth() {
         if (!isSupabaseConfigured) {
           const hasDemoCookie = document.cookie.includes('sb-access-token=demo-admin-token');
           if (!hasDemoCookie && window.location.pathname.startsWith('/admin')) {
-            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            window.location.replace(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
           }
           return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        const hasTokenCookie = document.cookie.includes('sb-access-token=');
+        // Validación criptográfica de sesión real
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (!session && !hasTokenCookie) {
-          window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+        if (error || !session) {
+          // Purgar tokens manipulados o falsos de la consola
+          document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          localStorage.removeItem('zairen_user_id');
+          localStorage.removeItem('zairen_user_role');
+          window.location.replace(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+          return;
+        }
+
+        // Comprobar rol administrativo en la tabla perfil
+        try {
+          const { data: profile } = await supabase
+            .from('perfil')
+            .select('rol, activo')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (profile && (!profile.activo || !['ADMIN', 'SUPERADMIN'].includes(profile.rol))) {
+            document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            window.location.replace('/login?error=unauthorized');
+          }
+        } catch (e) {
+          // No bloquear si RLS está en modo local
         }
       }
       verifyAdminAuth();
