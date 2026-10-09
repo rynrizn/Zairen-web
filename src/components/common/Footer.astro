@@ -4,92 +4,146 @@ import { siteConfig, getActiveSocialNetworks } from '../../config/site';
 const activeSocials = getActiveSocialNetworks();
 ---
 
-<footer class="relative z-10 w-full bg-[#0e0e0e] border-t border-white/[0.06] pt-16 pb-12 mt-auto">
-  <div class="max-w-[1440px] mx-auto px-4 md:px-12">
-    <!-- Grid Principal de Footer -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
-      <!-- Columna 1 & 2: Identidad de Marca -->
-      <div class="md:col-span-2 flex flex-col gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-[#201f1f] border border-white/[0.08] flex items-center justify-center text-[#dc143c]">
-            <svg class="w-4 h-4" viewBox="0 0 64 64" fill="none">
-              <path d="M14 20H50M20 20V48M44 20V48M14 28H50M24 38H40" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span class="font-display text-lg font-bold text-[#e5e2e1] tracking-wider uppercase">
+<footer class="relative z-10 w-full bg-[#0A0A0A] border-t border-[#1C1B1B] pt-16 pb-12 mt-auto transition-colors">
+  <div class="max-w-[1440px] mx-auto px-4 md:px-8">
+    
+    <!-- Fila Superior: Marca Limpia & Formulario Newsletter 'Signals' -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 pb-12 border-b border-[#1C1B1B]">
+      
+      <!-- Bloque de Marca (Sin cajas ni bordes que encierren el logo) -->
+      <div class="lg:col-span-6 space-y-4">
+        <a href="/" class="flex items-center gap-3 group w-fit">
+          <img
+            src="/brand/zairen_logo_oficial.svg"
+            alt="Zairen Lab"
+            class="w-8 h-8 object-contain transition-transform group-hover:scale-105"
+          />
+          <span class="font-display text-2xl font-extrabold uppercase tracking-widest text-[#FAF9F6]">
             {siteConfig.name}
           </span>
-          <span class="font-code text-[10px] text-[#dc143c] bg-[#dc143c]/15 px-2 py-0.5 rounded-full uppercase tracking-wider">
-            SHIBUYA & BOLIVIA
-          </span>
-        </div>
-
-        <p class="text-[#ac8888] font-body text-sm max-w-md leading-relaxed">
-          {siteConfig.description}
-        </p>
-
-        <span class="font-code text-xs text-[#5c3f3f]">
-          無断転載を禁じます。制限付きドロップアーキテクチャ。
-        </span>
-      </div>
-
-      <!-- Columna 3: Atención y Concierge -->
-      <div class="flex flex-col gap-3">
-        <span class="font-code text-xs text-[#e5e2e1] uppercase tracking-wider font-bold">
-          Línea Directa Concierge
-        </span>
-        <a
-          href={`https://wa.me/${siteConfig.whatsapp.number}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 bg-[#1c1b1b] hover:bg-[#201f1f] text-[#e5e2e1] px-4 py-2 rounded-full border border-white/[0.06] text-xs font-mono transition-all w-fit group"
-        >
-          <span class="w-2 h-2 rounded-full bg-emerald-400 group-hover:shadow-[0_0_8px_#34d399] transition-all"></span>
-          <span>WhatsApp ({siteConfig.whatsapp.displayNumber})</span>
         </a>
-        <span class="font-code text-[11px] text-[#ac8888]">
-          Despacho express a todo el país (24 a 48 hrs)
+        <p class="font-mono text-xs text-[#8F8F8C] uppercase tracking-widest">
+          EVOLUCIÓN CONSTANTE // IDENTIDAD PROPIA // NO DEFAULT.
+        </p>
+        <p class="font-body text-sm text-[#8F8F8C] max-w-md leading-relaxed pt-1">
+          Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo. Tienda oficial online.
+        </p>
+      </div>
+
+      <!-- Módulo Newsletter "Únete al Archivo" -->
+      <div class="lg:col-span-6 flex flex-col justify-end space-y-3">
+        <span class="text-xs font-mono text-[#FAF9F6] uppercase tracking-wider font-bold">
+          ÚNETE AL ARCHIVO // SEÑALES DE DROP
+        </span>
+        <form 
+          onsubmit="event.preventDefault(); alert('Gracias por unirte a las señales de Zairen Lab.');"
+          class="flex items-stretch max-w-md w-full"
+        >
+          <input
+            type="email"
+            placeholder="Introduce tu correo electrónico..."
+            required
+            class="flex-1 bg-[#141416] border border-[#2A2A2A] focus:border-[#dc143c] text-[#FAF9F6] px-4 py-3 text-xs font-mono placeholder:text-[#4A4A4A] outline-none transition-colors"
+          />
+          <button
+            type="submit"
+            title="Suscribirse a lanzamientos"
+            class="px-5 bg-[#FAF9F6] hover:bg-[#dc143c] text-[#0A0A0A] hover:text-white font-bold text-sm transition-colors border border-[#FAF9F6] hover:border-[#dc143c] flex items-center justify-center cursor-pointer"
+          >
+            →
+          </button>
+        </form>
+        <span class="text-[11px] font-mono text-[#4A4A4A]">
+          Acceso prioritario a tirajes limitados de 280-420 GSM. Cero spam.
         </span>
       </div>
 
-      <!-- Columna 4: Redes Sociales Dinámicas -->
-      <div class="flex flex-col gap-3">
-        <span class="font-code text-xs text-[#e5e2e1] uppercase tracking-wider font-bold">
-          Redes Oficiales
+    </div>
+
+    <!-- Fila Media: Columnas Profesionales & Acceso Administrativo -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 py-10 text-xs font-mono">
+      
+      <!-- Columna 1: Explorar Catálogo -->
+      <div class="space-y-3">
+        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
+          CATÁLOGO
         </span>
-        {activeSocials.length > 0 ? (
-          <div class="flex flex-col gap-2">
-            {activeSocials.map((social) => (
-              <a
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors"
-              >
-                <span class="text-[#dc143c]">▶</span>
-                <span>{social.name}</span>
+        <ul class="space-y-2 text-[#8F8F8C]">
+          <li><a href="/" class="hover:text-[#FAF9F6] transition-colors">Todas las Prendas</a></li>
+          <li><a href="/?col=drop-01" class="hover:text-[#FAF9F6] transition-colors">DROP 01</a></li>
+          <li><a href="/?col=basicos" class="hover:text-[#FAF9F6] transition-colors">Línea Básicos</a></li>
+          <li><a href="/?col=mecha-tech" class="hover:text-[#FAF9F6] transition-colors">Mecha Tech</a></li>
+        </ul>
+      </div>
+
+      <!-- Columna 2: Identidad de Marca -->
+      <div class="space-y-3">
+        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
+          MARCA
+        </span>
+        <ul class="space-y-2 text-[#8F8F8C]">
+          <li><a href="/marca" class="hover:text-[#FAF9F6] transition-colors">Manifiesto</a></li>
+          <li><a href="/marca#lineas" class="hover:text-[#FAF9F6] transition-colors">Líneas de Diseño</a></li>
+          <li><a href="/marca#especificaciones" class="hover:text-[#FAF9F6] transition-colors">Calidad 280-420 GSM</a></li>
+          <li><a href="/marca#contacto" class="hover:text-[#FAF9F6] transition-colors">Cotización & Pedidos</a></li>
+        </ul>
+      </div>
+
+      <!-- Columna 3: Canales Oficiales -->
+      <div class="space-y-3">
+        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
+          CANALES
+        </span>
+        <ul class="space-y-2 text-[#8F8F8C]">
+          {activeSocials.map((s) => (
+            <li>
+              <a href={s.url} target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
+                <span>{s.name}</span>
+                <span class="text-[10px] text-[#4A4A4A]">↗</span>
               </a>
-            ))}
-          </div>
-        ) : (
-          <span class="text-xs font-mono text-[#ac8888]">
-            Canal principal: WhatsApp
-          </span>
-        )}
-        <div class="flex items-center gap-2 pt-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="font-code text-[10px] text-[#ac8888] uppercase">NODE ONLINE // 2026-v2</span>
-        </div>
+            </li>
+          ))}
+          <li>
+            <a 
+              href={`https://wa.me/${siteConfig.whatsapp.number}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="text-emerald-400 hover:underline flex items-center gap-1"
+            >
+              <span>WhatsApp Directo</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Columna 4: Gestión & Acceso Administrativo (Donde siempre estaba) -->
+      <div class="space-y-3">
+        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
+          SISTEMA
+        </span>
+        <ul class="space-y-2 text-[#8F8F8C]">
+          <li>
+            <a href="/login" class="text-[#8F8F8C] hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 bg-[#dc143c] rounded-full"></span>
+              <span>Acceso Admin // Core</span>
+            </a>
+          </li>
+          <li><span class="text-[#4A4A4A]">ZRN-OS v2.6 Online</span></li>
+          <li><span class="text-[#4A4A4A]">Tokyo Streetwear Core</span></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Fila Inferior: Copyright & Créditos -->
+    <div class="pt-8 border-t border-[#1C1B1B] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-[#8F8F8C]">
+      <span>© 2026 {siteConfig.name}. Todos los derechos reservados. Tienda Oficial Online.</span>
+      <div class="flex items-center gap-6">
+        <span>ESTRUCTURA SIN SATURACIÓN</span>
+        <span class="w-1.5 h-1.5 bg-emerald-400"></span>
+        <span>DROP 01 DISPONIBLE</span>
       </div>
     </div>
 
-    <!-- Barra Inferior de Copyright y Legales -->
-    <div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-white/[0.06] gap-4 text-xs font-mono text-[#ac8888]">
-      <span>© 2026 {siteConfig.name}. Confección experimental. Todos los derechos reservados.</span>
-      <div class="flex items-center gap-6">
-        <a href="/login" class="hover:text-[#e5e2e1] transition-colors">Admin Core</a>
-        <a href="#catalogo" class="hover:text-[#e5e2e1] transition-colors">Políticas de Envío</a>
-      </div>
-    </div>
   </div>
 </footer>

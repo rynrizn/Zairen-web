@@ -1,7 +1,8 @@
 import React from 'react';
 
-interface MorphIconProps {
-  active: boolean;
+export interface MorphIconProps {
+  active?: boolean;
+  state?: 'A' | 'B' | string;
   IconA: React.ComponentType<{ className?: string }>;
   IconB: React.ComponentType<{ className?: string }>;
   className?: string;
@@ -13,22 +14,25 @@ interface MorphIconProps {
  */
 export function MorphIcon({
   active,
+  state,
   IconA,
   IconB,
   className = 'w-4 h-4',
 }: MorphIconProps) {
+  const isBActive = active !== undefined ? active : state === 'B';
+
   return (
     <span className="relative inline-flex items-center justify-center w-5 h-5 overflow-hidden">
       <span
         className={`absolute transition-all duration-200 ease-out transform ${
-          active ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0'
+          isBActive ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0'
         }`}
       >
         <IconA className={className} />
       </span>
       <span
         className={`absolute transition-all duration-200 ease-out transform ${
-          active ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'
+          isBActive ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45'
         }`}
       >
         <IconB className={className} />

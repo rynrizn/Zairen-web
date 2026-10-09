@@ -157,13 +157,13 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       {/* ======================================================== */}
       {/* 1. BARRA SUPERIOR MÓVIL (Con botón de 3 líneas horizontales) */}
       {/* ======================================================== */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 z-40 bg-[#141416]/95 backdrop-blur-xl border-b border-white/[0.08] px-4 flex items-center justify-between">
+      <header className="md:hidden fixed top-0 left-0 right-0 h-16 z-40 bg-[#141416]/95 backdrop-blur-xl border-b border-[#2A2A2A] px-4 flex items-center justify-between">
         {/* Botón 3 Líneas Horizontales (Hamburguesa) */}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Abrir menú de navegación de administración"
-          className="w-10 h-10 rounded-xl bg-[#1c1b1b] border border-white/[0.08] flex items-center justify-center text-white cursor-pointer active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-none bg-[#1c1b1b] border border-[#2A2A2A] flex items-center justify-center text-white cursor-pointer active:scale-95 transition-transform"
         >
           {/* 3 Líneas Horizontales */}
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -175,7 +175,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
         {/* Logo Móvil */}
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#0a0a0a] border border-white/[0.1] p-1 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-none bg-[#0a0a0a] border border-[#2A2A2A] p-1 flex items-center justify-center">
             <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <span className="font-display font-bold text-sm tracking-wider uppercase text-white">
@@ -190,7 +190,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
             target="_blank"
             rel="noopener noreferrer"
             title="Ver tienda web"
-            className="w-9 h-9 rounded-xl bg-[#1c1b1b] border border-white/[0.08] text-[#ac8888] hover:text-white flex items-center justify-center"
+            className="w-9 h-9 rounded-none bg-[#1c1b1b] border border-[#2A2A2A] text-[#ac8888] hover:text-white flex items-center justify-center"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -200,7 +200,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
             type="button"
             onClick={handleLogout}
             title="Cerrar sesión"
-            className="w-9 h-9 rounded-xl bg-[#1c1b1b] hover:bg-[#dc143c] border border-white/[0.08] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-none bg-[#1c1b1b] hover:bg-[#dc143c] border border-[#2A2A2A] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
@@ -220,14 +220,14 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           onClick={() => setMobileOpen(false)}
         >
           <div
-            className="w-72 max-w-[85vw] h-full bg-[#141416] border-r border-white/[0.1] p-6 flex flex-col justify-between animate-in slide-in-from-left duration-200"
+            className="w-72 max-w-[85vw] h-full bg-[#141416] border-r border-[#2A2A2A] p-6 flex flex-col justify-between animate-in slide-in-from-left duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-6">
               {/* Encabezado Drawer */}
               <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#0a0a0a] border border-white/[0.1] p-1.5 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-none bg-[#0a0a0a] border border-[#2A2A2A] p-1.5 flex items-center justify-center">
                     <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
                   </div>
                   <div>
@@ -243,7 +243,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-[#1c1b1b] text-[#ac8888] hover:text-white flex items-center justify-center cursor-pointer"
+                  className="w-8 h-8 rounded-none bg-[#1c1b1b] text-[#ac8888] hover:text-white flex items-center justify-center cursor-pointer"
                 >
                   ✕
                 </button>
@@ -258,10 +258,10 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                       key={item.id}
                       href={item.path}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition-all ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-none text-xs font-mono uppercase tracking-wider transition-all border ${
                         isActive
-                          ? 'bg-[#dc143c] text-white font-bold shadow-[0_0_12px_rgba(220,20,60,0.4)]'
-                          : 'text-[#ac8888] hover:bg-[#1c1b1b] hover:text-white'
+                          ? 'bg-[#dc143c] text-white font-bold border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.4)]'
+                          : 'text-[#ac8888] hover:bg-[#1c1b1b] hover:text-white border-transparent'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                       </div>
                       {item.badge && (
                         <span
-                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${
+                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded-none ${
                             isActive ? 'bg-white text-[#dc143c]' : 'bg-[#dc143c] text-white'
                           }`}
                         >
@@ -289,7 +289,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2.5 px-3 rounded-xl bg-[#1c1b1b] text-white text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#201f1f]"
+                className="w-full py-2.5 px-3 rounded-none bg-[#1c1b1b] text-white text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#201f1f] border border-[#2A2A2A]"
               >
                 <span>Ver Tienda Web</span>
                 <span className="text-[10px]">↗</span>
@@ -297,7 +297,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full py-2.5 px-3 rounded-xl bg-[#7f1d1d]/30 text-[#fca5a5] hover:bg-[#dc143c] hover:text-white text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-none bg-[#7f1d1d]/30 text-[#fca5a5] hover:bg-[#dc143c] hover:text-white text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer border border-[#7f1d1d]/50"
               >
                 Cerrar Sesión
               </button>
@@ -385,12 +385,12 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                   key={item.id}
                   href={item.path}
                   title={isCollapsed ? item.label : undefined}
-                  className={`group relative flex items-center gap-3 px-3 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all ${
+                  className={`group relative flex items-center gap-3 px-3 py-3 rounded-none text-xs font-mono uppercase tracking-wider transition-all border ${
                     isCollapsed ? 'justify-center' : 'justify-between'
                   } ${
                     isActive
-                      ? 'bg-[#dc143c] text-white font-bold shadow-[0_4px_16px_rgba(220,20,60,0.45)]'
-                      : 'text-[#ac8888] hover:bg-[#1c1b1b] hover:text-white'
+                      ? 'bg-[#dc143c] text-white font-bold border-[#dc143c] shadow-[0_4px_16px_rgba(220,20,60,0.45)]'
+                      : 'text-[#8F8F8C] hover:bg-[#1c1b1b] hover:text-white border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -400,7 +400,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
                   {!isCollapsed && item.badge && (
                     <span
-                      className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${
+                      className={`px-1.5 py-0.5 text-[10px] font-bold rounded-none ${
                         isActive ? 'bg-white text-[#dc143c]' : 'bg-[#dc143c] text-white'
                       }`}
                     >
@@ -410,7 +410,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
                   {/* Tooltip en modo colapsado */}
                   {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#0a0a0a] text-white text-xs font-mono uppercase tracking-wider whitespace-nowrap border border-white/[0.1] shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                    <div className="absolute left-full ml-3 px-3 py-1.5 rounded-none bg-[#0a0a0a] text-white text-xs font-mono uppercase tracking-wider whitespace-nowrap border border-[#2A2A2A] shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                       {item.label}
                       {item.badge && ` (${item.badge})`}
                     </div>
@@ -429,7 +429,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
             target="_blank"
             rel="noopener noreferrer"
             title="Abrir tienda web pública"
-            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#1c1b1b] hover:bg-[#201f1f] text-[#ac8888] hover:text-white border border-white/[0.06] text-xs font-mono uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-none bg-[#1c1b1b] hover:bg-[#201f1f] text-[#8F8F8C] hover:text-white border border-[#2A2A2A] text-xs font-mono uppercase tracking-wider transition-colors ${
               isCollapsed ? 'justify-center' : ''
             }`}
           >
@@ -444,7 +444,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
             type="button"
             onClick={handleLogout}
             title="Cerrar sesión administrativa"
-            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#1c1b1b] hover:bg-[#7f1d1d] text-[#ac8888] hover:text-white border border-white/[0.06] text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-none bg-[#1c1b1b] hover:bg-[#7f1d1d] text-[#8F8F8C] hover:text-white border border-[#2A2A2A] text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer ${
               isCollapsed ? 'justify-center' : ''
             }`}
           >

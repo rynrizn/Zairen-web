@@ -50,7 +50,24 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0A0A0A" />
-    <meta name="author" content="ZAIREN LAB // Tarija, Bolivia" />
+    <meta name="author" content="ZAIREN LAB" />
+
+    <!-- Script Inline de Tema (Evita destello en carga) -->
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('zairen_theme')) {
+          return localStorage.getItem('zairen_theme');
+        }
+        return 'dark';
+      })();
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+      }
+    </script>
 
     <!-- Open Graph / Facebook / WhatsApp Preview -->
     <meta property="og:type" content={type} />

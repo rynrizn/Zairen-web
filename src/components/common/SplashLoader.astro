@@ -4,95 +4,50 @@ import { siteConfig } from '../../config/site';
 
 <div
   id="splash-loader"
-  class="fixed inset-0 z-50 bg-[#0d0d0e] text-[#e8e8e8] flex flex-col justify-between p-6 sm:p-10 transition-opacity duration-700 pointer-events-auto"
+  class="fixed inset-0 z-50 bg-[#0A0A0A] text-[#FAF9F6] flex flex-col items-center justify-center p-6 transition-opacity duration-500 pointer-events-auto"
 >
-  <!-- Halo ambiental y retícula de fondo -->
+  <!-- Halo sutil de fondo -->
   <div class="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center overflow-hidden">
-    <div class="w-[580px] h-[580px] rounded-full bg-[#dc143c] blur-[150px] opacity-25 animate-pulse"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:28px_28px] opacity-70"></div>
+    <div class="w-[360px] h-[360px] rounded-full bg-[#dc143c] blur-[140px] opacity-20"></div>
   </div>
 
-  <!-- Barra de Telemetría Superior -->
-  <header class="w-full flex items-center justify-between text-[11px] font-mono text-[#52525b] tracking-widest uppercase">
-    <div class="flex items-center gap-3">
-      <span class="inline-block w-2 h-2 rounded-full bg-[#dc143c] animate-ping opacity-75"></span>
-      <span class="text-[#8a8a93] font-medium">ZRN // OS-2026</span>
-      <span class="hidden sm:inline text-[#52525b]">|</span>
-      <span class="hidden sm:inline">PROTOCOLO ACTIVO</span>
+  <div class="w-full max-w-xs flex flex-col items-center text-center space-y-6">
+    <!-- Logotipo Oficial Vectorial Limpio (Sin cajas ni marcos alrededor) -->
+    <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center animate-fade-in">
+      <img
+        src="/brand/zairen_logo_oficial.svg"
+        alt="Zairen Lab Logo Oficial"
+        class="w-full h-full object-contain filter drop-shadow-[0_0_16px_rgba(220,20,60,0.35)]"
+      />
     </div>
 
-    <div class="flex items-center gap-4">
-      <div class="hidden sm:flex items-center gap-2 text-[#52525b]">
-        <span>TOKYO EDGE NODE</span>
-      </div>
-      <div class="px-2.5 py-0.5 rounded-full border border-white/10 bg-[#141416]/60 text-[#8a8a93] text-[10px] tracking-wider">
-        ONLINE
-      </div>
-    </div>
-  </header>
-
-  <!-- Centro: Identidad Visual y Barra de Carga -->
-  <div class="w-full flex flex-col items-center justify-center text-center my-auto px-4">
-    <div class="mb-6 flex flex-col items-center">
-      <div class="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md flex items-center justify-center shadow-2xl relative">
-        <svg class="w-8 h-8 text-[#dc143c]" viewBox="0 0 64 64" fill="none">
-          <path d="M14 20H50M20 20V48M44 20V48M14 28H50M24 38H40" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="absolute inset-0 rounded-2xl border border-[#dc143c]/30 animate-pulse"></div>
-      </div>
-    </div>
-
+    <!-- Nombre de la Marca Minimalista -->
     <div class="space-y-1">
-      <h1 class="text-3xl sm:text-4xl font-display font-bold tracking-[0.2em] text-[#e8e8e8] uppercase">
+      <h1 class="text-2xl sm:text-3xl font-display font-extrabold tracking-[0.25em] text-[#FAF9F6] uppercase">
         {siteConfig.name}
       </h1>
-      <p class="text-xs font-mono tracking-[0.3em] text-[#8a8a93] uppercase">
-        ザイレン 研究 // ARCHITECTURE TEXTILE
+      <p class="text-[10px] font-mono tracking-[0.3em] text-[#8F8F8C] uppercase">
+        TIENDA OFICIAL ONLINE
       </p>
     </div>
 
-    <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm my-8">
-      <span class="text-[11px] font-mono text-[#dc143c] tracking-wider font-semibold">DROP 01</span>
-      <span class="w-1 h-1 rounded-full bg-white/30"></span>
-      <span class="text-[11px] font-body text-[#8a8a93] tracking-wide">ESTÉTICA NEO-TOKYO & MINIMALISMO ZEN</span>
-    </div>
-
-    <!-- Barra de Progreso -->
-    <div class="w-full max-w-xs sm:max-w-sm space-y-3">
+    <!-- Barra de Progreso Minimalista -->
+    <div class="w-full space-y-2 pt-2">
       <div class="relative w-full h-[2px] bg-white/10 rounded-full overflow-hidden">
-        <div id="splash-bar" class="absolute top-0 left-0 bottom-0 bg-gradient-to-r from-[#dc143c]/50 via-[#dc143c] to-[#ff2d55] rounded-full w-0 transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(220,20,60,0.8)]"></div>
+        <div id="splash-bar" class="absolute top-0 left-0 bottom-0 bg-[#dc143c] rounded-full w-0 transition-all duration-300 ease-out shadow-[0_0_8px_rgba(220,20,60,0.8)]"></div>
       </div>
-      <div class="flex items-center justify-between text-[10px] font-mono text-[#52525b] tracking-widest">
-        <span class="flex items-center gap-1.5 text-[#8a8a93]">
-          <span class="text-[#dc143c]">▶</span> SINCRONIZANDO
-        </span>
-        <span id="splash-percent" class="text-[#e8e8e8] font-mono">0%</span>
+      <div class="flex items-center justify-between text-[10px] font-mono text-[#8F8F8C] tracking-widest">
+        <span>CARGANDO</span>
+        <span id="splash-percent">0%</span>
       </div>
-    </div>
-
-    <!-- Botón Omitir / Entrar -->
-    <div class="mt-8">
-      <button
-        id="splash-skip-btn"
-        class="inline-flex items-center gap-2 px-6 py-2 rounded-full text-xs font-mono tracking-widest text-[#e8e8e8] bg-white/[0.04] hover:bg-[#dc143c] border border-white/10 hover:border-[#dc143c] transition-all duration-300 shadow-lg cursor-pointer"
-      >
-        <span>ENTRAR AL ARCHIVO</span>
-        <span>→</span>
-      </button>
     </div>
   </div>
-
-  <footer class="w-full text-center text-[10px] font-mono text-[#52525b]">
-    CARGANDO MATRIZ DE PRENDAS • SHIBUYA OVERSIZED DIVISION
-  </footer>
 </div>
 
 <script>
-  // Ocultar si ya se vio en la sesión actual para no interferir en la navegación
   const loader = document.getElementById('splash-loader');
   const bar = document.getElementById('splash-bar');
   const percent = document.getElementById('splash-percent');
-  const skipBtn = document.getElementById('splash-skip-btn');
 
   function dismissLoader() {
     if (!loader) return;
@@ -100,34 +55,31 @@ import { siteConfig } from '../../config/site';
     loader.style.pointerEvents = 'none';
     setTimeout(() => {
       loader.style.display = 'none';
-    }, 700);
+    }, 500);
     sessionStorage.setItem('zairen_splash_seen', 'true');
   }
 
   if (sessionStorage.getItem('zairen_splash_seen')) {
     if (loader) loader.style.display = 'none';
   } else {
-    // Animación de barra de progreso rápida
-    let p = 15;
+    let p = 20;
     if (bar && percent) {
-      bar.style.width = '15%';
-      percent.textContent = '15%';
-      
+      bar.style.width = '20%';
+      percent.textContent = '20%';
+
       const interval = setInterval(() => {
-        p += Math.floor(Math.random() * 25) + 15;
+        p += Math.floor(Math.random() * 25) + 20;
         if (p >= 100) {
           p = 100;
           bar.style.width = '100%';
           percent.textContent = '100%';
           clearInterval(interval);
-          setTimeout(dismissLoader, 400);
+          setTimeout(dismissLoader, 300);
         } else {
           bar.style.width = `${p}%`;
           percent.textContent = `${p}%`;
         }
-      }, 150);
+      }, 120);
     }
-
-    skipBtn?.addEventListener('click', dismissLoader);
   }
 </script>

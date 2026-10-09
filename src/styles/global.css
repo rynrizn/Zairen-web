@@ -61,22 +61,106 @@
     min-height: 100vh;
     background-color: #0A0A0A;
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  /* Modo Claro // Zairen Minimal Alabaster */
+  html.light {
+    color-scheme: light;
+    background-color: #F8F7F4;
+    color: #141416;
+  }
+
+  html.light body {
+    background-color: #F8F7F4;
+    color: #141416;
+  }
+
+  html.light .bg-\[\#0A0A0A\],
+  html.light .bg-\[\#0a0a0a\],
+  html.light .bg-\[\#0d0d0e\] {
+    background-color: #F8F7F4 !important;
+  }
+
+  html.light .bg-\[\#141416\] {
+    background-color: #FFFFFF !important;
+  }
+
+  html.light .bg-\[\#1c1b1b\],
+  html.light .bg-\[\#201f1f\] {
+    background-color: #EFECE6 !important;
+  }
+
+  html.light .border-\[\#1C1B1B\],
+  html.light .border-\[\#201f1f\],
+  html.light .border-\[\#2A2A2A\],
+  html.light .border-white\/\[0\.08\],
+  html.light .border-white\/\[0\.06\],
+  html.light .border-white\/\[0\.12\] {
+    border-color: #DCD9D2 !important;
+  }
+
+  html.light .text-\[\#FAF9F6\],
+  html.light .text-\[\#e5e2e1\],
+  html.light .text-\[\#e8e8e8\],
+  html.light .text-white {
+    color: #141416 !important;
+  }
+
+  html.light .text-\[\#8F8F8C\],
+  html.light .text-\[\#ac8888\] {
+    color: #555558 !important;
   }
 }
 
+/* Animaciones de Rendimiento Ultraliviano (GPU-Accelerated) */
+@keyframes marqueeScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
 
-/* Ocultar barra de desplazamiento manteniendo scroll */
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 28s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes entranceFadeUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.entrance-fade-up {
+  animation: entranceFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Ocultar barra de desplazamiento manteniendo scroll fluido */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0e0e0e;
+  background: #0A0A0A;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 9999px;
+  background: #201f1f;
+  border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #dc143c;
+  background: #4A4A4A;
 }

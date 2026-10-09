@@ -57,7 +57,7 @@ export const siteConfig: SiteConfig = {
   name: import.meta.env.PUBLIC_BRAND_NAME || 'ZAIREN LAB',
   slogan: 'Evolución constante, identidad propia',
   tagline: 'Menos ruido, más identidad',
-  origin: 'Tarija, Bolivia',
+  origin: '',
   description: 'ZAIREN LAB // Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo.',
   url: import.meta.env.PUBLIC_SITE_URL || 'https://zairenlab.com',
   cloudflareDomain: import.meta.env.PUBLIC_CLOUDFLARE_DOMAIN || 'https://zairen-web.pages.dev',
@@ -85,15 +85,11 @@ export const siteConfig: SiteConfig = {
   shipping: {
     freeShippingThreshold: Number(import.meta.env.PUBLIC_FREE_SHIPPING_THRESHOLD) || 250,
     expressShippingCost: Number(import.meta.env.PUBLIC_EXPRESS_SHIPPING_COST) || 15,
-    deliveryTimeExpress: '24 a 48 hrs (La Paz / Cochabamba / Santa Cruz)',
+    deliveryTimeExpress: 'Coordinación directa',
   },
 
   /**
    * 5. REDES SOCIALES DINÁMICAS
-   * 👉 AGREGA O QUITA REDES A VOLUNTAD:
-   * - Si solo quieres Instagram: deja url en Instagram y pon enabled: false (o borra) las demás.
-   * - Si tienes Instagram y TikTok: coloca las URLs y enabled: true en ambas.
-   * - Toda la web (Header, Footer, Drawer) solo mostrará las redes activas con URL no vacía.
    */
   socialNetworks: [
     {
@@ -106,8 +102,8 @@ export const siteConfig: SiteConfig = {
     {
       id: 'tiktok',
       name: 'TikTok',
-      url: import.meta.env.PUBLIC_TIKTOK_URL || '',
-      enabled: false, // Actívalo a true cuando tengas tu cuenta lista
+      url: import.meta.env.PUBLIC_TIKTOK_URL || 'https://tiktok.com/@zairenlab',
+      enabled: true,
       icon: 'Video',
     },
     {

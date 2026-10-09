@@ -2,6 +2,7 @@
 import { siteConfig } from '../../config/site';
 import { CartBadge } from './CartBadge';
 import { ShareButton } from './ShareButton';
+import { ThemeToggle } from './ThemeToggle';
 import { BottomNavMobile } from './BottomNavMobile';
 
 interface Props {
@@ -11,95 +12,81 @@ interface Props {
 const { activePath = '/' } = Astro.props;
 ---
 
-<!-- Header Superior Flotante (Desktop y Tablet) -->
-<header class="fixed top-0 left-0 right-0 z-40 py-3 px-3 md:px-8 pointer-events-none">
-  <div class="h-16 w-full max-w-[1440px] mx-auto px-4 md:px-6 flex items-center justify-between rounded-full bg-[#141416]/85 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.65)] border border-white/[0.08] pointer-events-auto">
-    <!-- Logotipo Oficial Brand Book -->
+<!-- Header Superior Fijo Minimalista -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1C1B1B] transition-colors">
+  <div class="h-16 w-full max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-between">
+    
+    <!-- Logotipo Oficial Suelto & Limpio (Sin cajas ni bordes que lo encierren) -->
     <a href="/" class="flex items-center gap-3 group">
-      <div class="w-9 h-9 rounded-xl bg-[#0a0a0a] border border-white/[0.1] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(220,20,60,0.2)] group-hover:border-[#dc143c]/60 transition-colors">
-        <img
-          src="/brand/zairen_logo_oficial.svg"
-          alt="Zairen Lab Logo Oficial"
-          class="w-full h-full object-contain"
-        />
-      </div>
-      <div class="flex flex-col">
-        <span class="font-display text-sm md:text-base font-bold text-[#FAF9F6] tracking-wider uppercase group-hover:text-white transition-colors">
-          {siteConfig.name}
-        </span>
-        <span class="font-code text-[9px] text-[#ffb3b3] uppercase tracking-widest leading-none">
-          {siteConfig.slogan}
-        </span>
-      </div>
+      <img
+        src="/brand/zairen_logo_oficial.svg"
+        alt="Zairen Lab Logo Oficial"
+        class="w-8 h-8 object-contain transition-transform duration-300 group-hover:scale-105"
+      />
+      <span class="font-display text-base md:text-lg font-extrabold text-[#FAF9F6] tracking-widest uppercase transition-colors">
+        {siteConfig.name}
+      </span>
     </a>
 
     <!-- Enlaces Centrales (Desktop) -->
-    <nav class="hidden lg:flex items-center gap-1 bg-[#0a0a0a]/60 p-1.5 rounded-full border border-white/[0.06]">
+    <nav class="hidden md:flex items-center gap-8">
       <a
         href="/"
-        class={`px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider transition-colors ${
-          activePath === '/'
-            ? 'bg-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.5)]'
-            : 'text-[#e5e2e1] hover:text-white hover:bg-white/[0.06]'
-        }`}
-      >
-        Inicio
-      </a>
-      <a
-        href="/catalogo"
-        class={`px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider transition-colors ${
-          activePath === '/catalogo'
-            ? 'bg-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.5)]'
-            : 'text-[#e5e2e1] hover:text-white hover:bg-white/[0.06]'
+        class={`text-xs font-mono uppercase tracking-widest transition-colors ${
+          activePath === '/' || activePath === '/catalogo'
+            ? 'text-[#FAF9F6] font-bold border-b-2 border-[#dc143c] pb-1'
+            : 'text-[#8F8F8C] hover:text-[#FAF9F6]'
         }`}
       >
         Catálogo
       </a>
       <a
-        href="/#manifiesto"
-        class="px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider text-[#ac8888] hover:text-white hover:bg-white/[0.06] transition-colors"
+        href="/marca"
+        class={`text-xs font-mono uppercase tracking-widest transition-colors ${
+          activePath === '/marca'
+            ? 'text-[#FAF9F6] font-bold border-b-2 border-[#dc143c] pb-1'
+            : 'text-[#8F8F8C] hover:text-[#FAF9F6]'
+        }`}
       >
-        Manifiesto
+        Marca & Drops
       </a>
       <a
-        href="/#lineas"
-        class="px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider text-[#ac8888] hover:text-white hover:bg-white/[0.06] transition-colors"
-      >
-        Líneas
-      </a>
-      <a
-        href="/#contacto"
-        class="px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider text-[#ac8888] hover:text-white hover:bg-white/[0.06] transition-colors"
+        href="/marca#contacto"
+        class="text-xs font-mono uppercase tracking-widest text-[#8F8F8C] hover:text-[#FAF9F6] transition-colors"
       >
         Contacto
       </a>
     </nav>
 
-    <!-- Acciones Derecha (Compartir QR, WhatsApp Concierge, Bolsa) -->
-    <div class="flex items-center gap-2">
-      <!-- Botón Compartir Tienda & Código QR -->
+    <!-- Acciones Derecha (Tema, Compartir, WhatsApp, Carrito) -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Selector Modo Claro / Modo Oscuro -->
+      <ThemeToggle client:load />
+
+      <!-- Botón Compartir QR -->
       <ShareButton
         client:load
-        className="w-10 h-10 md:w-11 md:h-11 bg-[#201f1f] hover:bg-[#2a2a2a] text-[#FAF9F6] border border-white/[0.08]"
+        className="w-9 h-9 bg-[#141416] hover:bg-[#201f1f] text-[#FAF9F6] border border-[#2A2A2A] rounded-none"
       />
 
-      <!-- Botón WhatsApp Concierge Directo (Desktop) -->
+      <!-- WhatsApp Directo -->
       <a
         href={`https://wa.me/${siteConfig.whatsapp.number}`}
         target="_blank"
         rel="noopener noreferrer"
         title="Contactar Asesor WhatsApp"
-        class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#201f1f] hover:bg-[#2a2a2a] text-[#FAF9F6] hover:text-white border border-white/[0.08] text-xs font-mono tracking-wider transition-colors"
+        class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 bg-[#141416] hover:bg-[#201f1f] text-[#FAF9F6] border border-[#2A2A2A] text-xs font-mono tracking-wider transition-colors"
       >
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="hidden md:inline">WhatsApp</span>
+        <span class="w-1.5 h-1.5 bg-emerald-400"></span>
+        <span>WhatsApp</span>
       </a>
 
       <!-- Carrito Drawer Toggle -->
       <CartBadge client:load />
     </div>
+
   </div>
 </header>
 
-<!-- Navegación Inferior Flotante Móvil (Thumb Zone) -->
+<!-- Navegación Inferior Flotante Móvil -->
 <BottomNavMobile client:load />

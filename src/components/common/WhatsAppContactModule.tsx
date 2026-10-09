@@ -10,25 +10,25 @@ export function WhatsAppContactModule() {
     {
       id: 'catalogo',
       title: '📦 Disponibilidad & Drops',
-      desc: 'Preguntas sobre tallas, disponibilidad inmediata y nuevos lanzamientos.',
+      desc: 'Preguntas sobre tallas, disponibilidad y lanzamientos.',
       defaultMsg: 'Hola Zairen Lab, quisiera consultar sobre la disponibilidad de prendas y próximos drops.',
     },
     {
-      id: 'personalizadas',
-      title: '✂️ Prendas Personalizadas',
-      desc: 'Confección para proyectos especiales, colaboraciones y taller.',
-      defaultMsg: 'Hola Zairen Lab, me gustaría cotizar una prenda personalizada con ustedes.',
+      id: 'cotizacion',
+      title: '✂️ Cotización & Encargos',
+      desc: 'Cotización para proyectos especiales y pedidos exclusivos.',
+      defaultMsg: 'Hola Zairen Lab, me gustaría realizar una cotización para un pedido con ustedes.',
     },
     {
-      id: 'envios',
-      title: '🚚 Envíos Tarija y Bolivia',
-      desc: 'Tiempos de entrega express (24-48h) y cobertura nacional.',
-      defaultMsg: 'Hola Zairen Lab, deseo coordinar un envío y conocer los costos/tiempos hacia mi ciudad.',
+      id: 'entregas',
+      title: '🚚 Consultas de Entrega',
+      desc: 'Información directa sobre tiempos y coordinación de despacho.',
+      defaultMsg: 'Hola Zairen Lab, deseo consultar sobre la coordinación y tiempos de entrega.',
     },
     {
       id: 'tallas',
       title: '📏 Asesoría de Medidas',
-      desc: 'Ayuda para elegir la talla boxy oversized perfecta.',
+      desc: 'Orientación para elegir la talla boxy oversized ideal.',
       defaultMsg: 'Hola Zairen Lab, necesito orientación para elegir mi talla de acuerdo a mis medidas.',
     },
   ];
@@ -52,26 +52,26 @@ export function WhatsAppContactModule() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-3xl bg-[#141416]/90 backdrop-blur-2xl border border-white/[0.08] p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+    <div className="w-full max-w-4xl mx-auto rounded-3xl bg-[#141416]/90 backdrop-blur-2xl border border-white/[0.08] p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] transition-colors">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Lado Izquierdo: Info & Teléfono (5 cols) */}
         <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/30 text-[10px] font-mono uppercase tracking-widest font-bold">
               <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
-              CONCIERGE DIRECTO // 24/7
+              CANAL DIRECTO
             </div>
             <h3 className="font-display text-2xl md:text-3xl font-bold uppercase tracking-tight text-[#FAF9F6]">
               Atención Directa por WhatsApp
             </h3>
-            <p className="text-xs md:text-sm font-body text-[#ac8888] leading-relaxed">
-              Sin intermediarios ni bots automáticos. Escribe directamente a nuestro equipo de taller en Tarija, Bolivia.
+            <p className="text-xs md:text-sm font-body text-[#8F8F8C] leading-relaxed">
+              Comunicación directa con la tienda oficial. Resolvemos cualquier duda sobre prendas, tallas o cotizaciones especiales.
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#0a0a0a] border border-white/[0.06] space-y-2">
-            <div className="text-[10px] font-mono text-[#ac8888] uppercase tracking-wider">
-              LÍNEA OFICIAL VERIFICADA
+            <div className="text-[10px] font-mono text-[#8F8F8C] uppercase tracking-wider">
+              LÍNEA OFICIAL DE ATENCIÓN
             </div>
             <div className="font-mono text-lg font-bold text-white flex items-center gap-2">
               <span className="text-[#25D366]">📱</span>
@@ -79,14 +79,14 @@ export function WhatsAppContactModule() {
             </div>
             <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 pt-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span>Respuesta promedio: &lt; 15 minutos</span>
+              <span>Atención personalizada</span>
             </div>
           </div>
         </div>
 
         {/* Lado Derecho: Selector Interactivo & Formulario (7 cols) */}
         <form onSubmit={handleSendMessage} className="lg:col-span-7 flex flex-col space-y-4">
-          <label className="text-xs font-mono uppercase text-[#e5e2e1] font-bold tracking-wider">
+          <label className="text-xs font-mono uppercase text-[#FAF9F6] font-bold tracking-wider">
             1. Selecciona el motivo de tu consulta:
           </label>
 
@@ -102,11 +102,11 @@ export function WhatsAppContactModule() {
                   className={`p-3 rounded-2xl text-left transition-all cursor-pointer border ${
                     isSelected
                       ? 'bg-[#dc143c]/15 border-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.3)]'
-                      : 'bg-[#1c1b1b] border-white/[0.06] text-[#ac8888] hover:text-white hover:bg-[#201f1f]'
+                      : 'bg-[#1c1b1b] border-white/[0.06] text-[#8F8F8C] hover:text-white hover:bg-[#201f1f]'
                   }`}
                 >
                   <div className="font-mono text-xs font-bold text-[#FAF9F6]">{t.title}</div>
-                  <div className="text-[10px] font-body text-[#ac8888] line-clamp-1 mt-0.5">{t.desc}</div>
+                  <div className="text-[10px] font-body text-[#8F8F8C] line-clamp-1 mt-0.5">{t.desc}</div>
                 </button>
               );
             })}
@@ -114,41 +114,43 @@ export function WhatsAppContactModule() {
 
           <div className="space-y-3 pt-2">
             <div>
-              <label className="text-[11px] font-mono uppercase text-[#ac8888] block mb-1">
+              <label htmlFor="client-name" className="text-[11px] font-mono uppercase text-[#8F8F8C] block mb-1">
                 Tu Nombre (Opcional):
               </label>
               <input
+                id="client-name"
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                placeholder="Ej: Mateo R."
-                className="w-full bg-[#1c1b1b] border border-white/[0.08] focus:border-[#dc143c] rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder:text-[#ac8888]/50 focus:outline-none transition-colors"
+                placeholder="Ej: Mateo"
+                className="w-full bg-[#0a0a0a] border border-white/[0.08] rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-[#dc143c] transition-colors"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-mono uppercase text-[#ac8888] block mb-1">
-                Mensaje o prenda de interés (Opcional):
+              <label htmlFor="custom-details" className="text-[11px] font-mono uppercase text-[#8F8F8C] block mb-1">
+                Detalles Adicionales (Opcional):
               </label>
               <textarea
+                id="custom-details"
                 rows={2}
                 value={customNote}
                 onChange={(e) => setCustomNote(e.target.value)}
-                placeholder="¿Qué prenda o duda deseas consultar?"
-                className="w-full bg-[#1c1b1b] border border-white/[0.08] focus:border-[#dc143c] rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder:text-[#ac8888]/50 focus:outline-none transition-colors resize-none"
-              />
+                placeholder="Escribe aquí cualquier consulta o especificación..."
+                className="w-full bg-[#0a0a0a] border border-white/[0.08] rounded-xl p-3 text-xs font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-[#dc143c] transition-colors resize-none"
+              ></textarea>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            className="w-full py-4 px-6 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-black font-mono text-xs uppercase tracking-widest font-bold shadow-[0_4px_24px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_32px_rgba(37,211,102,0.6)] transition-all flex items-center justify-center gap-2.5 cursor-pointer mt-2"
-          >
-            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.585 1.771.867 2.796.867 3.182 0 5.768-2.587 5.769-5.769.001-3.181-2.587-5.768-5.769-5.769zm3.393 8.163c-.144.405-.837.774-1.17.822-.312.043-.687.069-2.029-.487-1.717-.711-2.825-2.457-2.91-2.57-.085-.114-.695-.923-.695-1.761s.44-1.25.597-1.423c.156-.173.342-.216.456-.216.114 0 .228.002.328.007.106.005.249-.04.389.297.144.347.49 1.196.533 1.284.043.088.072.19.014.305-.058.115-.087.186-.173.288-.086.102-.18.228-.257.306-.086.088-.176.184-.076.356.1.172.443.731.95 1.183.653.582 1.204.762 1.376.848.172.086.273.072.373-.043.101-.115.432-.503.548-.676.115-.173.23-.144.388-.086.158.058 1.002.472 1.175.558.172.086.287.13.33.202.043.072.043.418-.101.823z" />
-            </svg>
-            <span>Iniciar Conversación por WhatsApp</span>
-          </button>
+            <button
+              type="submit"
+              className="w-full py-3.5 px-6 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-[#0A0A0A] font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_20px_rgba(37,211,102,0.35)] hover:shadow-[0_6px_28px_rgba(37,211,102,0.5)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.37C9.37 7.37 9.1 7.43 8.88 7.68C8.65 7.92 8.02 8.51 8.02 9.73C8.02 10.95 8.91 12.12 9.03 12.28C9.16 12.45 10.77 14.93 13.23 16C13.82 16.25 14.28 16.41 14.63 16.52C15.22 16.71 15.77 16.68 16.2 16.62C16.67 16.55 17.65 16.03 17.86 15.45C18.06 14.86 18.06 14.36 18 14.26C17.94 14.15 17.79 14.09 17.56 13.98C17.34 13.87 16.25 13.33 16.05 13.26C15.84 13.18 15.69 13.15 15.54 13.38C15.38 13.61 14.94 14.15 14.81 14.3C14.68 14.45 14.54 14.47 14.32 14.36C14.09 14.24 13.37 14.01 12.52 13.25C11.86 12.66 11.41 11.93 11.29 11.71C11.16 11.49 11.27 11.37 11.39 11.25C11.49 11.14 11.62 10.98 11.73 10.84C11.85 10.71 11.89 10.61 11.96 10.46C12.04 10.31 12 10.18 11.94 10.07C11.89 9.96 11.43 8.84 11.25 8.38C11.06 7.93 10.88 7.99 10.74 7.99C10.61 7.98 10.46 7.98 10.31 7.98C10.16 7.98 9.91 8.04 9.71 8.25C9.53 8.46 9.53 7.37 9.53 7.37Z"/>
+              </svg>
+              <span>Abrir Conversación en WhatsApp</span>
+            </button>
+          </div>
         </form>
       </div>
     </div>
