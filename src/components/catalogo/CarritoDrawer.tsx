@@ -23,8 +23,10 @@ export function CarritoDrawer() {
   const isOpen = useStore($isDrawerOpen);
   const [clientNotes, setClientNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [turnstileVerified, setTurnstileVerified] = useState<boolean>(true);
+  const [turnstileVerified, setTurnstileVerified] = useState<boolean>(false);
+  const [honeypotValue, setHoneypotValue] = useState<string>('');
   const [mostrarPromoEnvio, setMostrarPromoEnvio] = useState<boolean>(false);
+  const lastOrderAttemptRef = React.useRef<number>(0);
 
   // Leer preferencia de promoción opcional (desactivada por defecto)
   useEffect(() => {
@@ -55,10 +57,26 @@ export function CarritoDrawer() {
 
   const handleCheckoutWhatsApp = async () => {
     if (cart.length === 0) return;
-    if (!turnstileVerified) {
-      toast.error('Por favor completa la verificación de seguridad');
+
+    // 1. Detección de Bot mediante Honeypot
+    if (honeypotValue.trim() !== '') {
+      toast.error('Detección de bot: Envío bloqueado.');
       return;
     }
+
+    // 2. Verificación Humana Requerida
+    if (!turnstileVerified) {
+      toast.error('Por favor completa la verificación de seguridad antes de continuar');
+      return;
+    }
+
+    // 3. Limitador de Frecuencia (Rate Limit: 15s)
+    const now = Date.now();
+    if (now - lastOrderAttemptRef.current < 15000) {
+      toast.warning('Por favor espera 15 segundos antes de generar otro pedido.');
+      return;
+    }
+    lastOrderAttemptRef.current = now;
 
     setIsSubmitting(true);
     try {
@@ -73,8 +91,10 @@ export function CarritoDrawer() {
           total,
           observacion: clientNotes || 'Checkout desde Drawer Web',
         })
-        .then(() => {})
-        .catch(() => {});
+        .then(
+          () => {},
+          () => {}
+        );
 
       // Generar URL y abrir WhatsApp
       const whatsappUrl = generateWhatsAppOrderUrl(cart, clientNotes);
@@ -252,6 +272,18 @@ export function CarritoDrawer() {
         {/* Footer / Resumen, Anti-Bot y Botón WhatsApp */}
         {cart.length > 0 && (
           <div className="p-6 border-t border-white/[0.08] bg-[#141416]/95 backdrop-blur-md space-y-4">
+            {/* Honeypot invisible para atrapar bots */}
+            <div className="sr-only" aria-hidden="true" style={{ display: 'none' }}>
+              <input
+                type="text"
+                name="website_url"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypotValue}
+                onChange={(e) => setHoneypotValue(e.target.value)}
+              />
+            </div>
+
             {/* Nota opcional */}
             <div>
               <label htmlFor="order-notes" className="block text-[10px] font-mono text-[#ac8888] uppercase tracking-wider mb-1">
@@ -262,7 +294,7 @@ export function CarritoDrawer() {
                 type="text"
                 value={clientNotes}
                 onChange={(e) => setClientNotes(e.target.value)}
-                placeholder="Ej: Tarija centro, pago con QR..."
+                placeholder="Ej: Envío a domicilio, pago con QR..."
                 className="w-full bg-[#0a0a0a] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-[#dc143c]"
               />
             </div>
