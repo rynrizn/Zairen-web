@@ -1,13 +1,11 @@
 ---
-import { siteConfig, getActiveSocialNetworks } from '../../config/site';
-
-const activeSocials = getActiveSocialNetworks();
+import { siteConfig } from '../../config/site';
 ---
 
-<footer class="relative z-10 w-full bg-[#0A0A0A] border-t border-[#1C1B1B] pt-16 pb-12 mt-auto transition-colors">
+<footer class="footer-container relative z-10 w-full bg-[#0A0A0A] border-t border-[#1C1B1B] pt-16 pb-12 mt-auto transition-colors">
   <div class="max-w-[1440px] mx-auto px-4 md:px-8">
     
-    <!-- Fila Superior: Marca Limpia & Formulario Newsletter 'Signals' -->
+    <!-- Fila Superior: Marca Limpia & Redes Oficiales ("Señales de Drop") -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 pb-12 border-b border-[#1C1B1B]">
       
       <!-- Bloque de Marca (Sin cajas ni bordes que encierren el logo) -->
@@ -18,7 +16,7 @@ const activeSocials = getActiveSocialNetworks();
             alt="Zairen Lab"
             class="w-8 h-8 object-contain transition-transform group-hover:scale-105"
           />
-          <span class="font-display text-2xl font-extrabold uppercase tracking-widest text-[#FAF9F6]">
+          <span class="footer-brand-title font-display text-2xl font-extrabold uppercase tracking-widest text-[#FAF9F6]">
             {siteConfig.name}
           </span>
         </a>
@@ -30,37 +28,76 @@ const activeSocials = getActiveSocialNetworks();
         </p>
       </div>
 
-      <!-- Módulo Newsletter "Únete al Archivo" -->
+      <!-- Módulo Canales Oficiales // SEÑALES DE DROP (Iconos + Nombres) -->
       <div class="lg:col-span-6 flex flex-col justify-end space-y-3">
         <span class="text-xs font-mono text-[#FAF9F6] uppercase tracking-wider font-bold">
           ÚNETE AL ARCHIVO // SEÑALES DE DROP
         </span>
-        <form 
-          onsubmit="event.preventDefault(); alert('Gracias por unirte a las señales de Zairen Lab.');"
-          class="flex items-stretch max-w-md w-full"
-        >
-          <input
-            type="email"
-            placeholder="Introduce tu correo electrónico..."
-            required
-            class="flex-1 bg-[#141416] border border-[#2A2A2A] focus:border-[#dc143c] text-[#FAF9F6] px-4 py-3 text-xs font-mono placeholder:text-[#4A4A4A] outline-none transition-colors"
-          />
-          <button
-            type="submit"
-            title="Suscribirse a lanzamientos"
-            class="px-5 bg-[#FAF9F6] hover:bg-[#dc143c] text-[#0A0A0A] hover:text-white font-bold text-sm transition-colors border border-[#FAF9F6] hover:border-[#dc143c] flex items-center justify-center cursor-pointer"
+        <p class="text-xs font-body text-[#8F8F8C]">
+          Sigue nuestros canales oficiales para notificaciones de lanzamientos limitados:
+        </p>
+        
+        <!-- Redes Sociales Ortogonales con Icono y Nombre -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+          <!-- TikTok -->
+          <a
+            href="https://tiktok.com/@zairenlab"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
           >
-            →
-          </button>
-        </form>
-        <span class="text-[11px] font-mono text-[#4A4A4A]">
-          Acceso prioritario a tirajes limitados de 280-420 GSM. Cero spam.
-        </span>
+            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+            </svg>
+            <span>TikTok</span>
+          </a>
+
+          <!-- Instagram -->
+          <a
+            href="https://instagram.com/zairenlab"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+          >
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="20" x="2" y="2" rx="0" ry="0"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+            </svg>
+            <span>Instagram</span>
+          </a>
+
+          <!-- WhatsApp -->
+          <a
+            href={`https://wa.me/${siteConfig.whatsapp.number}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#25D366] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#25D366] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+          >
+            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.37C9.37 7.37 9.1 7.43 8.88 7.68C8.65 7.92 8.02 8.51 8.02 9.73C8.02 10.95 8.91 12.12 9.03 12.28C9.16 12.45 10.77 14.93 13.23 16C13.82 16.25 14.28 16.41 14.63 16.52C15.22 16.71 15.77 16.68 16.2 16.62C16.67 16.55 17.65 16.03 17.86 15.45C18.06 14.86 18.06 14.36 18 14.26C17.94 14.15 17.79 14.09 17.56 13.98C17.34 13.87 16.25 13.33 16.05 13.26C15.84 13.18 15.69 13.15 15.54 13.38C15.38 13.61 14.94 14.15 14.81 14.3C14.68 14.45 14.54 14.47 14.32 14.36C14.09 14.24 13.37 14.01 12.52 13.25C11.86 12.66 11.41 11.93 11.29 11.71C11.16 11.49 11.27 11.37 11.39 11.25C11.49 11.14 11.62 10.98 11.73 10.84C11.85 10.71 11.89 10.61 11.96 10.46C12.04 10.31 12 10.18 11.94 10.07C11.89 9.96 11.43 8.84 11.25 8.38C11.06 7.93 10.88 7.99 10.74 7.99C10.61 7.98 10.46 7.98 10.31 7.98C10.16 7.98 9.91 8.04 9.71 8.25C9.53 8.46 9.53 7.37 9.53 7.37Z"/>
+            </svg>
+            <span>WhatsApp</span>
+          </a>
+
+          <!-- X / Twitter -->
+          <a
+            href="https://x.com/zairenlab"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+          >
+            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            <span>X / Red</span>
+          </a>
+        </div>
       </div>
 
     </div>
 
-    <!-- Fila Media: Columnas Profesionales & Acceso Administrativo -->
+    <!-- Fila Media: Columnas Profesionales -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 py-10 text-xs font-mono">
       
       <!-- Columna 1: Explorar Catálogo -->
@@ -95,14 +132,18 @@ const activeSocials = getActiveSocialNetworks();
           CANALES
         </span>
         <ul class="space-y-2 text-[#8F8F8C]">
-          {activeSocials.map((s) => (
-            <li>
-              <a href={s.url} target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
-                <span>{s.name}</span>
-                <span class="text-[10px] text-[#4A4A4A]">↗</span>
-              </a>
-            </li>
-          ))}
+          <li>
+            <a href="https://tiktok.com/@zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
+              <span>TikTok Oficial</span>
+              <span class="text-[10px] text-[#4A4A4A]">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://instagram.com/zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
+              <span>Instagram</span>
+              <span class="text-[10px] text-[#4A4A4A]">↗</span>
+            </a>
+          </li>
           <li>
             <a 
               href={`https://wa.me/${siteConfig.whatsapp.number}`} 
@@ -116,28 +157,29 @@ const activeSocials = getActiveSocialNetworks();
         </ul>
       </div>
 
-      <!-- Columna 4: Gestión & Acceso Administrativo (Donde siempre estaba) -->
+      <!-- Columna 4: Atención & Pedidos -->
       <div class="space-y-3">
         <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
-          SISTEMA
+          PEDIDOS
         </span>
         <ul class="space-y-2 text-[#8F8F8C]">
-          <li>
-            <a href="/login" class="text-[#8F8F8C] hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 bg-[#dc143c] rounded-full"></span>
-              <span>Acceso Admin // Core</span>
-            </a>
-          </li>
+          <li><span class="text-[#8F8F8C]">Coordinación Directa</span></li>
+          <li><span class="text-[#8F8F8C]">Envíos a Nivel Nacional</span></li>
           <li><span class="text-[#4A4A4A]">ZRN-OS v2.6 Online</span></li>
-          <li><span class="text-[#4A4A4A]">Tokyo Streetwear Core</span></li>
         </ul>
       </div>
 
     </div>
 
-    <!-- Fila Inferior: Copyright & Créditos -->
+    <!-- Fila Inferior: Copyright & Acceso Administrativo Discreto -->
     <div class="pt-8 border-t border-[#1C1B1B] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-[#8F8F8C]">
-      <span>© 2026 {siteConfig.name}. Todos los derechos reservados. Tienda Oficial Online.</span>
+      <div class="flex items-center gap-3">
+        <span>© 2026 {siteConfig.name}. Todos los derechos reservados. Tienda Oficial Online.</span>
+        <!-- Enlace de acceso admin discreto en el copyright -->
+        <a href="/login" class="text-[#4A4A4A] hover:text-[#8F8F8C] transition-colors" title="Acceso al sistema">
+          // SYS
+        </a>
+      </div>
       <div class="flex items-center gap-6">
         <span>ESTRUCTURA SIN SATURACIÓN</span>
         <span class="w-1.5 h-1.5 bg-emerald-400"></span>
@@ -147,3 +189,22 @@ const activeSocials = getActiveSocialNetworks();
 
   </div>
 </footer>
+
+<style>
+  :global(html.light) .footer-container {
+    background-color: #F8F7F4 !important;
+    border-color: #DCD9D2 !important;
+  }
+  :global(html.light) .footer-brand-title {
+    color: #141416 !important;
+  }
+  :global(html.light) .social-btn {
+    background-color: #FFFFFF !important;
+    border-color: #DCD9D2 !important;
+    color: #141416 !important;
+  }
+  :global(html.light) .social-btn:hover {
+    background-color: #dc143c !important;
+    color: #FFFFFF !important;
+  }
+</style>

@@ -3,7 +3,6 @@ import { siteConfig } from '../../config/site';
 import { CartBadge } from './CartBadge';
 import { ShareButton } from './ShareButton';
 import { ThemeToggle } from './ThemeToggle';
-import { BottomNavMobile } from './BottomNavMobile';
 
 interface Props {
   activePath?: string;
@@ -13,26 +12,26 @@ const { activePath = '/' } = Astro.props;
 ---
 
 <!-- Header Superior Fijo Minimalista -->
-<header class="fixed top-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1C1B1B] transition-colors">
+<header class="navbar-header fixed top-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1C1B1B] transition-colors">
   <div class="h-16 w-full max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-between">
     
-    <!-- Logotipo Oficial Suelto & Limpio (Sin cajas ni bordes que lo encierren) -->
+    <!-- Logotipo Oficial Suelto & Limpio (Sin cajas ni marcos que lo encierren) -->
     <a href="/" class="flex items-center gap-3 group">
       <img
         src="/brand/zairen_logo_oficial.svg"
         alt="Zairen Lab Logo Oficial"
         class="w-8 h-8 object-contain transition-transform duration-300 group-hover:scale-105"
       />
-      <span class="font-display text-base md:text-lg font-extrabold text-[#FAF9F6] tracking-widest uppercase transition-colors">
+      <span class="navbar-logo-text font-display text-base md:text-lg font-extrabold text-[#FAF9F6] tracking-widest uppercase transition-colors">
         {siteConfig.name}
       </span>
     </a>
 
-    <!-- Enlaces Centrales (Desktop) -->
+    <!-- Enlaces Centrales (Desktop) - Catálogo y Contacto -->
     <nav class="hidden md:flex items-center gap-8">
       <a
         href="/"
-        class={`text-xs font-mono uppercase tracking-widest transition-colors ${
+        class={`navbar-link text-xs font-mono uppercase tracking-widest transition-colors ${
           activePath === '/' || activePath === '/catalogo'
             ? 'text-[#FAF9F6] font-bold border-b-2 border-[#dc143c] pb-1'
             : 'text-[#8F8F8C] hover:text-[#FAF9F6]'
@@ -41,52 +40,128 @@ const { activePath = '/' } = Astro.props;
         Catálogo
       </a>
       <a
-        href="/marca"
-        class={`text-xs font-mono uppercase tracking-widest transition-colors ${
-          activePath === '/marca'
-            ? 'text-[#FAF9F6] font-bold border-b-2 border-[#dc143c] pb-1'
-            : 'text-[#8F8F8C] hover:text-[#FAF9F6]'
-        }`}
+        href={`https://wa.me/${siteConfig.whatsapp.number}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="navbar-link text-xs font-mono uppercase tracking-widest text-[#8F8F8C] hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5"
       >
-        Marca & Drops
-      </a>
-      <a
-        href="/marca#contacto"
-        class="text-xs font-mono uppercase tracking-widest text-[#8F8F8C] hover:text-[#FAF9F6] transition-colors"
-      >
-        Contacto
+        <span class="w-1.5 h-1.5 bg-emerald-400"></span>
+        <span>Contacto</span>
       </a>
     </nav>
 
-    <!-- Acciones Derecha (Tema, Compartir, WhatsApp, Carrito) -->
+    <!-- Acciones Derecha (Tema, Compartir, Carrito, Menú Hamburguesa Móvil) -->
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- Selector Modo Claro / Modo Oscuro -->
       <ThemeToggle client:load />
 
-      <!-- Botón Compartir QR -->
+      <!-- Botón Compartir QR Ortogonal -->
       <ShareButton
         client:load
         className="w-9 h-9 bg-[#141416] hover:bg-[#201f1f] text-[#FAF9F6] border border-[#2A2A2A] rounded-none"
       />
 
-      <!-- WhatsApp Directo -->
+      <!-- Carrito Drawer Toggle -->
+      <CartBadge client:load />
+
+      <!-- Botón Menú Móvil (3 Barras Horizontales) -->
+      <button
+        type="button"
+        id="mobile-menu-toggle-btn"
+        aria-label="Menú de Navegación"
+        aria-expanded="false"
+        class="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 bg-[#141416] border border-[#2A2A2A] text-[#FAF9F6] hover:text-[#dc143c] transition-colors cursor-pointer"
+      >
+        <span class="w-4 h-0.5 bg-current transition-transform duration-200" id="bar-1"></span>
+        <span class="w-4 h-0.5 bg-current transition-opacity duration-200" id="bar-2"></span>
+        <span class="w-4 h-0.5 bg-current transition-transform duration-200" id="bar-3"></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Menú Superior Desplegable Móvil -->
+  <div
+    id="mobile-top-menu"
+    class="hidden md:hidden border-t border-[#1C1B1B] bg-[#0E0F11]/98 backdrop-blur-xl px-5 py-4 transition-all duration-200"
+  >
+    <nav class="flex flex-col space-y-3 font-mono text-xs uppercase tracking-wider">
+      <a
+        href="/"
+        class={`mobile-nav-link py-2 px-3 flex items-center justify-between border-l-2 ${
+          activePath === '/' || activePath === '/catalogo'
+            ? 'border-[#dc143c] bg-[#141416] text-[#FAF9F6] font-bold'
+            : 'border-transparent text-[#8F8F8C] hover:text-[#FAF9F6] hover:bg-[#141416]'
+        }`}
+      >
+        <span>Catálogo Oficial</span>
+        <span class="text-[#dc143c]">01 //</span>
+      </a>
+
       <a
         href={`https://wa.me/${siteConfig.whatsapp.number}`}
         target="_blank"
         rel="noopener noreferrer"
-        title="Contactar Asesor WhatsApp"
-        class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 bg-[#141416] hover:bg-[#201f1f] text-[#FAF9F6] border border-[#2A2A2A] text-xs font-mono tracking-wider transition-colors"
+        class="mobile-nav-link py-2 px-3 flex items-center justify-between border-l-2 border-transparent text-[#8F8F8C] hover:text-[#FAF9F6] hover:bg-[#141416]"
       >
-        <span class="w-1.5 h-1.5 bg-emerald-400"></span>
-        <span>WhatsApp</span>
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-emerald-400"></span>
+          <span>Contacto WhatsApp</span>
+        </span>
+        <span class="text-[#8F8F8C]">↗</span>
       </a>
-
-      <!-- Carrito Drawer Toggle -->
-      <CartBadge client:load />
-    </div>
-
+    </nav>
   </div>
 </header>
 
-<!-- Navegación Inferior Flotante Móvil -->
-<BottomNavMobile client:load />
+<style>
+  :global(html.light) .navbar-header {
+    background-color: rgba(248, 247, 244, 0.95) !important;
+    border-color: #DCD9D2 !important;
+  }
+  :global(html.light) .navbar-logo-text {
+    color: #141416 !important;
+  }
+  :global(html.light) .navbar-link {
+    color: #555558 !important;
+  }
+  :global(html.light) .navbar-link:hover {
+    color: #141416 !important;
+  }
+  :global(html.light) #mobile-top-menu {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    border-color: #DCD9D2 !important;
+  }
+  :global(html.light) .mobile-nav-link {
+    color: #141416 !important;
+  }
+  :global(html.light) #mobile-menu-toggle-btn {
+    background-color: #FFFFFF !important;
+    border-color: #DCD9D2 !important;
+    color: #141416 !important;
+  }
+</style>
+
+<script>
+  const toggleBtn = document.getElementById('mobile-menu-toggle-btn');
+  const mobileMenu = document.getElementById('mobile-top-menu');
+
+  toggleBtn?.addEventListener('click', () => {
+    const isHidden = mobileMenu?.classList.contains('hidden');
+    if (isHidden) {
+      mobileMenu?.classList.remove('hidden');
+      toggleBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      mobileMenu?.classList.add('hidden');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Cerrar menú al hacer clic en enlaces móviles
+  document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      mobileMenu?.classList.add('hidden');
+      toggleBtn?.setAttribute('aria-expanded', 'false');
+    });
+  });
+</script>
