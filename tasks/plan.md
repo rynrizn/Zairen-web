@@ -1,54 +1,84 @@
-# Implementation Plan: Solución de Login Admin, Catálogo en Portada, Detalle de Producto y Seguridad Anti-Bot
+# Implementation Plan: Estética Ortogonal Zairen Lab, Moneda Dinámica, Mejoras Admin y Rediseño de Navegación
 
 ## Overview
-Resolver el problema de autenticación y bloqueo en `/admin` causado por el conflicto de prerenderizado y middleware en Astro 5; transformar la portada (`/`) para que el catálogo de prendas sea la primera pantalla sin hero superior; trasladar el contenido editorial a `/info`; añadir botón de retorno y diseño consistente a las páginas de producto; y blindar la aplicación contra accesos por consola DevTools y ataques de spam en pedidos mediante verificación anti-bot multicapa.
+Implementar la segunda fase de modernización y consistencia para Zairen Lab:
+1. Unificación estética estricta hacia esquinas rectas y diseño ortogonal/brutalista-zen (`rounded-none`, 0px border-radius) en todo el sistema (Admin, Catálogo, Producto, Modales y QR).
+2. Optimización de la experiencia del catálogo: reemplazo de texto redundante por el logotipo SVG oficial con gradiente en el encabezado.
+3. Seguridad y control en credenciales: campo de contraseña con selector interactivo de visibilidad (ojito) en `UsuariosManager` y `login.astro`.
+4. Navegación y Footer: menú móvil superior de 3 líneas horizontales (hamburguesa) sin barra inferior; retiro de enlaces redundantes ("Marca & Drops" y botón WhatsApp en navbar); reemplazo del formulario de newsletter por redes sociales oficiales con icono y nombre; y discreción total del enlace de acceso administrativo en el footer.
+5. Calidad visual en modos Claro y Oscuro en login, navbar y componentes globales.
+6. Configuraciones de negocio en Admin:
+   - Control de costo de envío y activación/desactivación explícita de la promoción de envío gratis.
+   - Modal flotante para creación/edición de productos en inventario (dejando la tabla en pantalla completa con tipografía ampliada).
+   - Eliminación del ítem duplicado "Usuarios y Roles" en el sidebar para Superadmin.
+   - Gestión de múltiples sucursales.
+   - Sistema de moneda unificada (`BOB` vs `USD` con tipo de cambio manual configurable) aplicado uniformemente a todos los productos.
+7. Guía completa de variables de entorno y despliegue en Cloudflare Pages desde GitHub.
 
 ## Architecture Decisions
-- **Rutas Admin Dinámicas en Servidor**: Añadir `export const prerender = false` a todas las rutas bajo `src/pages/admin/` para resolver la advertencia `Astro.request.headers` y evitar bloqueos en el dev server.
-- **Middleware Stateless con Timeout**: Instanciar un cliente Supabase específico para servidor en `src/middleware/index.ts` sin persistencia de almacenamiento y con un timeout estricto de 3500ms para garantizar que nunca se quede colgada la terminal.
-- **Guard de Seguridad Criptográfico (Anti-Console)**: En `AdminLayout.astro`, no confiar en la existencia de strings en cookies. Validar la sesión con `supabase.auth.getUser()` y verificar que el usuario tenga rol `ADMIN` o `SUPERADMIN` en `public.perfil`. Tokens manipulados en la consola son purgados inmediatamente.
-- **Home como Catálogo Principal**: Integrar `CatalogoGrid` directamente en `src/pages/index.astro`. Retirar el `HeroPortada` antiguo. Mover manifiesto, líneas textiles y módulo de contacto a `src/pages/info.astro`.
-- **Navegación Intuitiva de Producto**: En `DetalleProducto.tsx`, añadir botón `← Volver al catálogo` con `history.back()` / fallback seguro a `/` y optimizar la disposición de información técnica de la prenda.
-- **Anti-Bot Multicapa para Pedidos**: Combinar Cloudflare Turnstile nativo + fallback de validación interactiva "Slide to Verify" + campo honeypot invisible (`website_url`) + rate limiting de 15s para blindar el checkout de WhatsApp contra bots de spam.
+- **Estética Ortogonal Global (Design Token Sharp)**: Reemplazar clases `rounded-*` por `rounded-none` en componentes de catálogo, modales, drawers, cards de administración e inputs. En `detail-bento.css`, forzar `border-radius: 0px` en todas las celdas, miniaturas, badges y selectores.
+- **Modal Flotante de Producto (Portal UI)**: `ProductoEditor.tsx` se renderiza como un modal flotante con backdrop oscuro, liberando a `InventarioManager.tsx` para mostrar la tabla de productos a 12 columnas completas con tipografía legible en escritorio.
+- **Sistema de Moneda Unificada**: Configuración reactiva en `site.ts` y persistida en `localStorage` (`zairen_currency_config`). Si el admin elige `USD`, `formatCurrency(monto)` calcula `(monto / tasa)` y muestra `$ XX.XX USD`. Si elige `BOB`, muestra `Bs XX.XX`. Garantiza que todos los productos se visualicen en una sola moneda uniforme.
+- **Navegación Móvil Superior Unificada**: Eliminar `BottomNavMobile.tsx` en favor de un menú móvil drawer/dropdown integrado en la barra superior con gatillo de 3 barras horizontales.
+- **Control de Visibilidad de Contraseña**: Componente reutilizable o inputs con estado `showPassword` y botón toggle con icono SVG de ojo / ojo tachado.
 
 ## Task List
 
-### Phase 1: Seguridad y Corrección de Login Admin
-- [ ] Task 1: Configurar rutas `/admin` dinámicas (`prerender = false`) y adaptar `astro.config.mjs`
-- [ ] Task 2: Refactorizar `src/middleware/index.ts` con cliente Supabase stateless resiliente y timeout
-- [ ] Task 3: Blindar `AdminLayout.astro` y `login.astro` contra bypass por consola con validación de roles en Supabase
+### Phase 1: Estética Ortogonal Global, Modales y Detalle de Producto
+- [x] Task 1.1: Quitar bordes redondeados y duplicados en `AdminSidebar.tsx` (corregir doble ítem de usuarios).
+- [x] Task 1.2: Rediseñar `InventarioManager.tsx` (tabla a ancho completo, tipografía desktop aumentada `text-sm/base`, `rounded-none`) y convertir `ProductoEditor.tsx` en modal flotante.
+- [x] Task 1.3: Convertir a esquinas rectas (`rounded-none`) los módulos admin restantes (`POSTerminal.tsx`, `PedidosTable.tsx`, `ClientesTable.tsx`, `UsuariosManager.tsx`).
+- [x] Task 1.4: En `CatalogoGrid.tsx`, quitar el párrafo de descripción y reemplazarlo por el logotipo SVG oficial con degradado sin caja. Convertir filtros y buscador a `rounded-none`.
+- [x] Task 1.5: En `detail-bento.css` y `DetalleProducto.tsx`, aplicar esquinas en punta (`border-radius: 0px`, `rounded-none`) en todas las celdas, badges, botones de tallas y modales.
+- [x] Task 1.6: En `ShareWebModal.tsx`, estilizar el marco del código QR y el modal con esquinas rectas (`rounded-none`) y proporciones óptimas.
 
-### Checkpoint: Autenticación Admin
-- [ ] Login admin funciona sin trabar la terminal
-- [ ] No aparece la advertencia `Astro.request.headers`
-- [ ] Intento de bypass por consola en DevTools es expulsado a `/login`
+### Checkpoint: Estética Ortogonal y Modales
+- [x] Todas las pantallas (Admin, Catálogo, Detalle, Modales, QR) muestran esquinas rectas ortogonales.
+- [x] No hay ítems duplicados en el menú lateral de administración.
+- [x] Al presionar "+ AGREGAR PRENDA" o editar en inventario, se abre un modal flotante sin reducir la tabla.
 
-### Phase 2: Rediseño de Página Principal y Nueva Vista `/info`
-- [ ] Task 4: Crear `src/pages/info.astro` con Manifiesto, Líneas, Especificaciones y Contacto
-- [ ] Task 5: Rediseñar `src/pages/index.astro` para que el catálogo sea la primera pantalla sin hero
-- [ ] Task 6: Actualizar enlaces en `Navbar.astro` y `BottomNavMobile.tsx`
+### Phase 2: Autenticación, Ojito de Contraseña y Soporte de Modo Claro
+- [x] Task 2.1: En `UsuariosManager.tsx`, incorporar campo de contraseña y botón para ver/ocultar contraseña (ojito).
+- [x] Task 2.2: En `login.astro`, añadir botón de ver/ocultar contraseña (ojito), esquinas rectas y corregir estilos en modo claro para máxima legibilidad.
+- [x] Task 2.3: Ajustar `global.css` para que las superficies, inputs y textos en `html.light` tengan contraste nítido y consistente.
 
-### Checkpoint: Navegación y Portada
-- [ ] Portada muestra el catálogo de prendas inmediatamente
-- [ ] `/info` carga el contenido editorial completo
-- [ ] Navegación móvil y desktop es fluida y coherente
+### Checkpoint: Autenticación y Contraste
+- [x] En login y en creación de usuarios es posible alternar la visibilidad de la contraseña.
+- [x] Modo claro es perfectamente legible en el formulario de inicio de sesión y catálogo.
 
-### Phase 3: Detalle de Producto y Verificación Anti-Bot
-- [ ] Task 7: Añadir botón "Volver atrás" y pulir diseño consistente en `DetalleProducto.tsx`
-- [ ] Task 8: Implementar widget anti-bot híbrido en `TurnstileWidget.tsx` (Turnstile + Slide to verify)
-- [ ] Task 9: Implementar honeypot invisible y rate limiting en `CarritoDrawer.tsx`
+### Phase 3: Navegación del Cliente, Menú Móvil Hamburger y Rediseño del Footer
+- [x] Task 3.1: En `Navbar.astro`, remover enlace a "Marca & Drops" y botón redundante de WhatsApp. Dejar enlaces a Catálogo y Contacto.
+- [x] Task 3.2: Reemplazar navegación móvil inferior por un menú hamburguesa superior de 3 líneas horizontales que despliega el menú de navegación del cliente.
+- [x] Task 3.3: Ajustar contraste y apariencia de `Navbar.astro` en modo claro.
+- [x] Task 3.4: En `Footer.astro`, reemplazar el formulario de newsletter por las redes sociales oficiales con icono SVG y nombre legible.
+- [x] Task 3.5: En `Footer.astro`, retirar el acceso visible a admin de la columna de canales y reubicarlo como link discreto `// SYS` en el copyright.
 
-### Checkpoint: Finalización y Calidad
-- [ ] Botón volver atrás funciona en todos los productos
-- [ ] Pedidos requieren verificación humana activa
-- [ ] `pnpm build` y `pnpm check` compilan con 0 errores
+### Checkpoint: Navegación y Footer
+- [x] Navbar en móvil tiene botón de 3 líneas arriba y despliega el menú correctamente.
+- [x] No hay botón redundante de WhatsApp en la navbar.
+- [x] El footer muestra redes con iconos y nombres sin formulario de correo, y el link de admin está protegido/discreto.
+
+### Phase 4: Configuración de Envíos, Sucursales y Selector de Moneda Unificada
+- [x] Task 4.1: En `ConfiguracionWeb.tsx`, añadir controles para costo de envío, interruptor para envío gratis y umbral condicional.
+- [x] Task 4.2: En `CarritoDrawer.tsx`, ocultar por completo la barra y textos de envío gratis si la promoción está desactivada.
+- [x] Task 4.3: En `ConfiguracionWeb.tsx`, añadir módulo de gestión de sucursales (listado + agregar nueva sucursal).
+- [x] Task 4.4: En `ConfiguracionWeb.tsx`, añadir selector de moneda (`BOB` / `USD`) con ingreso manual de tasa de cambio.
+- [x] Task 4.5: En `src/config/site.ts`, actualizar `formatCurrency` y utilidades de moneda para formatear dinámicamente según la moneda y tasa configurada.
+
+### Checkpoint: Ajustes de Negocio
+- [x] El carrito oculta el envío gratis cuando está desactivado.
+- [x] Se pueden añadir sucursales en la configuración web.
+- [x] Si se cambia la moneda a USD con tipo de cambio (ej. 6.96), todos los productos de la tienda se muestran en USD uniformemente.
+
+### Phase 5: Compilación, Despliegue en Cloudflare Pages y Git Workflow
+- [x] Task 5.1: Ejecutar `pnpm build` para asegurar 0 errores en compilación de rutas estáticas y SSR.
+- [x] Task 5.2: Ejecutar `graphify update .` para sincronizar el grafo de conocimiento.
+- [x] Task 5.3: Realizar commits atómicos por fases y unificarlos en `main`.
+- [x] Task 5.4: Redactar la guía completa de variables de entorno y pasos para subir a Cloudflare Pages desde GitHub.
 
 ## Risks and Mitigations
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
-| Latencia de red o cuelgue de Supabase en middleware | Alto | Timeout de 3.5s con `Promise.race`; si expira, redirige a login sin bloquear el stream |
-| Usuario sin conexión o bloqueador de anuncios bloquea Turnstile | Medio | Fallback interactivo de deslizamiento ("Slide to verify") integrado directamente en React |
-| Enlaces antiguos a `/catalogo` quedan huérfanos | Bajo | Mantener `src/pages/catalogo.astro` como vista funcional o alias canónico a `/` |
-
-## Open Questions
-- ¿Deseas que la nueva página de información se llame `/info` o prefieres `/nosotros` o `/marca`? (Por defecto configurada como `/info` con redirección amigable).
+| Inconsistencias de moneda en productos | Alto | Centralizar la conversión en `formatCurrency` y crear un hook/evento de sincronización de moneda para reactivar los componentes al guardar la configuración |
+| Desbordamiento del modal flotante de inventario en pantallas pequeñas | Medio | Diseñar el modal flotante con `max-h-[90vh] overflow-y-auto` y clases responsivas |
+| Desalineación de estilos en modo claro | Medio | Probar exhaustivamente tanto `html.light` como modo oscuro con variables CSS directas |
