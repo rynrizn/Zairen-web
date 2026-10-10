@@ -4,9 +4,7 @@ export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { siteConfig } from '../../config/site';
 import { PedidosPendientes } from '../../components/admin/dashboard/PedidosPendientes';
-import { VentasChart } from '../../components/admin/dashboard/VentasChart';
 import { DonutColecciones } from '../../components/admin/dashboard/DonutColecciones';
-import { TopVendidos } from '../../components/admin/dashboard/TopVendidos';
 import { AlertasInventario } from '../../components/admin/dashboard/AlertasInventario';
 ---
 
@@ -86,20 +84,39 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
     <!-- Pedidos Pendientes Island -->
     <PedidosPendientes client:load />
 
-    <!-- Analítica de Ventas y Colecciones -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2">
-        <VentasChart client:visible />
-      </div>
+    <!-- Resumen de Stock & Colecciones + Acceso Directo a Métricas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div>
         <DonutColecciones client:visible />
       </div>
-    </div>
-
-    <!-- Rankings y Alertas de Stock -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <TopVendidos client:visible />
-      <AlertasInventario client:visible />
+      <div>
+        <AlertasInventario client:visible />
+      </div>
+      <div class="p-6 bg-[#141416] border border-[#201f1f] flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-1.5 h-1.5 bg-[#dc143c]"></span>
+            <span class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest">
+              REPORTES COMPLETOS
+            </span>
+          </div>
+          <h3 class="text-base font-bold font-headline uppercase text-white mb-2">
+            Métricas Comerciales & Exportación
+          </h3>
+          <p class="text-xs font-mono text-[#8F8F8C] leading-relaxed">
+            Gráficos detallados por 1 Semana y 1 Mes, rankings por volumen y facturación, con exportación directa a CSV y PDF.
+          </p>
+        </div>
+        <div class="pt-6">
+          <a
+            href="/admin/metricas"
+            class="w-full py-3 px-4 bg-[#1c1b1b] hover:bg-[#dc143c] text-white font-mono text-xs uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2 border border-white/[0.08] hover:border-[#dc143c]"
+          >
+            <span class="material-symbols-outlined text-[16px]">monitoring</span>
+            <span>Ver Métricas & Reportes</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </AdminLayout>
