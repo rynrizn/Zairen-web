@@ -53,19 +53,6 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       ),
     },
     {
-      label: 'Vista Catálogo',
-      path: '/admin/vista-catalogo',
-      id: 'vista-catalogo',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect width="7" height="7" x="3" y="3" rx="1" />
-          <rect width="7" height="7" x="14" y="3" rx="1" />
-          <rect width="7" height="7" x="14" y="14" rx="1" />
-          <rect width="7" height="7" x="3" y="14" rx="1" />
-        </svg>
-      ),
-    },
-    {
       label: 'Pedidos',
       path: '/admin/pedidos',
       id: 'pedidos',
@@ -137,6 +124,17 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
         </svg>
       ),
     },
+    {
+      label: 'Métricas & Reportes',
+      path: '/admin/metricas',
+      id: 'metricas',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 3v18h18" />
+          <path d="m19 9-5 5-4-4-3 3" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -160,11 +158,9 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           </svg>
         </button>
 
-        {/* Logo Móvil */}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-none bg-[#0a0a0a] border border-[#2A2A2A] p-1 flex items-center justify-center">
-            <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
-          </div>
+        {/* Logo Móvil Sin Cajas */}
+        <div className="flex items-center gap-2.5">
+          <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-7 h-7 object-contain shrink-0" />
           <span className="font-display font-bold text-sm tracking-wider uppercase text-white">
             {siteConfig.name} <span className="text-[#dc143c] text-[10px] font-mono">// CORE</span>
           </span>
@@ -214,9 +210,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
               {/* Encabezado Drawer */}
               <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-none bg-[#0a0a0a] border border-[#2A2A2A] p-1.5 flex items-center justify-center">
-                    <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
-                  </div>
+                  <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-8 h-8 object-contain shrink-0" />
                   <div>
                     <div className="font-display font-bold text-sm uppercase text-white leading-none">
                       {siteConfig.name}
@@ -306,9 +300,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           <div className="h-20 px-4 flex items-center justify-between border-b border-white/[0.06]">
             {!isCollapsed ? (
               <a href="/admin" className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-none bg-[#0a0a0a] border border-white/[0.1] p-2 flex items-center justify-center shrink-0 shadow-md">
-                  <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
-                </div>
+                <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-9 h-9 object-contain shrink-0 filter drop-shadow-[0_0_8px_rgba(220,20,60,0.3)]" />
                 <div className="flex flex-col truncate">
                   <span className="font-display font-bold text-sm tracking-wider uppercase text-white truncate">
                     {siteConfig.name}
@@ -319,10 +311,8 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                 </div>
               </a>
             ) : (
-              <a href="/admin" title="Panel General" className="mx-auto">
-                <div className="w-10 h-10 rounded-none bg-[#0a0a0a] border border-white/[0.1] p-2 flex items-center justify-center shadow-md hover:border-[#dc143c]/60 transition-colors">
-                  <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-full h-full object-contain" />
-                </div>
+              <a href="/admin" title="Panel General" className="mx-auto block p-1 hover:opacity-80 transition-opacity">
+                <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-8 h-8 object-contain shrink-0 filter drop-shadow-[0_0_8px_rgba(220,20,60,0.3)]" />
               </a>
             )}
 

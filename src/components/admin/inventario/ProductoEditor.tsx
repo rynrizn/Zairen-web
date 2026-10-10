@@ -525,7 +525,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                   onChange={(e) => setPublicado(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-10 h-5 bg-[#2a2a2a] peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-4 after:w-4 after:transition-all peer-checked:bg-[#dc143c]"></div>
+                <div className="w-10 h-5 bg-[#262626] border border-white/10 peer-focus:outline-none transition-colors peer peer-checked:bg-[#dc143c] peer-checked:border-[#dc143c] relative after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-5"></div>
               </label>
             </div>
           </div>

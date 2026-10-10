@@ -29,24 +29,78 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
       rel="stylesheet"
     />
     <title>{title}</title>
+
+    {/* Script Inline de Tema para Admin (Sincronizado con localStorage) */}
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('zairen_theme')) {
+          return localStorage.getItem('zairen_theme');
+        }
+        return 'dark';
+      })();
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+      }
+    </script>
   </head>
-  <body class="bg-[#0A0A0A] text-[#FAF9F6] antialiased min-h-screen flex flex-col font-body selection:bg-[#dc143c] selection:text-white">
+  <body class="bg-[#0A0A0A] text-[#FAF9F6] antialiased min-h-screen flex flex-col font-body selection:bg-[#dc143c] selection:text-white relative">
+    {/* Textura sutil de ruido Zen Washi / Sumi-iro */}
+    <div class="bg-noise" aria-hidden="true"></div>
+
     <Toaster client:load />
 
-    <!-- Barra Lateral Colapsable y Drawer Móvil (Isla React) -->
+    {/* Barra Lateral Colapsable y Drawer Móvil (Isla React) */}
     <AdminSidebar client:load activePath={activePath} />
 
-    <!-- Área de Contenido Principal Dinámica -->
+    {/* Área de Contenido Principal Dinámica */}
     <main
       id="admin-main-wrapper"
-      class="w-full flex-1 pt-20 md:pt-6 pb-12 px-4 md:px-8 transition-all duration-300 md:pl-64"
+      class="w-full flex-1 pt-20 md:pt-6 pb-12 px-4 md:px-8 transition-all duration-300 md:pl-64 relative z-10"
     >
       <div class="max-w-[1600px] mx-auto">
+        {/* Topbar de Administración Desktop con Selector de Tema */}
+        <div class="hidden md:flex items-center justify-between pb-5 mb-6 border-b border-white/[0.08]">
+          <div className="flex items-center gap-3">
+            <span class="w-2 h-2 bg-[#dc143c]"></span>
+            <span class="font-mono text-xs text-[#ffb3b3] uppercase tracking-wider font-bold">
+              ZAIREN LAB // SISTEMA DE CONTROL CORE
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3 py-1.5 rounded-none bg-[#141416] hover:bg-[#1c1b1b] border border-white/[0.08] text-[#8F8F8C] hover:text-white font-mono text-xs uppercase tracking-wider flex items-center gap-2 transition-colors"
+            >
+              <span>Ver Tienda</span>
+              <span class="text-[10px]">↗</span>
+            </a>
+
+            {/* Toggle de Modo Claro / Oscuro en Admin */}
+            <button
+              id="admin-theme-toggle"
+              type="button"
+              aria-label="Cambiar tema de color"
+              title="Alternar modo claro / oscuro"
+              class="w-8 h-8 rounded-none bg-[#141416] hover:bg-[#1c1b1b] border border-white/[0.08] text-[#8F8F8C] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-[18px] dark:hidden">dark_mode</span>
+              <span class="material-symbols-outlined text-[18px] hidden dark:inline">light_mode</span>
+            </button>
+          </div>
+        </div>
+
         <slot />
       </div>
     </main>
 
-    <!-- Script de ajuste dinámico de padding y guarda de autenticación -->
+    {/* Script de ajuste dinámico de padding, guarda de autenticación y cambio de tema */}
     <script>
       import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
@@ -64,7 +118,6 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error || !session) {
-          // Purgar tokens manipulados o falsos de la consola
           document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           localStorage.removeItem('zairen_user_id');
@@ -73,7 +126,6 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
           return;
         }
 
-        // Comprobar rol administrativo en la tabla perfil
         try {
           const { data: profile } = await supabase
             .from('perfil')
@@ -85,9 +137,7 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
             document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
             window.location.replace('/login?error=unauthorized');
           }
-        } catch (e) {
-          // No bloquear si RLS está en modo local
-        }
+        } catch (e) {}
       }
       verifyAdminAuth();
 
@@ -108,6 +158,24 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
             wrapper.classList.remove('md:pl-20');
             wrapper.classList.add('md:pl-64');
           }
+        });
+      }
+
+      // 3. Listener del botón de Tema en Admin
+      const adminThemeBtn = document.getElementById('admin-theme-toggle');
+      if (adminThemeBtn) {
+        adminThemeBtn.addEventListener('click', () => {
+          const isLight = document.documentElement.classList.contains('light');
+          const next = isLight ? 'dark' : 'light';
+          if (next === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+          } else {
+            document.documentElement.classList.remove('light');
+            document.documentElement.classList.add('dark');
+          }
+          localStorage.setItem('zairen_theme', next);
+          window.dispatchEvent(new Event('theme-change'));
         });
       }
     </script>

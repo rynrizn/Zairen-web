@@ -92,6 +92,13 @@ export function ConfiguracionWeb() {
     },
   ]);
 
+  // 6. Apariencia Zen & Personalización (Estilo CatalogoV0)
+  const [accentColor, setAccentColor] = useState<string>('#dc143c');
+  const [blurIntensity, setBlurIntensity] = useState<string>('16px');
+  const [customGreeting, setCustomGreeting] = useState<string>(
+    'Hola Zairen Lab, me interesa consultar sobre una prenda del catálogo:'
+  );
+
   // Cargar configuraciones guardadas al iniciar
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -126,6 +133,16 @@ export function ConfiguracionWeb() {
           }
         } catch (e) {}
       }
+
+      // Apariencia Zen
+      const savedAccent = localStorage.getItem('zairen_accent_color');
+      if (savedAccent) setAccentColor(savedAccent);
+
+      const savedBlur = localStorage.getItem('zairen_blur_intensity');
+      if (savedBlur) setBlurIntensity(savedBlur);
+
+      const savedGreeting = localStorage.getItem('zairen_custom_greeting');
+      if (savedGreeting) setCustomGreeting(savedGreeting);
     }
   }, []);
 
@@ -202,10 +219,17 @@ export function ConfiguracionWeb() {
 
       // 3. Guardar Sucursales
       localStorage.setItem('zairen_sucursales', JSON.stringify(sucursales));
+
+      // 4. Guardar Apariencia Zen
+      localStorage.setItem('zairen_accent_color', accentColor);
+      localStorage.setItem('zairen_blur_intensity', blurIntensity);
+      localStorage.setItem('zairen_custom_greeting', customGreeting);
+      document.documentElement.style.setProperty('--color-brand-crimson', accentColor);
+      document.documentElement.style.setProperty('--color-primary-container', accentColor);
     }
 
     toast.success('Configuración guardada exitosamente', {
-      description: `Moneda: ${currency} (1 USD = ${exchangeRate} Bs) // Envíos: ${shippingCost} Bs (Envío gratis: ${freeShippingEnabled ? 'ACTIVO' : 'DESACTIVADO'})`,
+      description: `Moneda: ${currency} (1 USD = ${exchangeRate} Bs) // Acento: ${accentColor} // Blur: ${blurIntensity}`,
     });
   };
 
@@ -637,6 +661,123 @@ export function ConfiguracionWeb() {
                 />
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN 6: APARIENCIA ZEN & PERSONALIZACIÓN DE INTERFAZ    */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-6">
+          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">palette</span>
+              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                Apariencia Zen & Personalización de Interfaz
+              </h3>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
+              CONFIG ESTÉTICA
+            </span>
+          </div>
+
+          <p className="text-xs text-[#ac8888] font-sans">
+            Personaliza el acento cromático, el desenfoque glassmorphism y los mensajes de bienvenida automáticos para el cliente.
+          </p>
+
+          {/* Color de Estado / Acento */}
+          <div className="space-y-3">
+            <label className="font-mono text-xs text-[#ac8888] uppercase block">
+              Color de Estado & Acento Dinámico
+            </label>
+            <div className="flex flex-wrap items-center gap-3">
+              {[
+                { name: 'Crimson Official', hex: '#dc143c' },
+                { name: 'Steel Sky (Zen)', hex: '#5c88b0' },
+                { name: 'Neon Cyber', hex: '#00f0ff' },
+                { name: 'Emerald Matrix', hex: '#10b981' },
+                { name: 'Tokyo Amber', hex: '#f59e0b' },
+                { name: 'Obsidian Violet', hex: '#8b5cf6' },
+              ].map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  onClick={() => setAccentColor(c.hex)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-none border font-mono text-xs transition-all cursor-pointer ${
+                    accentColor.toLowerCase() === c.hex.toLowerCase()
+                      ? 'border-white text-white bg-white/10 shadow-sm'
+                      : 'border-white/[0.08] text-[#ac8888] hover:border-white/30'
+                  }`}
+                >
+                  <span
+                    className="w-3.5 h-3.5 border border-white/20"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <span>{c.name}</span>
+                </button>
+              ))}
+
+              {/* Color Personalizado Input */}
+              <div className="flex items-center gap-2 ml-auto">
+                <input
+                  type="color"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="w-7 h-7 bg-transparent cursor-pointer border border-white/20"
+                />
+                <input
+                  type="text"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="w-24 px-2 py-1 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:outline-none"
+                  placeholder="#dc143c"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Intensidad de Desenfoque (Glassmorphism Blur) */}
+          <div className="space-y-3 pt-2">
+            <label className="font-mono text-xs text-[#ac8888] uppercase block">
+              Desenfoque Glassmorphism (Backdrop Blur)
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { id: '0px', label: '0px (Nítido / Sin Blur)' },
+                { id: '8px', label: '8px (Sutil)' },
+                { id: '16px', label: '16px (Estándar Zen)' },
+                { id: '24px', label: '24px (Profundo Glass)' },
+              ].map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => setBlurIntensity(b.id)}
+                  className={`py-2 px-3 text-center rounded-none font-mono text-xs border transition-all cursor-pointer ${
+                    blurIntensity === b.id
+                      ? 'bg-[#dc143c]/20 border-[#dc143c] text-white font-bold'
+                      : 'bg-[#1c1b1b] border-white/[0.08] text-[#ac8888] hover:text-white'
+                  }`}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Saludo Personalizado para Consultas */}
+          <div className="space-y-2 pt-2">
+            <label className="font-mono text-xs text-[#ac8888] uppercase block">
+              Mensaje de Saludo Automático (Contacto & Producto)
+            </label>
+            <input
+              type="text"
+              value={customGreeting}
+              onChange={(e) => setCustomGreeting(e.target.value)}
+              placeholder="Hola Zairen Lab, me interesa consultar sobre una prenda del catálogo:"
+              className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+            />
+            <span className="font-mono text-[10px] text-[#ac8888] block">
+              Texto predeterminado que precede las consultas directas en WhatsApp y modal de producto.
+            </span>
           </div>
         </div>
 
