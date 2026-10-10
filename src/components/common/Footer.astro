@@ -5,16 +5,16 @@ import { siteConfig } from '../../config/site';
 <footer class="footer-container relative z-10 w-full bg-[#0A0A0A] border-t border-[#1C1B1B] pt-16 pb-12 mt-auto transition-colors">
   <div class="max-w-[1440px] mx-auto px-4 md:px-8">
     
-    <!-- Fila Superior: Marca Limpia & Redes Oficiales ("Señales de Drop") -->
+    {/* Fila Superior: Marca Limpia & Redes Oficiales ("Señales de Drop") */}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 pb-12 border-b border-[#1C1B1B]">
       
-      <!-- Bloque de Marca (Sin cajas ni bordes que encierren el logo) -->
-      <div class="lg:col-span-6 space-y-4">
+      {/* Bloque de Marca (Sin cajas ni bordes que encierren el logo) */}
+      <div class="lg:col-span-6 space-y-3">
         <a href="/" class="flex items-center gap-3 group w-fit">
           <img
             src="/brand/zairen_logo_oficial.svg"
             alt="Zairen Lab"
-            class="w-8 h-8 object-contain transition-transform group-hover:scale-105"
+            class="w-9 h-9 object-contain transition-transform group-hover:scale-105"
           />
           <span class="footer-brand-title font-display text-2xl font-extrabold uppercase tracking-widest text-[#FAF9F6]">
             {siteConfig.name}
@@ -23,12 +23,9 @@ import { siteConfig } from '../../config/site';
         <p class="font-mono text-xs text-[#8F8F8C] uppercase tracking-widest">
           EVOLUCIÓN CONSTANTE // IDENTIDAD PROPIA // NO DEFAULT.
         </p>
-        <p class="font-body text-sm text-[#8F8F8C] max-w-md leading-relaxed pt-1">
-          Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo. Tienda oficial online.
-        </p>
       </div>
 
-      <!-- Módulo Canales Oficiales // SEÑALES DE DROP (Iconos + Nombres) -->
+      {/* Módulo Canales Oficiales // SEÑALES DE DROP (Iconos + Nombres) */}
       <div class="lg:col-span-6 flex flex-col justify-end space-y-3">
         <span class="text-xs font-mono text-[#FAF9F6] uppercase tracking-wider font-bold">
           ÚNETE AL ARCHIVO // SEÑALES DE DROP
@@ -37,9 +34,9 @@ import { siteConfig } from '../../config/site';
           Sigue nuestros canales oficiales para notificaciones de lanzamientos limitados:
         </p>
         
-        <!-- Redes Sociales Ortogonales con Icono y Nombre -->
+        {/* Redes Sociales Ortogonales con Icono y Nombre */}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-          <!-- TikTok -->
+          {/* TikTok */}
           <a
             href="https://tiktok.com/@zairenlab"
             target="_blank"
@@ -52,7 +49,7 @@ import { siteConfig } from '../../config/site';
             <span>TikTok</span>
           </a>
 
-          <!-- Instagram -->
+          {/* Instagram */}
           <a
             href="https://instagram.com/zairenlab"
             target="_blank"
@@ -67,7 +64,7 @@ import { siteConfig } from '../../config/site';
             <span>Instagram</span>
           </a>
 
-          <!-- WhatsApp -->
+          {/* WhatsApp */}
           <a
             href={`https://wa.me/${siteConfig.whatsapp.number}`}
             target="_blank"
@@ -80,7 +77,7 @@ import { siteConfig } from '../../config/site';
             <span>WhatsApp</span>
           </a>
 
-          <!-- X / Twitter -->
+          {/* X / Twitter */}
           <a
             href="https://x.com/zairenlab"
             target="_blank"
@@ -97,39 +94,13 @@ import { siteConfig } from '../../config/site';
 
     </div>
 
-    <!-- Fila Media: Columnas Profesionales -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 py-10 text-xs font-mono">
+    {/* Fila Media: Columnas Clave Reorganizadas (Sin Catálogo ni Marca) */}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 py-10 text-xs font-mono">
       
-      <!-- Columna 1: Explorar Catálogo -->
+      {/* Columna 1: Canales Oficiales */}
       <div class="space-y-3">
         <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
-          CATÁLOGO
-        </span>
-        <ul class="space-y-2 text-[#8F8F8C]">
-          <li><a href="/" class="hover:text-[#FAF9F6] transition-colors">Todas las Prendas</a></li>
-          <li><a href="/?col=drop-01" class="hover:text-[#FAF9F6] transition-colors">DROP 01</a></li>
-          <li><a href="/?col=basicos" class="hover:text-[#FAF9F6] transition-colors">Línea Básicos</a></li>
-          <li><a href="/?col=mecha-tech" class="hover:text-[#FAF9F6] transition-colors">Mecha Tech</a></li>
-        </ul>
-      </div>
-
-      <!-- Columna 2: Identidad de Marca -->
-      <div class="space-y-3">
-        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
-          MARCA
-        </span>
-        <ul class="space-y-2 text-[#8F8F8C]">
-          <li><a href="/marca" class="hover:text-[#FAF9F6] transition-colors">Manifiesto</a></li>
-          <li><a href="/marca#lineas" class="hover:text-[#FAF9F6] transition-colors">Líneas de Diseño</a></li>
-          <li><a href="/marca#especificaciones" class="hover:text-[#FAF9F6] transition-colors">Calidad 280-420 GSM</a></li>
-          <li><a href="/marca#contacto" class="hover:text-[#FAF9F6] transition-colors">Cotización & Pedidos</a></li>
-        </ul>
-      </div>
-
-      <!-- Columna 3: Canales Oficiales -->
-      <div class="space-y-3">
-        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
-          CANALES
+          CANALES OFICIALES
         </span>
         <ul class="space-y-2 text-[#8F8F8C]">
           <li>
@@ -140,7 +111,7 @@ import { siteConfig } from '../../config/site';
           </li>
           <li>
             <a href="https://instagram.com/zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
-              <span>Instagram</span>
+              <span>Instagram Oficial</span>
               <span class="text-[10px] text-[#4A4A4A]">↗</span>
             </a>
           </li>
@@ -157,29 +128,48 @@ import { siteConfig } from '../../config/site';
         </ul>
       </div>
 
-      <!-- Columna 4: Atención & Pedidos -->
+      {/* Columna 2: Atención & Pedidos */}
       <div class="space-y-3">
         <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
-          PEDIDOS
+          ATENCIÓN & PEDIDOS
         </span>
         <ul class="space-y-2 text-[#8F8F8C]">
-          <li><span class="text-[#8F8F8C]">Coordinación Directa</span></li>
+          <li><span class="text-[#8F8F8C]">Coordinación y Ventas Online</span></li>
           <li><span class="text-[#8F8F8C]">Envíos a Nivel Nacional</span></li>
-          <li><span class="text-[#4A4A4A]">ZRN-OS v2.6 Online</span></li>
+          <li><span class="text-[#4A4A4A]">Soporte Oficial por WhatsApp</span></li>
+        </ul>
+      </div>
+
+      {/* Columna 3: Información de Tienda */}
+      <div class="space-y-3">
+        <span class="text-[#FAF9F6] uppercase font-bold tracking-widest block">
+          TIENDA ONLINE
+        </span>
+        <ul class="space-y-2 text-[#8F8F8C]">
+          <li><span class="text-[#8F8F8C]">Pagos con QR & Transferencia</span></li>
+          <li><span class="text-[#8F8F8C]">Empaquetado Seguro & Rápido</span></li>
+          <li><span class="text-[#4A4A4A]">ZRN-OS v2.6 Producción</span></li>
         </ul>
       </div>
 
     </div>
 
-    <!-- Fila Inferior: Copyright & Acceso Administrativo Discreto -->
+    {/* Fila Inferior: Copyright & Botón de Acceso Admin */}
     <div class="pt-8 border-t border-[#1C1B1B] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-[#8F8F8C]">
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <span>© 2026 {siteConfig.name}. Todos los derechos reservados. Tienda Oficial Online.</span>
-        <!-- Enlace de acceso admin discreto en el copyright -->
-        <a href="/login" class="text-[#4A4A4A] hover:text-[#8F8F8C] transition-colors" title="Acceso al sistema">
-          // SYS
+        
+        {/* Botón de Acceso a Administración */}
+        <a
+          href="/login"
+          class="px-2.5 py-1 rounded-none border border-[#2A2A2A] hover:border-[#dc143c] bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white transition-all text-[10px] tracking-wider font-bold inline-flex items-center gap-1.5"
+          title="Acceso al Panel Administrativo"
+        >
+          <span>// SYS</span>
+          <span class="text-[9px] opacity-70">ADMIN</span>
         </a>
       </div>
+
       <div class="flex items-center gap-6">
         <span>ESTRUCTURA SIN SATURACIÓN</span>
         <span class="w-1.5 h-1.5 bg-emerald-400"></span>
@@ -192,16 +182,16 @@ import { siteConfig } from '../../config/site';
 
 <style>
   :global(html.light) .footer-container {
-    background-color: #F8F7F4 !important;
-    border-color: #DCD9D2 !important;
+    background-color: #F0EDE5 !important;
+    border-color: #D6D1C4 !important;
   }
   :global(html.light) .footer-brand-title {
-    color: #141416 !important;
+    color: #0A0A0B !important;
   }
   :global(html.light) .social-btn {
     background-color: #FFFFFF !important;
-    border-color: #DCD9D2 !important;
-    color: #141416 !important;
+    border-color: #D6D1C4 !important;
+    color: #0A0A0B !important;
   }
   :global(html.light) .social-btn:hover {
     background-color: #dc143c !important;
