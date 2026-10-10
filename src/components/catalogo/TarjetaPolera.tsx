@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
 import { getOptimizedImageUrl } from '../../lib/cloudinary';
+import { formatCurrency } from '../../config/site';
 
 export interface TarjetaPoleraProps {
   id: string;
@@ -105,8 +106,6 @@ export function TarjetaPolera({
           />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e]/80 via-transparent to-transparent pointer-events-none"></div>
-
         {/* Badges de Disponibilidad y Estado Comercial (Cuadrados / Ortogonales) */}
         <div className="absolute top-2.5 left-2.5 flex flex-wrap items-center gap-1.5 z-10 max-w-[90%]">
           {isSoldOut ? (
@@ -195,7 +194,7 @@ export function TarjetaPolera({
                 PRECIO
               </span>
               <span className="font-mono text-base md:text-lg font-bold text-[#FAF9F6] tracking-tight">
-                Bs. {precio.toFixed(0)}
+                {formatCurrency(precio)}
               </span>
             </div>
 

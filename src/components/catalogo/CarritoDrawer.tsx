@@ -305,7 +305,7 @@ export function CarritoDrawer() {
                 value={clientNotes}
                 onChange={(e) => setClientNotes(e.target.value)}
                 placeholder="Ej: Envío a domicilio, pago con QR..."
-                className="w-full bg-[#0a0a0a] border border-[#201f1f] rounded-none px-3 py-2 text-xs font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-[#dc143c]"
+                className="w-full bg-[#0a0a0a] border border-[#201f1f] rounded-none px-3 py-2 text-xs font-mono text-[#FAF9F6] placeholder:text-[#ac8888]/60 focus:outline-none focus:border-[#dc143c]"
               />
             </div>
 
@@ -323,7 +323,7 @@ export function CarritoDrawer() {
               </div>
               <div className="pt-2 border-t border-white/[0.06] flex justify-between items-baseline">
                 <div>
-                  <span className="font-display text-sm font-bold text-white uppercase block">
+                  <span className="font-display text-sm font-bold text-[#FAF9F6] uppercase block">
                     Total a Confirmar
                   </span>
                   <span className="text-[10px] text-[#ac8888]">

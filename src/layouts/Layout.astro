@@ -97,7 +97,10 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:creator" content="@zairenlab" />
   </head>
-  <body class="bg-[#0A0A0A] text-[#FAF9F6] antialiased selection:bg-[#dc143c] selection:text-white min-h-screen flex flex-col font-body">
+  <body class="bg-[#0A0A0A] text-[#FAF9F6] antialiased selection:bg-[#dc143c] selection:text-white min-h-screen flex flex-col font-body relative">
+    <!-- Textura sutil de ruido Zen Washi / Sumi-iro -->
+    <div class="bg-noise" aria-hidden="true"></div>
+
     <!-- Contenedor de notificación Sonner -->
     <Toaster client:load />
 

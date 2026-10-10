@@ -427,3 +427,95 @@
   .bento-actions-btns { flex-direction: column; max-width: 100%; width: 100%; }
   .bento-btn-wsp, .bento-btn-cart { width: 100%; }
 }
+
+/* ============================================================ */
+/* ☀️ MODO CLARO PARA PRODUCT DETAIL BENTO GRID                */
+/* ============================================================ */
+html.light .bento-cell {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .bento-cell:hover {
+  border-color: rgba(0, 0, 0, 0.16) !important;
+}
+
+html.light .bento-image {
+  background: #FFFFFF !important;
+}
+
+html.light .bento-title {
+  color: #0A0A0B !important;
+}
+
+html.light .bento-desc {
+  color: #38383A !important;
+}
+
+html.light .bento-cell-label,
+html.light .tag-muted {
+  color: #555558 !important;
+}
+
+html.light .tag-sep {
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .bento-id {
+  color: #76767B !important;
+}
+
+html.light .talla-btn {
+  background: #F0EDE5 !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #0A0A0B !important;
+}
+
+html.light .talla-btn:hover {
+  background: #E5E1D7 !important;
+  border-color: #dc143c !important;
+  color: #dc143c !important;
+}
+
+html.light .talla-btn.talla-selected {
+  background: #dc143c !important;
+  border-color: #dc143c !important;
+  color: #FFFFFF !important;
+}
+
+html.light .bento-price-value {
+  color: #0A0A0B !important;
+}
+
+html.light .detail-thumbnails {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .bento-fullscreen-btn {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0A0A0B !important;
+}
+
+html.light .bento-btn-cart {
+  background: #F0EDE5 !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #0A0A0B !important;
+}
+
+html.light .bento-btn-cart:hover {
+  background: #E5E1D7 !important;
+}
+
+html.light .lightbox-modal {
+  background: rgba(246, 244, 238, 0.95) !important;
+}
+
+html.light .lightbox-close,
+html.light .lightbox-nav {
+  background: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0A0A0B !important;
+}
