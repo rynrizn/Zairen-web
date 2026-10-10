@@ -66,15 +66,15 @@
     "semantic_hash": ""
   },
   "src/components/admin/inventario/ProductoEditor.tsx": {
-    "mtime": 1791581626.3289678,
-    "seen": 1791584011.511059,
-    "ast_hash": "b07410a77cd2b9412b4db9655016869c",
+    "mtime": 1791595126.7052562,
+    "seen": 1791595783.0676477,
+    "ast_hash": "8c162ef9b7135562b7479e05292df814",
     "semantic_hash": ""
   },
   "src/components/admin/layout/AdminSidebar.tsx": {
-    "mtime": 1791581495.1961546,
-    "seen": 1791584011.5110652,
-    "ast_hash": "9c2707204c90579e168975933f771b41",
+    "mtime": 1791594774.2472095,
+    "seen": 1791595783.0676563,
+    "ast_hash": "c63d8719808ea80290dd64df8dff6085",
     "semantic_hash": ""
   },
   "src/components/admin/pedidos/PedidosTable.tsx": {
@@ -96,9 +96,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/settings/ConfiguracionWeb.tsx": {
-    "mtime": 1791583566.4127715,
-    "seen": 1791584011.5110896,
-    "ast_hash": "64841eea9228e625df0df5e49c74268e",
+    "mtime": 1791595456.4773147,
+    "seen": 1791595783.0703058,
+    "ast_hash": "a6ed183baadc89364dea646873048a0f",
     "semantic_hash": ""
   },
   "src/components/admin/usuarios/UsuariosManager.tsx": {
@@ -108,15 +108,15 @@
     "semantic_hash": ""
   },
   "src/components/catalogo/CarritoDrawer.tsx": {
-    "mtime": 1791583667.4209473,
-    "seen": 1791584011.511103,
-    "ast_hash": "61f925e4285d19f4bb2da4f37b1f3987",
+    "mtime": 1791594398.3797839,
+    "seen": 1791595783.0710766,
+    "ast_hash": "adf877dec9b1670097a2a01b4f6e628e",
     "semantic_hash": ""
   },
   "src/components/catalogo/CatalogoGrid.tsx": {
-    "mtime": 1791583167.5145898,
-    "seen": 1791584011.511109,
-    "ast_hash": "49e38b8ce6491bab29cf9f5088e9f30a",
+    "mtime": 1791594002.7755628,
+    "seen": 1791595783.0710838,
+    "ast_hash": "2f0857eff49a304ddad8b9e4f367103c",
     "semantic_hash": ""
   },
   "src/components/catalogo/DetalleProducto.tsx": {
@@ -132,9 +132,9 @@
     "semantic_hash": ""
   },
   "src/components/catalogo/TarjetaPolera.tsx": {
-    "mtime": 1791572631.438779,
-    "seen": 1791574096.2542553,
-    "ast_hash": "b7f9d505ad17559444b13317dd57ebcb",
+    "mtime": 1791594205.542147,
+    "seen": 1791595783.0725458,
+    "ast_hash": "f82478851f94619fbe2579002b075fd7",
     "semantic_hash": ""
   },
   "src/components/common/BottomNavMobile.tsx": {
@@ -150,9 +150,9 @@
     "semantic_hash": "1bd02145e00494541cb402ec73383b4a"
   },
   "src/components/common/Footer.astro": {
-    "mtime": 1791583486.2098546,
-    "seen": 1791584011.5128877,
-    "ast_hash": "6f0f30333f778c2f6e44bd6c733cd0a1",
+    "mtime": 1791594515.48008,
+    "seen": 1791595783.073929,
+    "ast_hash": "310c29589b1b3c5febb51731fe0d5cc0",
     "semantic_hash": ""
   },
   "src/components/common/Navbar.astro": {
@@ -234,15 +234,15 @@
     "semantic_hash": ""
   },
   "src/layouts/AdminLayout.astro": {
-    "mtime": 1791568019.5782585,
-    "seen": 1791574096.2579954,
-    "ast_hash": "29477fe578728e023cf9441702d346b2",
+    "mtime": 1791594855.2423153,
+    "seen": 1791595783.0858757,
+    "ast_hash": "e9d43bc95cf9f39524e64ec5368b07e0",
     "semantic_hash": ""
   },
   "src/layouts/Layout.astro": {
-    "mtime": 1791568069.9840117,
-    "seen": 1791574096.2580023,
-    "ast_hash": "5fd46ce45acd536c4dffd61d47d61e84",
+    "mtime": 1791594278.8084126,
+    "seen": 1791595783.0858831,
+    "ast_hash": "0e31db8f514b92df4f4f0be114c536eb",
     "semantic_hash": ""
   },
   "src/lib/cloudinary.ts": {
@@ -276,9 +276,9 @@
     "semantic_hash": ""
   },
   "src/pages/admin/index.astro": {
-    "mtime": 1791567765.2987256,
-    "seen": 1791574096.2591102,
-    "ast_hash": "dbf7658e17b9a365e1cc4d3b1f2cb887",
+    "mtime": 1791595605.4169059,
+    "seen": 1791595783.0887046,
+    "ast_hash": "318bb20012e2c5d0f1e18be1008bc581",
     "semantic_hash": ""
   },
   "src/pages/admin/interfaz-web.astro": {
@@ -315,12 +315,6 @@
     "mtime": 1791567881.0918412,
     "seen": 1791574096.2591474,
     "ast_hash": "7ce581992780651a1fb9be26ab4b448d",
-    "semantic_hash": ""
-  },
-  "src/pages/admin/vista-catalogo.astro": {
-    "mtime": 1791567893.5136373,
-    "seen": 1791574096.259154,
-    "ast_hash": "2fafc5681f0649e9164a767c7fc8d466",
     "semantic_hash": ""
   },
   "src/pages/catalogo.astro": {
@@ -840,15 +834,15 @@
     "semantic_hash": ""
   },
   "tasks/plan.md": {
-    "mtime": 1791580339.7843447,
-    "seen": 1791584011.553736,
-    "ast_hash": "b4996fae27eed13f2a04f1e3ce5a6fa9",
+    "mtime": 1791593285.013306,
+    "seen": 1791595783.1268847,
+    "ast_hash": "ec6dc19c26056e2fe235f4e497e6bc68",
     "semantic_hash": ""
   },
   "tasks/todo.md": {
-    "mtime": 1791580385.0375137,
-    "seen": 1791584011.55374,
-    "ast_hash": "9d2d6853b441719bb8c0b3a27a3cf6b9",
+    "mtime": 1791593328.4771101,
+    "seen": 1791595783.1268923,
+    "ast_hash": "512a9cfb183d7a9ff3afde7a10245192",
     "semantic_hash": ""
   },
   "public/brand/zairen_brand_wordmark.png": {
@@ -927,6 +921,18 @@
     "mtime": 1791514288.1742074,
     "seen": 1791574096.2628162,
     "ast_hash": "924efdd579bdc4eb84d8e1617de751b2",
+    "semantic_hash": ""
+  },
+  "src/components/admin/metricas/MetricasManager.tsx": {
+    "mtime": 1791595564.2581377,
+    "seen": 1791595783.0676622,
+    "ast_hash": "83a1cfad61db6de6fc080654286644c3",
+    "semantic_hash": ""
+  },
+  "src/pages/admin/metricas.astro": {
+    "mtime": 1791595569.595511,
+    "seen": 1791595783.0898013,
+    "ast_hash": "a0441384744570de484b8a9c220bca59",
     "semantic_hash": ""
   }
 }

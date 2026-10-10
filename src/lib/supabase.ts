@@ -1,5 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Polyfill seguro de WebSocket para entornos de compilación SSR / prerendering (Node.js < 22 en Cloudflare Pages)
+if (typeof globalThis !== 'undefined' && typeof (globalThis as any).WebSocket === 'undefined') {
+  class PrerenderWebSocket {
+    static readonly CONNECTING = 0;
+    static readonly OPEN = 1;
+    static readonly CLOSING = 2;
+    static readonly CLOSED = 3;
+    readonly CONNECTING = 0;
+    readonly OPEN = 1;
+    readonly CLOSING = 2;
+    readonly CLOSED = 3;
+    readyState = 3;
+    bufferedAmount = 0;
+    extensions = '';
+    protocol = '';
+    binaryType = 'blob';
+    url = '';
+    onopen = null;
+    onclose = null;
+    onerror = null;
+    onmessage = null;
+    addEventListener() {}
+    removeEventListener() {}
+    dispatchEvent() { return false; }
+    send() {}
+    close() {}
+  }
+  (globalThis as any).WebSocket = PrerenderWebSocket;
+}
+
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 

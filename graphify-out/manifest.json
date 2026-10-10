@@ -6,10 +6,10 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1791251942.0981615,
-    "seen": 1791499573.921793,
-    "ast_hash": "385fb45a4938d1e597cb3c0e4446b7ba",
-    "semantic_hash": "385fb45a4938d1e597cb3c0e4446b7ba"
+    "mtime": 1791597265.6166573,
+    "seen": 1791597466.6260304,
+    "ast_hash": "7b72105aceb2a169ca5937fbd267974d",
+    "semantic_hash": ""
   },
   "src/components/admin/clientes/ClientesTable.tsx": {
     "mtime": 1791582824.1167529,
@@ -258,9 +258,9 @@
     "semantic_hash": "49c5939d824c896ca8386c12e7569720"
   },
   "src/lib/supabase.ts": {
-    "mtime": 1791567911.1753697,
-    "seen": 1791574096.2590892,
-    "ast_hash": "409f562c62cdc66f7c72516327af47a9",
+    "mtime": 1791597234.7416213,
+    "seen": 1791597466.6903453,
+    "ast_hash": "2502b8efe975f80f1ca12ddc123ac451",
     "semantic_hash": ""
   },
   "src/middleware/index.ts": {
