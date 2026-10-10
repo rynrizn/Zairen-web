@@ -12,123 +12,123 @@
     "semantic_hash": "385fb45a4938d1e597cb3c0e4446b7ba"
   },
   "src/components/admin/clientes/ClientesTable.tsx": {
-    "mtime": 1791255024.7401366,
-    "seen": 1791499573.921796,
-    "ast_hash": "44d177a70b64e320a55678186499afce",
-    "semantic_hash": "44d177a70b64e320a55678186499afce"
+    "mtime": 1791582824.1167529,
+    "seen": 1791584011.5109446,
+    "ast_hash": "48b8bf5780a1cae0c4db3c08105c154d",
+    "semantic_hash": ""
   },
   "src/components/admin/dashboard/AlertasInventario.tsx": {
-    "mtime": 1791254021.8080158,
-    "seen": 1791499573.921798,
-    "ast_hash": "30ebb28dcc37e0de3efe8b1b6add77a3",
-    "semantic_hash": "30ebb28dcc37e0de3efe8b1b6add77a3"
+    "mtime": 1791583776.155607,
+    "seen": 1791584011.5109518,
+    "ast_hash": "9593f5a13a1329a3ec90e65998e6b629",
+    "semantic_hash": ""
   },
   "src/components/admin/dashboard/DonutColecciones.tsx": {
-    "mtime": 1791254021.8090148,
-    "seen": 1791499573.9218,
-    "ast_hash": "3e12f67b251a1a9c9456e5d9348de8ec",
-    "semantic_hash": "3e12f67b251a1a9c9456e5d9348de8ec"
+    "mtime": 1791583776.1615582,
+    "seen": 1791584011.5109587,
+    "ast_hash": "c722a8d015d401a16d7b26701739a2c0",
+    "semantic_hash": ""
   },
   "src/components/admin/dashboard/PedidosPendientes.tsx": {
-    "mtime": 1791254021.8120134,
-    "seen": 1791499573.9218018,
-    "ast_hash": "70e13152f2df2a48fc7a21b2ab804a65",
-    "semantic_hash": "70e13152f2df2a48fc7a21b2ab804a65"
+    "mtime": 1791583776.1620948,
+    "seen": 1791584011.5109642,
+    "ast_hash": "7fc79e589d08242c7271eda0fedaf4c7",
+    "semantic_hash": ""
   },
   "src/components/admin/dashboard/TopVendidos.tsx": {
-    "mtime": 1791254021.813255,
-    "seen": 1791499573.9218035,
-    "ast_hash": "ca93cfc20ae6e634ec68054f77ca6eee",
-    "semantic_hash": "ca93cfc20ae6e634ec68054f77ca6eee"
+    "mtime": 1791583776.1620948,
+    "seen": 1791584011.51097,
+    "ast_hash": "70bbac816ae4fa9d212efb71f790489d",
+    "semantic_hash": ""
   },
   "src/components/admin/dashboard/VentasChart.tsx": {
-    "mtime": 1791254021.8152616,
-    "seen": 1791499573.9218051,
-    "ast_hash": "046d0117ead233aabb67b6adb32f5aa2",
-    "semantic_hash": "046d0117ead233aabb67b6adb32f5aa2"
+    "mtime": 1791583776.1662407,
+    "seen": 1791584011.511019,
+    "ast_hash": "0825db2619b77fcc599beaeb23dcec3f",
+    "semantic_hash": ""
   },
   "src/components/admin/inventario/InventarioManager.tsx": {
-    "mtime": 1791254021.8212621,
-    "seen": 1791499573.9218066,
-    "ast_hash": "6cd06016bb73cc6e0eb310725eb24c92",
-    "semantic_hash": "6cd06016bb73cc6e0eb310725eb24c92"
+    "mtime": 1791581705.1508746,
+    "seen": 1791584011.511038,
+    "ast_hash": "76350aabe7d8995975c2153cb05b8a9e",
+    "semantic_hash": ""
   },
   "src/components/admin/inventario/InventarioTable.tsx": {
-    "mtime": 1791254021.8222618,
-    "seen": 1791499573.9218082,
-    "ast_hash": "114cf4fff87a13b3641e505ecd141cf7",
-    "semantic_hash": "114cf4fff87a13b3641e505ecd141cf7"
+    "mtime": 1791583776.1667888,
+    "seen": 1791584011.5110462,
+    "ast_hash": "3d96ef7012518494501b71a9b335078b",
+    "semantic_hash": ""
   },
   "src/components/admin/inventario/MatrizStock.tsx": {
-    "mtime": 1791254021.8244963,
-    "seen": 1791499573.92181,
-    "ast_hash": "bde163696bfa4036ff48828949371819",
-    "semantic_hash": "bde163696bfa4036ff48828949371819"
+    "mtime": 1791581574.6861691,
+    "seen": 1791584011.5110524,
+    "ast_hash": "7e063612451af4797cf6484521e0b642",
+    "semantic_hash": ""
   },
   "src/components/admin/inventario/ProductoEditor.tsx": {
-    "mtime": 1791408833.1607988,
-    "seen": 1791499573.9218118,
-    "ast_hash": "fe5b7d3da0462f7a1dccaf51810aa99e",
-    "semantic_hash": "fe5b7d3da0462f7a1dccaf51810aa99e"
+    "mtime": 1791581626.3289678,
+    "seen": 1791584011.511059,
+    "ast_hash": "b07410a77cd2b9412b4db9655016869c",
+    "semantic_hash": ""
   },
   "src/components/admin/layout/AdminSidebar.tsx": {
-    "mtime": 1791519857.304994,
-    "seen": 1791574096.2506323,
-    "ast_hash": "d3b70e20c38cff04b3c353ae86c7cd75",
+    "mtime": 1791581495.1961546,
+    "seen": 1791584011.5110652,
+    "ast_hash": "9c2707204c90579e168975933f771b41",
     "semantic_hash": ""
   },
   "src/components/admin/pedidos/PedidosTable.tsx": {
-    "mtime": 1791254021.8284996,
-    "seen": 1791499573.9218144,
-    "ast_hash": "183a109b5afdd4f819ad7cdceff2bae5",
-    "semantic_hash": "183a109b5afdd4f819ad7cdceff2bae5"
+    "mtime": 1791582824.1167529,
+    "seen": 1791584011.5110714,
+    "ast_hash": "362719c5254e131a8549e2234120e3ee",
+    "semantic_hash": ""
   },
   "src/components/admin/pos/POSTerminal.tsx": {
-    "mtime": 1791255024.7421353,
-    "seen": 1791499573.921816,
-    "ast_hash": "9a436d3596cbd0b766640e643e98f10f",
-    "semantic_hash": "9a436d3596cbd0b766640e643e98f10f"
+    "mtime": 1791582824.1105826,
+    "seen": 1791584011.5110774,
+    "ast_hash": "1f4ee9de011dc95f61bbb74ba7781946",
+    "semantic_hash": ""
   },
   "src/components/admin/preview/SimuladorCatalogo.tsx": {
-    "mtime": 1791255024.7443478,
-    "seen": 1791499573.9218175,
-    "ast_hash": "6ddd7af63576cf7f8fc57f9f25c130f3",
-    "semantic_hash": "6ddd7af63576cf7f8fc57f9f25c130f3"
+    "mtime": 1791583776.1667888,
+    "seen": 1791584011.5110838,
+    "ast_hash": "862ae0e415a70753f8a19426c2168702",
+    "semantic_hash": ""
   },
   "src/components/admin/settings/ConfiguracionWeb.tsx": {
-    "mtime": 1791352670.3482702,
-    "seen": 1791499573.9218192,
-    "ast_hash": "a8b7c182fe9eb2d0fef80b44f6bae4ba",
-    "semantic_hash": "a8b7c182fe9eb2d0fef80b44f6bae4ba"
+    "mtime": 1791583566.4127715,
+    "seen": 1791584011.5110896,
+    "ast_hash": "64841eea9228e625df0df5e49c74268e",
+    "semantic_hash": ""
   },
   "src/components/admin/usuarios/UsuariosManager.tsx": {
-    "mtime": 1791408833.1660314,
-    "seen": 1791499573.9218206,
-    "ast_hash": "8b7f3e049f541f8ccf8d064fcf2beef8",
-    "semantic_hash": "8b7f3e049f541f8ccf8d064fcf2beef8"
+    "mtime": 1791583883.4926052,
+    "seen": 1791584011.5110967,
+    "ast_hash": "5ec75cbfc604bb60df4eaf65be56c600",
+    "semantic_hash": ""
   },
   "src/components/catalogo/CarritoDrawer.tsx": {
-    "mtime": 1791572889.5812407,
-    "seen": 1791574096.2542288,
-    "ast_hash": "88afda7dc2d3963a3858aefef412e2c6",
+    "mtime": 1791583667.4209473,
+    "seen": 1791584011.511103,
+    "ast_hash": "61f925e4285d19f4bb2da4f37b1f3987",
     "semantic_hash": ""
   },
   "src/components/catalogo/CatalogoGrid.tsx": {
-    "mtime": 1791572899.5585916,
-    "seen": 1791574096.2542365,
-    "ast_hash": "1611ff2eeab54ca3b2a7714791234082",
+    "mtime": 1791583167.5145898,
+    "seen": 1791584011.511109,
+    "ast_hash": "49e38b8ce6491bab29cf9f5088e9f30a",
     "semantic_hash": ""
   },
   "src/components/catalogo/DetalleProducto.tsx": {
-    "mtime": 1791572759.680906,
-    "seen": 1791574096.2542427,
-    "ast_hash": "8ff26a17018ccff31c66ca6bad6ac542",
+    "mtime": 1791583214.6149812,
+    "seen": 1791584011.5111187,
+    "ast_hash": "6ceb6c2153b85171c225a7f5d56bff09",
     "semantic_hash": ""
   },
   "src/components/catalogo/ShareProductModal.tsx": {
-    "mtime": 1791568247.878498,
-    "seen": 1791574096.2542489,
-    "ast_hash": "43bf80924e3c8aa38709dcfa88242cfe",
+    "mtime": 1791583260.2664194,
+    "seen": 1791584011.511126,
+    "ast_hash": "1c3d8c92c6c2426509861f833e740891",
     "semantic_hash": ""
   },
   "src/components/catalogo/TarjetaPolera.tsx": {
@@ -150,15 +150,15 @@
     "semantic_hash": "1bd02145e00494541cb402ec73383b4a"
   },
   "src/components/common/Footer.astro": {
-    "mtime": 1791568186.9070282,
-    "seen": 1791574096.254821,
-    "ast_hash": "0289dc0914ea41b1cf88508dd97ac537",
+    "mtime": 1791583486.2098546,
+    "seen": 1791584011.5128877,
+    "ast_hash": "6f0f30333f778c2f6e44bd6c733cd0a1",
     "semantic_hash": ""
   },
   "src/components/common/Navbar.astro": {
-    "mtime": 1791568122.936684,
-    "seen": 1791574096.2548282,
-    "ast_hash": "4dab8a1cd37004f475983d9f4f6f137e",
+    "mtime": 1791583414.215465,
+    "seen": 1791584011.5128958,
+    "ast_hash": "431551479ecbf88bce2f050abc4a6320",
     "semantic_hash": ""
   },
   "src/components/common/ShareButton.tsx": {
@@ -168,9 +168,9 @@
     "semantic_hash": "a36a0fb820b786b026fb0ec5d19af985"
   },
   "src/components/common/ShareWebModal.tsx": {
-    "mtime": 1791572917.116276,
-    "seen": 1791574096.2556956,
-    "ast_hash": "07f939de9581d0d9dda55b26bdd00323",
+    "mtime": 1791583238.1182842,
+    "seen": 1791584011.5135255,
+    "ast_hash": "b9b05aefd0d0b1e50e339588a55c0a20",
     "semantic_hash": ""
   },
   "src/components/common/SplashLoader.astro": {
@@ -216,9 +216,9 @@
     "semantic_hash": "e68ed3efa7259803999283d5d3a616f5"
   },
   "src/config/site.ts": {
-    "mtime": 1791568060.1335857,
-    "seen": 1791574096.257435,
-    "ast_hash": "7fbe00f518fa216ed1d472c6ee5f89c1",
+    "mtime": 1791583503.258935,
+    "seen": 1791584011.5203192,
+    "ast_hash": "9b013cc81755c77a841324d8d9eea061",
     "semantic_hash": ""
   },
   "src/data/mockProducts.ts": {
@@ -336,9 +336,9 @@
     "semantic_hash": ""
   },
   "src/pages/login.astro": {
-    "mtime": 1791568038.945642,
-    "seen": 1791574096.2591732,
-    "ast_hash": "c915c9e6866aba3bba78465fc0d46f0f",
+    "mtime": 1791583377.6595087,
+    "seen": 1791584011.5319686,
+    "ast_hash": "3a30fbe9508372a7b595f3e35e13db9c",
     "semantic_hash": ""
   },
   "src/pages/producto/[id].astro": {
@@ -348,10 +348,10 @@
     "semantic_hash": ""
   },
   "src/stores/cartStore.ts": {
-    "mtime": 1791251942.1359556,
-    "seen": 1791499573.9218857,
-    "ast_hash": "aca7737caffa6df1f956dc876e795871",
-    "semantic_hash": "aca7737caffa6df1f956dc876e795871"
+    "mtime": 1791583582.3437314,
+    "seen": 1791584011.5330637,
+    "ast_hash": "f8196070f64ed304bf259b7065a855c9",
+    "semantic_hash": ""
   },
   "src/types/database.ts": {
     "mtime": 1791352670.397573,
@@ -840,15 +840,15 @@
     "semantic_hash": ""
   },
   "tasks/plan.md": {
-    "mtime": 1791565026.2815437,
-    "seen": 1791574096.2627187,
-    "ast_hash": "681aacc4ff252fa52c42f8c1ee66addc",
+    "mtime": 1791580339.7843447,
+    "seen": 1791584011.553736,
+    "ast_hash": "b4996fae27eed13f2a04f1e3ce5a6fa9",
     "semantic_hash": ""
   },
   "tasks/todo.md": {
-    "mtime": 1791565057.6893022,
-    "seen": 1791574096.262727,
-    "ast_hash": "9cef7271acee53f09f3e272f1886cdf7",
+    "mtime": 1791580385.0375137,
+    "seen": 1791584011.55374,
+    "ast_hash": "9d2d6853b441719bb8c0b3a27a3cf6b9",
     "semantic_hash": ""
   },
   "public/brand/zairen_brand_wordmark.png": {

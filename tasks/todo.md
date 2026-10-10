@@ -1,250 +1,332 @@
-# Task List: Zairen Lab // Estética Ortogonal, Moneda Unificada, Ajustes Admin y Navegación
+# Task List: Zairen Lab // Rediseño Zen, Modo Claro/Oscuro, Mejoras Admin y Métricas
 
-## Phase 1: Estética Ortogonal Global, Modales y Detalle de Producto
+## Phase 1: Catálogo Zen — Header, Secciones Colapsables, Scrollbar y Filtros Ampliados
 
-### Task 1.1: Limpieza y ortogonalidad en `AdminSidebar.tsx`
-**Description:** Eliminar la duplicación de "Usuarios y Roles" en `navItems` para Superadmin. Cambiar todos los bordes redondeados a esquinas rectas (`rounded-none`).
+### Task 1.1: Header de catálogo con logo oficial como watermark derecho detrás del texto
+**Description:** Modificar el encabezado de `CatalogoGrid.tsx` para que utilice únicamente el icono vectorial SVG sin texto, ubicado siempre a la derecha (en móvil y escritorio) y posicionado como marca de agua sutil detrás del texto del título.
 **Acceptance criteria:**
-- [x] No aparece duplicado "Usuarios y Roles" en el sidebar.
-- [x] Todos los botones, iconos contenedores y estados activos usan `rounded-none`.
+- [ ] El logotipo no tiene letras acompañantes en el header del catálogo.
+- [ ] El icono vectorial se sitúa a la derecha y detrás del texto con opacidad sutil zen.
+- [ ] Se visualiza correctamente tanto en pantallas móviles como de escritorio.
 **Verification:**
-- [x] Build succeeds: `pnpm build`
-- [x] Manual check: Verificar en `/admin` que el sidebar muestra cada ítem una sola vez y con esquinas rectas.
-**Dependencies:** None
-**Files likely touched:** `src/components/admin/layout/AdminSidebar.tsx`
-**Estimated scope:** S (1 file)
-
-### Task 1.2: Modal flotante para productos y tabla de inventario a pantalla completa en `InventarioManager.tsx`
-**Description:** En lugar de dividir la pantalla y achicar la tabla a 5 columnas, `InventarioManager` muestra la tabla a pantalla completa (12 columnas) con tipografía aumentada (`text-sm` y `text-base` en desktop) y esquinas rectas (`rounded-none`). El formulario de añadir/editar prenda se abre en un modal flotante centrado con backdrop.
-**Acceptance criteria:**
-- [x] La tabla de inventario ocupa todo el ancho y no se comprime al abrir el editor.
-- [x] El tamaño de fuente en la tabla de inventario en escritorio es más grande y nítido.
-- [x] Al pulsar "+ AGREGAR PRENDA" o editar un ítem se despliega un modal flotante centrado.
-- [x] Todas las tarjetas, botones y badges usan `rounded-none`.
-**Verification:**
-- [x] Manual check: Abrir `/admin/inventario`, verificar ancho completo y probar abrir el modal flotante.
-**Dependencies:** Task 1.1
-**Files likely touched:**
-- `src/components/admin/inventario/InventarioManager.tsx`
-- `src/components/admin/inventario/ProductoEditor.tsx`
-**Estimated scope:** M (2 files)
-
-### Task 1.3: Ortogonalidad en módulos admin restantes
-**Description:** Actualizar `POSTerminal.tsx`, `PedidosTable.tsx`, `ClientesTable.tsx` y `UsuariosManager.tsx` para eliminar `rounded-xl`, `rounded-2xl` y `rounded-full`, unificando a `rounded-none`.
-**Acceptance criteria:**
-- [x] Todas las tablas, inputs, tarjetas y botones en módulos administrativos tienen esquinas rectas.
-**Verification:**
-- [x] Manual check: Navegar por `/admin/ventas`, `/admin/pedidos`, `/admin/clientes` y `/admin/usuarios`.
-**Dependencies:** Task 1.2
-**Files likely touched:**
-- `src/components/admin/pos/POSTerminal.tsx`
-- `src/components/admin/pedidos/PedidosTable.tsx`
-- `src/components/admin/clientes/ClientesTable.tsx`
-- `src/components/admin/usuarios/UsuariosManager.tsx`
-**Estimated scope:** M (4 files)
-
-### Task 1.4: Header del catálogo con logo SVG y filtros ortogonales en `CatalogoGrid.tsx`
-**Description:** Remover el párrafo de texto redundante en el encabezado del catálogo. En su lugar, colocar el logotipo oficial SVG con sutil gradiente sin caja contenedora. Reemplazar los chips `rounded-full` de colección y estado por botones rectangulares ortogonales `rounded-none`.
-**Acceptance criteria:**
-- [x] Se elimina el texto "Cortes oversized diseñados...".
-- [x] Se muestra el logo SVG limpio y sin marco cuadrado.
-- [x] Todos los filtros de colección, estado, buscador y select de orden tienen `rounded-none`.
-**Verification:**
-- [x] Manual check: Verificar la portada `/` y comprobar el encabezado y los filtros.
+- [ ] Build succeeds: `pnpm build`
+- [ ] Manual check: Abrir `/` y comprobar alineación del watermark en móvil y desktop.
 **Dependencies:** None
 **Files likely touched:** `src/components/catalogo/CatalogoGrid.tsx`
 **Estimated scope:** S (1 file)
 
-### Task 1.5: Esquinas en punta en la vista de producto y `detail-bento.css`
-**Description:** Actualizar `detail-bento.css` y `DetalleProducto.tsx` para que todas las celdas del bento grid, botones de tallas, badges, miniaturas y modales tengan `border-radius: 0px` (`rounded-none`).
+### Task 1.2: Retirar etiqueta "ESTADO:" y diseño fluido de chips comerciales
+**Description:** Eliminar la palabra "ESTADO:" que antecede a los botones de filtro comercial en `CatalogoGrid.tsx`. Permitir que los chips de estado se adapten con fluidez a la pantalla.
 **Acceptance criteria:**
-- [x] Celdas bento, badge de estado, botones de tallas y botones de WhatsApp/bolsa tienen esquinas rectas.
-- [x] Lightbox y modal de compartir producto tienen esquinas rectas.
+- [ ] No aparece el texto "ESTADO:" en la barra de filtros.
+- [ ] Los chips (Todos, Pre-Order, Nuevo Drop, etc.) se ajustan fluidamente según el ancho de pantalla.
 **Verification:**
-- [x] Manual check: Abrir `/producto/samurai-mecha-kanji-oversized-tee` y verificar esquinas ortogonales.
+- [ ] Manual check: Verificar en `/` que los filtros de estado se presentan limpios sin la etiqueta.
+**Dependencies:** Task 1.1
+**Files likely touched:** `src/components/catalogo/CatalogoGrid.tsx`
+**Estimated scope:** XS (1 file)
+
+### Task 1.3: Scroll horizontal para colecciones con scrollbar interactiva fina
+**Description:** En la lista de chips de colecciones ("Todas", "Anime Mecha", etc.), implementar scroll horizontal táctil y una barra de desplazamiento fina (`scrollbar-thin-hover`) que se engrosa ligeramente al posar el ratón para permitir arrastrarla cómodamente.
+**Acceptance criteria:**
+- [ ] En pantallas móviles y tablets, los filtros de colección no desbordan la pantalla verticalmente; se deslizan horizontalmente.
+- [ ] La barra de desplazamiento es ultra-fina (2-3px) y se ensancha al hover (5-6px) para facilitar su manipulación con el ratón.
+**Verification:**
+- [ ] Manual check: Probar en viewport móvil y probar hover con ratón en desktop.
+**Dependencies:** Task 1.1
+**Files likely touched:**
+- `src/components/catalogo/CatalogoGrid.tsx`
+- `src/styles/global.css`
+**Estimated scope:** S (2 files)
+
+### Task 1.4: Ampliar opciones de ordenamiento en catálogo
+**Description:** Ampliar el `<select>` de ordenamiento en `CatalogoGrid.tsx` incorporando orden alfabético A-Z y Z-A, además de los existentes (precio ascendente, precio descendente y más recientes).
+**Acceptance criteria:**
+- [ ] El selector incluye opciones: "Más Recientes", "Precio: Menor a Mayor", "Precio: Mayor a Menor", "Nombre: A - Z", "Nombre: Z - A".
+- [ ] La lista de productos se reordena correctamente según la opción elegida.
+**Verification:**
+- [ ] Manual check: Cambiar a orden A-Z y verificar que los productos se ordenan alfabéticamente.
+**Dependencies:** Task 1.1
+**Files likely touched:** `src/components/catalogo/CatalogoGrid.tsx`
+**Estimated scope:** S (1 file)
+
+### Task 1.5: Secciones colapsables de productos por colección en `CatalogoGrid.tsx`
+**Description:** Implementar la agrupación de productos en secciones independientes por colección (como en `CatalogoV0`), con barra de cabecera de sección, contador de prendas, toggle colapsable interactivo y cuadrícula de productos en su interior (sin botón de QR por sección).
+**Acceptance criteria:**
+- [ ] Los productos se agrupan bajo su cabecera de sección/colección correspondiente.
+- [ ] Cada sección incluye título, contador de artículos y flecha interactiva para contraer/expandir.
+- [ ] Al seleccionar una colección específica en los filtros superiores, se enfoca la sección seleccionada.
+- [ ] No incluye botones de código QR por sección.
+**Verification:**
+- [ ] Manual check: Hacer clic en el encabezado de una sección y verificar que se contrae y expande suavemente.
+**Dependencies:** Tasks 1.1 - 1.4
+**Files likely touched:**
+- `src/components/catalogo/CatalogoGrid.tsx`
+- `src/styles/global.css`
+**Estimated scope:** M (2 files)
+
+## Checkpoint 1: Catálogo Zen y Navegación
+- [ ] Header con logo watermark sin letras funcionando.
+- [ ] Scrollbar interactiva en filtros y ordenamiento ampliado.
+- [ ] Secciones colapsables por colección operativas.
+
+---
+
+## Phase 2: Sistema de Fondos Zen, Modo Claro/Oscuro y Contrastes Globales
+
+### Task 2.1: Configurar fondo zen Washi/Sumi-iro y remover degradados negros agresivos
+**Description:** Reemplazar los fondos planos negros y degradados artificiales en `Layout.astro`, `AdminLayout.astro` y `global.css` por la paleta zen de `CatalogoV0`: modo claro Washi (`#F6F4EE`) y modo oscuro Sumi-iro (`#0E0F11`), con superposición de textura sutil de ruido `.bg-noise`.
+**Acceptance criteria:**
+- [ ] No hay degradados negros feos en la vista de catálogo ni en admin.
+- [ ] En modo claro, el fondo es un tono Washi crema suave y limpio.
+- [ ] En modo oscuro, el fondo es un Sumi-iro carbón elegante y profundo.
+**Verification:**
+- [ ] Manual check: Alternar entre modo claro y oscuro en `/` y `/admin` para validar la textura y armonía del fondo.
 **Dependencies:** None
+**Files likely touched:**
+- `src/styles/global.css`
+- `src/layouts/Layout.astro`
+- `src/layouts/AdminLayout.astro`
+- `src/pages/index.astro`
+**Estimated scope:** M (4 files)
+
+### Task 2.2: Contraste y estilos completos en modo claro para `CarritoDrawer.tsx`
+**Description:** Implementar estilos semánticos para que el cajón del carrito en modo claro (`html.light`) muestre fondo marfil/blanco, textos oscuros nítidos, inputs legibles, resumen de precios con alto contraste y botón de WhatsApp destacado.
+**Acceptance criteria:**
+- [ ] El fondo del carrito en modo claro es blanco/marfil translúcido con borde suave.
+- [ ] Todos los textos (títulos, nombres de prenda, precios, subtotales) son 100% legibles sin letras blancas sobre blanco.
+- [ ] El campo de notas para envío tiene fondo e input claros de alto contraste.
+**Verification:**
+- [ ] Manual check: Abrir el carrito en modo claro y verificar legibilidad de todos los elementos.
+**Dependencies:** Task 2.1
+**Files likely touched:**
+- `src/components/catalogo/CarritoDrawer.tsx`
+- `src/styles/global.css`
+**Estimated scope:** S (2 files)
+
+### Task 2.3: Soporte total de modo claro en `detail-bento.css` y `DetalleProducto.tsx`
+**Description:** Reemplazar los valores oscuros fijos de `detail-bento.css` por variables adaptativas con reglas explícitas para `html.light`, permitiendo que la ficha de producto en `/producto/[id]` tenga celdas translúcidas claras, textos oscuros de alto contraste, selector de tallas y lightbox perfectamente visibles.
+**Acceptance criteria:**
+- [ ] Las celdas bento en modo claro tienen fondo translúcido blanco y sombras nítidas.
+- [ ] Título, especificaciones, botones de talla y badges son perfectamente legibles en modo claro.
+- [ ] En modo oscuro conserva su atmósfera sumi-iro intacta.
+**Verification:**
+- [ ] Manual check: Navegar a un producto individual en modo claro y verificar cada celda.
+**Dependencies:** Task 2.1
 **Files likely touched:**
 - `src/styles/detail-bento.css`
 - `src/components/catalogo/DetalleProducto.tsx`
 **Estimated scope:** S (2 files)
 
-### Task 1.6: Marco del QR y modal ortogonal en `ShareWebModal.tsx`
-**Description:** Corregir el marco del código QR y el modal exterior en `ShareWebModal.tsx` para que tenga esquinas rectas `rounded-none` con estética técnica Zairen Lab.
+### Task 2.4: Remover degradado negro inferior en `TarjetaPolera.tsx`
+**Description:** Eliminar la capa con `bg-gradient-to-t from-[#0e0e0e]/80` de `TarjetaPolera.tsx` y reemplazarla por una sombra y degradado semántico que respete el modo claro y oscuro sin manchar las tarjetas.
 **Acceptance criteria:**
-- [x] Marco del código QR tiene esquinas rectas sin bordes redondeados.
-- [x] El contenedor del modal tiene `rounded-none`.
+- [ ] Las tarjetas de producto en modo claro no tienen una franja negra sucia en la parte inferior.
+- [ ] Los nombres y precios de las prendas son nítidos en ambos modos.
 **Verification:**
-- [x] Manual check: Abrir modal de compartir QR en la web y verificar puntas rectas.
-**Dependencies:** None
-**Files likely touched:** `src/components/common/ShareWebModal.tsx`
+- [ ] Manual check: Observar las tarjetas de producto en el catálogo en modo claro.
+**Dependencies:** Task 2.1
+**Files likely touched:** `src/components/catalogo/TarjetaPolera.tsx`
 **Estimated scope:** XS (1 file)
 
-## Checkpoint 1: Estética Ortogonal y Modales
-- [x] Todas las esquinas redondeadas han sido reemplazadas por esquinas rectas (`rounded-none`).
-- [x] `InventarioManager` no se achica al editar prendas (modal flotante funcional).
-- [x] Encabezado del catálogo muestra el logo SVG sin texto redundante.
+## Checkpoint 2: Atmósfera Zen y Modo Claro Impecable
+- [ ] Fondo zen Washi / Sumi-iro activo con grano sutil.
+- [ ] Carrito, ficha de producto y catálogo 100% legibles y armónicos en modo claro.
 
 ---
 
-## Phase 2: Autenticación, Visibilidad de Contraseña y Soporte Modo Claro
+## Phase 3: Rediseño y Limpieza del Footer
 
-### Task 2.1: Campo de contraseña y selector de visibilidad (ojito) en `UsuariosManager.tsx`
-**Description:** Añadir campo de contraseña en el modal de usuario (creación/edición) con botón interactivo con icono de ojo para ver/ocultar la contraseña.
+### Task 3.1: Retiro de texto redundante extenso en `Footer.astro`
+**Description:** Eliminar el párrafo "Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo. Tienda oficial online." de `Footer.astro`.
 **Acceptance criteria:**
-- [x] El formulario de usuario incluye campo de contraseña.
-- [x] Botón de ojo alterna entre ver y ocultar contraseña (`password` vs `text`).
+- [ ] El párrafo extenso ya no aparece en el footer.
 **Verification:**
-- [x] Manual check: Crear/editar usuario en `/admin/usuarios` y probar el botón de visibilidad.
-**Dependencies:** Task 1.3
-**Files likely touched:** `src/components/admin/usuarios/UsuariosManager.tsx`
-**Estimated scope:** S (1 file)
-
-### Task 2.2: Visibilidad de contraseña (ojito), diseño ortogonal y contraste en `login.astro`
-**Description:** Añadir botón de ojo para ver/ocultar la contraseña en `login.astro`. Cambiar la tarjeta y los inputs a `rounded-none`. Corregir el contraste en modo claro (`html.light`) para que textos, fondo e inputs sean perfectamente legibles.
-**Acceptance criteria:**
-- [x] El input de contraseña en login tiene botón de ojito funcional.
-- [x] En modo claro, la tarjeta de login, textos y placeholders tienen alto contraste.
-- [x] Esquinas rectas `rounded-none`.
-**Verification:**
-- [x] Manual check: Probar login en modo oscuro y claro, alternando visibilidad de contraseña.
+- [ ] Manual check: Inspeccionar el footer en `/` y `/marca`.
 **Dependencies:** None
-**Files likely touched:**
-- `src/pages/login.astro`
-- `src/styles/global.css`
-**Estimated scope:** S (2 files)
+**Files likely touched:** `src/components/common/Footer.astro`
+**Estimated scope:** XS (1 file)
 
-## Checkpoint 2: Autenticación y Contraste
-- [x] En login y en gestión de usuarios se puede ver y ocultar la contraseña con el botón de ojo.
-- [x] Modo claro en login es completamente legible y de alto contraste.
-
----
-
-## Phase 3: Navegación del Cliente, Menú Móvil Hamburger y Rediseño del Footer
-
-### Task 3.1: Simplificación de `Navbar.astro` y soporte modo claro
-**Description:** Remover el enlace "Marca & Drops" y el botón redundante de WhatsApp de la barra superior. Dejar enlaces a "Catálogo" y "Contacto". Pulir la apariencia en modo claro para que la navbar use fondo y bordes claros elegantes.
+### Task 3.2: Retiro de columnas "CATÁLOGO" y "MARCA" y reorganización armónica
+**Description:** Eliminar las columnas redundantes de "CATÁLOGO" y "MARCA" del pie de página, dejando las columnas clave ("CANALES", "PEDIDOS", "ATENCIÓN") y redistribuyendo el ancho de la grilla para un balance visual superior.
 **Acceptance criteria:**
-- [x] No aparece enlace "Marca & Drops" en la navbar.
-- [x] No aparece botón de WhatsApp en la navbar.
-- [x] Modo claro muestra fondo blanco/marfil translúcido con bordes y tipografía oscuros de alto contraste.
+- [ ] No aparecen los bloques "CATÁLOGO" y "MARCA" en el footer.
+- [ ] Las columnas restantes se distribuyen limpiamente sin espacios vacíos desproporcionados.
 **Verification:**
-- [x] Manual check: Probar navbar en escritorio tanto en modo oscuro como en modo claro.
-**Dependencies:** None
-**Files likely touched:** `src/components/common/Navbar.astro`
-**Estimated scope:** S (1 file)
-
-### Task 3.2: Menú superior móvil con 3 barras horizontales (hamburguesa)
-**Description:** Retirar la barra inferior flotante `BottomNavMobile.tsx`. En la navbar móvil, incluir botón superior con 3 líneas horizontales que despliega el menú de navegación del cliente.
-**Acceptance criteria:**
-- [x] La navegación móvil reside en la barra superior con botón de 3 líneas horizontales.
-- [x] Al presionar el botón se despliega el menú móvil con accesos a Catálogo, Contacto, Compartir QR y Cambio de Tema.
-- [x] Se retira la barra inferior redundante en móviles.
-**Verification:**
-- [x] Manual check: Probar en viewport móvil (iPhone/Android responsive) y abrir menú hamburguesa.
+- [ ] Manual check: Verificar el pie de página en escritorio y móvil.
 **Dependencies:** Task 3.1
-**Files likely touched:**
-- `src/components/common/Navbar.astro`
-- `src/components/common/BottomNavMobile.tsx`
-**Estimated scope:** S (2 files)
-
-### Task 3.3: Rediseño del Footer: redes sociales con iconos y acceso admin discreto en `Footer.astro`
-**Description:** En la sección "ÚNETE AL ARCHIVO // SEÑALES DE DROP", retirar el formulario de suscripción por correo y colocar las redes sociales oficiales de la marca (TikTok, Instagram, WhatsApp, etc.) con sus iconos SVG y nombres legibles. Retirar la columna visible de "SISTEMA" al lado de canales y mover el enlace de acceso a admin a un discreto enlace `// SYS` en el copyright.
-**Acceptance criteria:**
-- [x] No hay formulario de email en el footer; en su lugar están las redes con icono y nombre.
-- [x] No hay columna expuesta de admin al lado de canales.
-- [x] Enlace discreto a `/login` al final de la página.
-**Verification:**
-- [x] Manual check: Inspeccionar el footer y verificar redes sociales y enlace discreto de admin.
-**Dependencies:** None
 **Files likely touched:** `src/components/common/Footer.astro`
 **Estimated scope:** S (1 file)
 
-## Checkpoint 3: Navegación y Footer
-- [x] Menú móvil opera desde la barra superior con 3 barras horizontales.
-- [x] Footer limpio con redes sociales sin formulario de correo.
-- [x] Acceso a admin no está expuesto en columnas públicas.
+### Task 3.3: Realce y accesibilidad del botón/enlace de acceso admin junto a `// SYS`
+**Description:** En la fila final de copyright, asegurar que el enlace de acceso a administración esté claramente posicionado al lado de `// SYS` con estilo técnico interactivo para facilitar el ingreso del administrador.
+**Acceptance criteria:**
+- [ ] El enlace conduce a `/login` al hacer clic.
+- [ ] Está ubicado al lado de la leyenda de copyright y `// SYS`.
+**Verification:**
+- [ ] Manual check: Hacer clic en el enlace del footer y verificar redirección a `/login`.
+**Dependencies:** Task 3.2
+**Files likely touched:** `src/components/common/Footer.astro`
+**Estimated scope:** XS (1 file)
+
+## Checkpoint 3: Footer Limpio y Equilibrado
+- [ ] Footer sin párrafos redundantes ni columnas innecesarias.
+- [ ] Enlace admin accesible y bien formateado.
 
 ---
 
-## Phase 4: Configuración de Envíos, Sucursales y Selector de Moneda Unificada
+## Phase 4: Panel Admin — Eliminación de Pantalla Inútil, Navbar con Tema y Correcciones
 
-### Task 4.1: Configuración de envío y desactivación limpia de envío gratis
-**Description:** En `ConfiguracionWeb.tsx`, añadir controles para costo de envío y un interruptor On/Off para la promoción de envío gratis. En `CarritoDrawer.tsx`, si la promoción está desactivada, no mostrar ninguna barra de progreso ni mensaje de envío gratis.
+### Task 4.1: Eliminar pantalla y ruta `vista-catalogo.astro` y su referencia en `AdminSidebar.tsx`
+**Description:** Borrar el archivo `src/pages/admin/vista-catalogo.astro` y retirar el ítem correspondiente del array `navItems` en `AdminSidebar.tsx`.
 **Acceptance criteria:**
-- [x] El admin puede editar el costo base de envío y activar/desactivar la promoción de envío gratis.
-- [x] El carrito de compras no muestra referencias a envío gratis cuando está desactivado.
+- [ ] El archivo `vista-catalogo.astro` es eliminado.
+- [ ] El sidebar no muestra la opción "Vista Catálogo".
 **Verification:**
-- [x] Manual check: Desactivar envío gratis en `/admin/interfaz-web` y abrir el carrito para confirmar que no aparece la barra.
+- [ ] Build succeeds: `pnpm build`
+- [ ] Manual check: Verificar el menú lateral de administración en `/admin`.
 **Dependencies:** None
 **Files likely touched:**
-- `src/components/admin/settings/ConfiguracionWeb.tsx`
-- `src/components/catalogo/CarritoDrawer.tsx`
+- `src/pages/admin/vista-catalogo.astro` (delete)
+- `src/components/admin/layout/AdminSidebar.tsx`
 **Estimated scope:** S (2 files)
 
-### Task 4.2: Gestión de sucursales en `ConfiguracionWeb.tsx`
-**Description:** Añadir sección para gestionar sucursales: ver sucursales existentes (por defecto 1 central activa) y formulario/modal para registrar nuevas sucursales con persistencia.
+### Task 4.2: Retirar caja/marco contenedor del logo en `AdminSidebar.tsx`
+**Description:** Modificar el sidebar para que el logotipo vectorial SVG se muestre limpio y suelto, sin recuadros negros con bordes (`bg-[#0a0a0a] border border-[#2A2A2A] p-2`).
 **Acceptance criteria:**
-- [x] Muestra listado de sucursales con estado activo.
-- [x] Botón para registrar nueva sucursal con campos: Nombre, Ciudad/Ubicación, Teléfono.
+- [ ] El logo en el sidebar no tiene un recuadro o caja con borde alrededor.
+- [ ] Se muestra con nitidez y proporciones correctas tanto en versión expandida como colapsada.
 **Verification:**
-- [x] Manual check: Añadir una nueva sucursal en configuración y verificar que se guarda en la lista.
-**Dependencies:** Task 4.1
-**Files likely touched:** `src/components/admin/settings/ConfiguracionWeb.tsx`
-**Estimated scope:** S (1 file)
+- [ ] Manual check: Comprobar el logo en la cabecera del sidebar en `/admin`.
+**Dependencies:** None
+**Files likely touched:** `src/components/admin/layout/AdminSidebar.tsx`
+**Estimated scope:** XS (1 file)
 
-### Task 4.3: Selector de moneda unificada (`BOB` vs `USD`) con tasa manual
-**Description:** En `ConfiguracionWeb.tsx`, añadir selector de moneda (`BOB` o `USD`) y entrada manual de tipo de cambio (`1 USD = X BOB`). Actualizar `src/config/site.ts` para que `formatCurrency` convierta automáticamente todos los precios de la tienda a la moneda seleccionada de manera unificada.
+### Task 4.3: Implementar barra superior administrativa con selector de Modo Oscuro / Claro
+**Description:** Agregar una barra superior limpia en `AdminLayout.astro` / `AdminSidebar.tsx` que incluya un botón toggle para alternar entre modo oscuro y claro en el panel administrativo, sincronizado con `zairen_theme` en `localStorage`.
 **Acceptance criteria:**
-- [x] El admin puede alternar la moneda de la tienda entre Bs y USD, ingresando el valor del dólar en Bs.
-- [x] Todos los productos en catálogo, detalle, carrito y checkout muestran los precios en la moneda seleccionada de forma homogénea.
+- [ ] El panel administrativo incluye botón de cambio de tema oscuro/claro accesible en desktop y móvil.
+- [ ] Al alternar, el fondo, tablas, tarjetas y tipografía del admin se adaptan correctamente.
 **Verification:**
-- [x] Manual check: Cambiar la moneda a USD con tasa 6.96; verificar que un producto de Bs 140 pasa a mostrarse como `$ 20.11 USD` en catálogo, ficha y carrito.
-**Dependencies:** Task 4.1
+- [ ] Manual check: Cambiar a modo claro dentro de `/admin` y comprobar persistencia tras recargar.
+**Dependencies:** None
 **Files likely touched:**
-- `src/components/admin/settings/ConfiguracionWeb.tsx`
-- `src/config/site.ts`
-- `src/stores/cartStore.ts`
-**Estimated scope:** M (3 files)
+- `src/layouts/AdminLayout.astro`
+- `src/components/admin/layout/AdminSidebar.tsx`
+- `src/styles/global.css`
+**Estimated scope:** S (3 files)
 
-## Checkpoint 4: Negocio y Moneda Unificada
-- [x] Control de envío y envío gratis sincronizado con el carrito.
-- [x] Gestión de sucursales funcional.
-- [x] Moneda unificada en toda la tienda (BOB o USD) con tipo de cambio manual.
+### Task 4.4: Corregir switch de "Producto Visible" en `ProductoEditor.tsx`
+**Description:** Corregir el interruptor de visibilidad del producto en `ProductoEditor.tsx` sustituyendo el contenedor y la pelotita desalineada por un switch de tamaño estándar simétrico (`w-11 h-6`, `after:w-5 after:h-5`, `peer-checked:after:translate-x-5`) que encaje fluidamente.
+**Acceptance criteria:**
+- [ ] Cuando el switch está encendido, el indicador queda perfectamente alineado en el extremo derecho sin separación anómala.
+- [ ] Cuando está apagado, queda alineado en el extremo izquierdo.
+- [ ] Funciona suavemente con transición animada.
+**Verification:**
+- [ ] Manual check: Abrir modal de añadir/editar prenda en `/admin/inventario` y probar el switch.
+**Dependencies:** None
+**Files likely touched:** `src/components/admin/inventario/ProductoEditor.tsx`
+**Estimated scope:** XS (1 file)
+
+### Task 4.5: Ampliar `ConfiguracionWeb.tsx` con personalización de `CatalogoV0`
+**Description:** Incorporar en `ConfiguracionWeb.tsx` las opciones del catálogo anterior: selector de color de acento & estado con swatches de color, selector de intensidad de desenfoque (Glassmorphism sutil 10px, medio 20px, profundo 35px), y personalización de mensajes de saludo/despedida para compras por WhatsApp e Instagram.
+**Acceptance criteria:**
+- [ ] Panel de configuración incluye paleta de colores de acento para el catálogo público.
+- [ ] Control de desenfoque de glassmorphism configurable.
+- [ ] Campos de saludo y plantilla de mensaje para redes sociales.
+- [ ] Persistencia reactiva en configuración.
+**Verification:**
+- [ ] Manual check: Modificar una opción en `/admin/interfaz-web` y guardar.
+**Dependencies:** None
+**Files likely touched:** `src/components/admin/settings/ConfiguracionWeb.tsx`
+**Estimated scope:** M (1 file)
+
+## Checkpoint 4: Admin Optimizado y Consistente
+- [ ] Pantalla "Vista Catálogo" eliminada.
+- [ ] Logo sin recuadro en sidebar y botón de modo claro/oscuro en admin.
+- [ ] Switch de prendas corregido y configuración web ampliada.
 
 ---
 
-## Phase 5: Verificación, Guía Cloudflare Pages y Git Workflow
+## Phase 5: Módulo Independiente de Métricas & Reportes con Exportación
 
-### Task 5.1: Verificación de compilación completa
-**Description:** Ejecutar `pnpm build` para asegurar 0 errores de build tanto en páginas prerenderizadas como en rutas dinámicas de Cloudflare.
+### Task 5.1: Crear página `/admin/metricas.astro` y componente `MetricasManager.tsx`
+**Description:** Crear una vista administrativa independiente para analíticas y rendimiento con filtros de período (1 Semana y 1 Mes), métricas de productos más vendidos, tasa de conversión y clics de compra.
 **Acceptance criteria:**
-- [x] `pnpm build` finaliza con código 0.
+- [ ] Ruta `/admin/metricas` accesible para administradores.
+- [ ] Permite alternar entre métricas de "Última Semana (7 Días)" y "Último Mes (30 Días)".
+- [ ] Muestra listado y gráfico de productos más populares con stock, precio y ventas.
 **Verification:**
-- [x] Build output: Complete!
-**Dependencies:** All previous tasks
-**Estimated scope:** S (0 code files)
+- [ ] Build succeeds: `pnpm build`
+- [ ] Manual check: Abrir `/admin/metricas` y cambiar entre 7 días y 30 días.
+**Dependencies:** None
+**Files likely touched:**
+- `src/pages/admin/metricas.astro` (new)
+- `src/components/admin/metricas/MetricasManager.tsx` (new)
+**Estimated scope:** M (2 files)
 
-### Task 5.2: Actualización de Graphify
-**Description:** Ejecutar `graphify update .` conforme a la regla del proyecto para mantener el grafo AST sincronizado.
+### Task 5.2: Desacoplar gráficos pesados del dashboard inicial `/admin`
+**Description:** Limpiar el panel general (`src/pages/admin/index.astro`) retirando `TopVendidos.tsx` y `VentasChart.tsx` para que cargue ultrarrápido con las KPIs esenciales y accesos directos, dejando los análisis detallados en la nueva vista de métricas.
 **Acceptance criteria:**
-- [x] Grafo actualizado en `graphify-out`.
+- [ ] El dashboard principal `/admin` carga de forma ligera e instantánea.
+- [ ] Los gráficos residen exclusivamente en `/admin/metricas`.
 **Verification:**
-- [x] `graphify update .` exit code 0.
+- [ ] Manual check: Cargar `/admin` y verificar que solo muestra KPIs rápidas y alertas urgentes.
 **Dependencies:** Task 5.1
-**Estimated scope:** S (0 code files)
+**Files likely touched:** `src/pages/admin/index.astro`
+**Estimated scope:** S (1 file)
 
-### Task 5.3: Commits atómicos y Git Push
-**Description:** Crear commits semánticos por cada fase (`feat(design): ...`, `feat(auth): ...`, `feat(nav): ...`, `feat(currency): ...`) y subirlos a `origin main`.
+### Task 5.3: Incorporar exportación de métricas a CSV y vista formateada para PDF
+**Description:** Añadir botones de exportación en `MetricasManager.tsx`: generar y descargar archivo `.csv` con los datos del período seleccionado, y gatillar una vista de impresión limpia y estilizada para guardar como `.pdf`.
 **Acceptance criteria:**
-- [x] Commits limpios en `main`.
-- [x] `git push origin main` exitoso.
-**Dependencies:** Task 5.2
-**Estimated scope:** S (0 code files)
+- [ ] Botón "Exportar CSV" descarga un archivo `metricas_zairen_YYYY-MM-DD.csv` con encabezados y datos tabulares.
+- [ ] Botón "Exportar PDF / Imprimir" abre la ventana de impresión del navegador con estilos de página limpios sin barras laterales.
+**Verification:**
+- [ ] Manual check: Probar descarga de CSV e inspeccionar contenido; pulsar botón PDF y revisar vista previa.
+**Dependencies:** Task 5.1
+**Files likely touched:** `src/components/admin/metricas/MetricasManager.tsx`
+**Estimated scope:** S (1 file)
 
-### Task 5.4: Documentación de Variables de Entorno y Despliegue en Cloudflare Pages
-**Description:** Redactar la guía detallada con todas las variables de entorno necesarias y los pasos exactos para conectar el repositorio de GitHub con Cloudflare Pages.
+### Task 5.4: Añadir enlace "Métricas & Reportes" al final de `AdminSidebar.tsx`
+**Description:** Incorporar el nuevo ítem de navegación "Métricas & Reportes" con su respectivo icono analítico al final del menú en `AdminSidebar.tsx`.
 **Acceptance criteria:**
-- [x] Lista exhaustiva de variables de entorno con descripciones claras.
-- [x] Pasos numerados paso a paso para desplegar en Cloudflare Pages.
-**Dependencies:** Task 5.3
-**Estimated scope:** S (Documentación)
+- [ ] El ítem aparece al final de la lista de navegación en el sidebar de escritorio y móvil.
+- [ ] Enlaza correctamente a `/admin/metricas` con estado activo resaltado.
+**Verification:**
+- [ ] Manual check: Navegar desde el sidebar a `/admin/metricas`.
+**Dependencies:** Task 5.1
+**Files likely touched:** `src/components/admin/layout/AdminSidebar.tsx`
+**Estimated scope:** XS (1 file)
+
+## Checkpoint 5: Módulo de Métricas Independiente
+- [ ] Pantalla `/admin/metricas` funcional con filtros de 1 semana y 1 mes.
+- [ ] Dashboard `/admin` aligerado y rápido.
+- [ ] Exportación a CSV y PDF operativa.
+
+---
+
+## Phase 6: Preparación para Datos Reales de Supabase y Tabla de Imágenes Cloudinary
+
+### Task 6.1: Desacoplar mockProducts y estructurar fallback limpio a Supabase
+**Description:** Asegurar que las consultas a `vw_catalogo_publico` y la tabla `producto` en `src/pages/index.astro` y `src/pages/producto/[id].astro` sean las fuentes primarias de verdad, de modo que al registrar productos en Supabase la tienda muestre exclusivamente las prendas reales.
+**Acceptance criteria:**
+- [ ] Si la base de datos de Supabase contiene productos, se muestran únicamente los productos de Supabase (sin mezclar mocks).
+- [ ] Si la base de datos está vacía, muestra el estado vacío profesional o fallback controlado.
+**Verification:**
+- [ ] Build succeeds: `pnpm build`
+**Dependencies:** All previous phases
+**Files likely touched:**
+- `src/pages/index.astro`
+- `src/pages/producto/[id].astro`
+**Estimated scope:** S (2 files)
+
+### Task 6.2: Elaborar inventario y tabla de imágenes locales para sustitución en Cloudinary
+**Description:** Documentar detalladamente en un informe al usuario cada una de las imágenes locales que se están utilizando, su ubicación, su propósito y las dimensiones/formatos exactos recomendados para subirlas a Cloudinary y sustituir las rutas locales sin conflictos.
+**Acceptance criteria:**
+- [ ] Documento con la lista exhaustiva de imágenes locales.
+- [ ] Especificación de formato (WebP, PNG transparente o SVG) y dimensiones recomendadas para cada una.
+**Verification:**
+- [ ] Manual check: Revisar reporte entregado al usuario.
+**Dependencies:** None
+**Files likely touched:** Documentation / Implementation Plan Artifact
+**Estimated scope:** XS (Documentation)
