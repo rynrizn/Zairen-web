@@ -7,18 +7,18 @@ import { CatalogoGrid } from '../components/catalogo/CatalogoGrid';
 import { CarritoDrawer } from '../components/catalogo/CarritoDrawer';
 import { siteConfig } from '../config/site';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { mockProducts, mockCollections } from '../data/mockProducts';
+import type { TarjetaPoleraProps } from '../components/catalogo/TarjetaPolera';
 
-// Carga de productos (Supabase o Mock)
-let products = mockProducts;
-let collections = mockCollections;
+// Carga de productos directamente desde la base de datos de Supabase
+let products: TarjetaPoleraProps[] = [];
+let collections: Array<{ id: string; nombre: string; slug: string }> = [];
 
 if (isSupabaseConfigured) {
   try {
     const { data: dbProducts, error: pError } = await supabase
       .from('vw_catalogo_publico')
       .select('*')
-      .limit(50);
+      .limit(100);
 
     if (!pError && dbProducts && dbProducts.length > 0) {
       products = dbProducts.map((p) => ({
@@ -28,7 +28,7 @@ if (isSupabaseConfigured) {
         precio: Number(p.precio_venta),
         coleccion: p.coleccion || 'DROP 01',
         subtitulo: p.descripcion || 'Algodón pesado 280 GSM',
-        imagen: p.imagen_portada || mockProducts[0].imagen,
+        imagen: p.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
         imagenDorsal: p.imagen_dorsal,
         tallas: p.tallas && p.tallas.length > 0 ? p.tallas : ['S', 'M', 'L', 'XL'],
         stockDisponible: Number(p.stock_disponible || 0),
@@ -47,7 +47,7 @@ if (isSupabaseConfigured) {
       collections = dbCols;
     }
   } catch (e) {
-    // Fallback silencioso a mockProducts
+    console.warn('Error al cargar catálogo desde Supabase:', e);
   }
 }
 ---
