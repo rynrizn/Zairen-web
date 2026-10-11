@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { siteConfig } from '../config/site';
+import { TurnstileWidget } from '../components/common/TurnstileWidget';
 
 const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 ---
@@ -88,10 +89,16 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
           </div>
         </div>
 
+        <!-- Verificación Cloudflare Turnstile Oficial -->
+        <div class="pt-2">
+          <TurnstileWidget client:load id="login-turnstile" onVerify="window.__onLoginTurnstileVerify" />
+        </div>
+
         <button
           type="submit"
           id="submit-btn"
-          class="w-full py-3 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-sm uppercase tracking-wider font-bold shadow-[0_4px_20px_rgba(220,20,60,0.4)] transition-all cursor-pointer mt-2 border border-[#dc143c]"
+          disabled
+          class="w-full py-3 rounded-none bg-[#dc143c] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#ff2d55] text-white font-mono text-sm uppercase tracking-wider font-bold shadow-[0_4px_20px_rgba(220,20,60,0.4)] transition-all cursor-pointer mt-2 border border-[#dc143c]"
         >
           Iniciar Sesión // Acceder
         </button>
@@ -155,25 +162,29 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
     }
   });
 
+  let isTurnstileVerified = false;
+
+  // Callback global invocado por TurnstileWidget una vez verificado criptográficamente
+  (window as any).__onLoginTurnstileVerify = (token: string) => {
+    isTurnstileVerified = true;
+    submitBtn.disabled = false;
+  };
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorBox.classList.add('hidden');
+
+    if (!isTurnstileVerified) {
+      errorBox.textContent = 'Por favor completa la verificación de seguridad Cloudflare.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Autenticando...';
 
     const email = (document.getElementById('email') as HTMLInputElement).value;
     const password = (document.getElementById('password') as HTMLInputElement).value;
-
-    // Modo Demo Rápido si se usan credenciales locales
-    if ((email === 'admin@zairenlab.com' || email === 'admin@zairen.com') && (password === 'admin123' || password === 'zairen2026')) {
-      document.cookie = `sb-access-token=demo-admin-token; path=/; max-age=604800; SameSite=Lax`;
-      document.cookie = `sb-refresh-token=demo-refresh-token; path=/; max-age=604800; SameSite=Lax`;
-      localStorage.setItem('zairen_user_id', 'demo-admin-id');
-      localStorage.setItem('zairen_user_email', email);
-      localStorage.setItem('zairen_user_role', 'SUPERADMIN');
-      window.location.href = redirectInput.value || '/admin';
-      return;
-    }
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
