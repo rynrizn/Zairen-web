@@ -160,7 +160,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
         {/* Logo Móvil Sin Cajas */}
         <div className="flex items-center gap-2.5">
-          <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-7 h-7 object-contain shrink-0" />
+          <img src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp" alt="Logo" className="w-7 h-7 object-contain shrink-0" />
           <span className="font-display font-bold text-sm tracking-wider uppercase text-white">
             {siteConfig.name} <span className="text-[#dc143c] text-[10px] font-mono">// CORE</span>
           </span>
@@ -210,7 +210,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
               {/* Encabezado Drawer */}
               <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-8 h-8 object-contain shrink-0" />
+                  <img src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp" alt="Logo" className="w-8 h-8 object-contain shrink-0" />
                   <div>
                     <div className="font-display font-bold text-sm uppercase text-white leading-none">
                       {siteConfig.name}
@@ -300,7 +300,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           <div className="h-20 px-4 flex items-center justify-between border-b border-white/[0.06]">
             {!isCollapsed ? (
               <a href="/admin" className="flex items-center gap-3 overflow-hidden">
-                <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-9 h-9 object-contain shrink-0 filter drop-shadow-[0_0_8px_rgba(220,20,60,0.3)]" />
+                <img src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp" alt="Logo" className="w-9 h-9 object-contain shrink-0 filter drop-shadow-[0_0_8px_rgba(220,20,60,0.3)]" />
                 <div className="flex flex-col truncate">
                   <span className="font-display font-bold text-sm tracking-wider uppercase text-white truncate">
                     {siteConfig.name}
@@ -312,7 +312,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
               </a>
             ) : (
               <a href="/admin" title="Panel General" className="mx-auto block p-1 hover:opacity-80 transition-opacity">
-                <img src="/brand/zairen_logo_oficial.svg" alt="Logo" className="w-8 h-8 object-contain shrink-0 filter drop-shadow-[0_0_8px_rgba(220,20,60,0.3)]" />
+                <img src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp" alt="Logo" className="w-8 h-8 object-contain shrink-0 filter drop-shadow-[0_0_8px_rgba(220,20,60,0.3)]" />
               </a>
             )}
 

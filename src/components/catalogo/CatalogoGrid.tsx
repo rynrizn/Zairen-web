@@ -142,7 +142,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         {/* Logotipo Oficial Watermark Suelto Sin Letras (Detrás del texto en el lado derecho) */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-15 select-none w-36 h-36 md:w-56 md:h-56 filter drop-shadow-[0_0_20px_rgba(220,20,60,0.4)]">
           <img
-            src="/brand/zairen_logo_oficial.svg"
+            src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
             alt="Zairen Lab"
             className="w-full h-full object-contain"
           />
