@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '../../../lib/supabase';
+import { clearStoreConfigCache } from '../../../lib/configuracion';
 import {
   siteConfig,
   getCurrencyConfig,
@@ -99,51 +101,95 @@ export function ConfiguracionWeb() {
     'Hola Zairen Lab, me interesa consultar sobre una prenda del catálogo:'
   );
 
-  // Cargar configuraciones guardadas al iniciar
+  // Cargar configuraciones guardadas al iniciar desde Supabase (y localStorage de fallback)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Moneda
-      const curConfig = getCurrencyConfig();
-      setCurrency(curConfig.currency);
-      setExchangeRate(curConfig.rate);
+    let isMounted = true;
 
-      // Envío
-      const savedPromo = localStorage.getItem('zairen_cart_promo_enabled');
-      if (savedPromo !== null) {
-        setFreeShippingEnabled(savedPromo === 'true');
-      }
+    async function loadConfig() {
+      try {
+        const { data, error } = await supabase
+          .from('configuracion')
+          .select('*')
+          .eq('id', 1)
+          .maybeSingle();
 
-      const savedCost = localStorage.getItem('zairen_shipping_cost');
-      if (savedCost !== null && !isNaN(Number(savedCost))) {
-        setShippingCost(Number(savedCost));
-      }
+        if (data && isMounted) {
+          // Marca & WhatsApp
+          if (data.marca) setBrandName(data.marca);
+          if (data.slogan) setBrandSlogan(data.slogan);
+          if (data.whatsapp_numero) setWhatsappNumber(data.whatsapp_numero);
+          if (data.whatsapp_mensaje_template) setWhatsappTemplate(data.whatsapp_mensaje_template);
 
-      const savedThreshold = localStorage.getItem('zairen_shipping_threshold');
-      if (savedThreshold !== null && !isNaN(Number(savedThreshold))) {
-        setFreeShippingThreshold(Number(savedThreshold));
-      }
-
-      // Sucursales
-      const savedSuc = localStorage.getItem('zairen_sucursales');
-      if (savedSuc) {
-        try {
-          const parsed = JSON.parse(savedSuc);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSucursales(parsed);
+          // Canales de contacto / display
+          if (data.canales_contacto?.whatsapp?.telefono) {
+            setWhatsappDisplay(data.canales_contacto.whatsapp.telefono);
           }
-        } catch (e) {}
+
+          // Redes sociales
+          if (Array.isArray(data.redes_sociales) && data.redes_sociales.length > 0) {
+            setSocials(
+              data.redes_sociales.map((r: any) => ({
+                id: r.id,
+                name: r.nombre || r.id,
+                url: r.url || '',
+                enabled: Boolean(r.activo),
+                icon: r.id === 'tiktok' ? 'Video' : r.id === 'instagram' ? 'Instagram' : r.id === 'twitter' ? 'Twitter' : r.id === 'facebook' ? 'Facebook' : 'MessageSquare',
+              }))
+            );
+          }
+
+          // Políticas de envío
+          if (data.politicas_envio) {
+            if (typeof data.politicas_envio.costo_envio_express === 'number') {
+              setShippingCost(data.politicas_envio.costo_envio_express);
+            }
+            if (typeof data.politicas_envio.envio_gratis_minimo === 'number') {
+              setFreeShippingThreshold(data.politicas_envio.envio_gratis_minimo);
+            }
+            if (typeof (data.politicas_envio as any).envio_gratis_habilitado === 'boolean') {
+              setFreeShippingEnabled((data.politicas_envio as any).envio_gratis_habilitado);
+            }
+            if ((data.politicas_envio as any).tiempo_entrega) {
+              setDeliveryTime((data.politicas_envio as any).tiempo_entrega);
+            }
+          }
+
+          // Moneda & Apariencia
+          if (data.apariencia) {
+            if (data.apariencia.color_acento) setAccentColor(data.apariencia.color_acento);
+            if (data.apariencia.blur_intensidad) setBlurIntensity(data.apariencia.blur_intensidad);
+            if (data.apariencia.saludo_personalizado) setCustomGreeting(data.apariencia.saludo_personalizado);
+            if (data.apariencia.moneda_activa) setCurrency(data.apariencia.moneda_activa);
+            if (data.apariencia.tasa_cambio) setExchangeRate(data.apariencia.tasa_cambio);
+          }
+        }
+      } catch (err) {
+        console.warn('Error cargando configuracion desde Supabase:', err);
       }
 
-      // Apariencia Zen
-      const savedAccent = localStorage.getItem('zairen_accent_color');
-      if (savedAccent) setAccentColor(savedAccent);
+      // Sincronizar fallback local si es necesario
+      if (typeof window !== 'undefined' && isMounted) {
+        const curConfig = getCurrencyConfig();
+        if (!currency) setCurrency(curConfig.currency);
+        if (!exchangeRate) setExchangeRate(curConfig.rate);
 
-      const savedBlur = localStorage.getItem('zairen_blur_intensity');
-      if (savedBlur) setBlurIntensity(savedBlur);
-
-      const savedGreeting = localStorage.getItem('zairen_custom_greeting');
-      if (savedGreeting) setCustomGreeting(savedGreeting);
+        const savedSuc = localStorage.getItem('zairen_sucursales');
+        if (savedSuc) {
+          try {
+            const parsed = JSON.parse(savedSuc);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setSucursales(parsed);
+            }
+          } catch (e) {}
+        }
+      }
     }
+
+    loadConfig();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleToggleSocial = (id: string) => {
@@ -206,31 +252,82 @@ export function ConfiguracionWeb() {
     toast.info('Sucursal eliminada');
   };
 
-  const handleSaveAll = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (typeof window !== 'undefined') {
-      // 1. Guardar Moneda
-      setCurrencyConfig({ currency, rate: exchangeRate > 0 ? exchangeRate : 6.96 });
+  const handleSaveAll = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const loadingToast = toast.loading('Guardando configuración en la base de datos...');
 
-      // 2. Guardar Envíos
-      localStorage.setItem('zairen_cart_promo_enabled', String(freeShippingEnabled));
-      localStorage.setItem('zairen_shipping_cost', String(shippingCost));
-      localStorage.setItem('zairen_shipping_threshold', String(freeShippingThreshold));
+    try {
+      // Formatear payload para la tabla public.configuracion en Supabase
+      const payload = {
+        marca: brandName,
+        slogan: brandSlogan,
+        whatsapp_numero: whatsappNumber,
+        whatsapp_mensaje_template: whatsappTemplate,
+        moneda_codigo: currency,
+        moneda_simbolo: currency === 'BOB' ? 'Bs' : '$',
+        canales_contacto: {
+          whatsapp: { activo: true, telefono: whatsappDisplay },
+          instagram_dm: { activo: true, usuario: '@zairenlab' },
+        },
+        redes_sociales: socials.map((s) => ({
+          id: s.id,
+          nombre: s.name,
+          url: s.url,
+          activo: s.enabled,
+        })),
+        politicas_envio: {
+          envio_gratis_minimo: freeShippingThreshold,
+          costo_envio_express: shippingCost,
+          envio_gratis_habilitado: freeShippingEnabled,
+          tiempo_entrega: deliveryTime,
+          ciudades_cobertura: ['La Paz', 'Cochabamba', 'Santa Cruz', 'Tarija', 'Sucre', 'Oruro', 'Potosí', 'Beni', 'Pando'],
+        },
+        apariencia: {
+          color_acento: accentColor,
+          blur_intensidad: blurIntensity,
+          saludo_personalizado: customGreeting,
+          tasa_cambio: exchangeRate > 0 ? exchangeRate : 6.96,
+          moneda_activa: currency,
+        },
+        updated_at: new Date().toISOString(),
+      };
 
-      // 3. Guardar Sucursales
-      localStorage.setItem('zairen_sucursales', JSON.stringify(sucursales));
+      // Guardar en Supabase tabla configuracion (fila única id=1)
+      const { error } = await supabase
+        .from('configuracion')
+        .upsert({ id: 1, ...payload });
 
-      // 4. Guardar Apariencia Zen
-      localStorage.setItem('zairen_accent_color', accentColor);
-      localStorage.setItem('zairen_blur_intensity', blurIntensity);
-      localStorage.setItem('zairen_custom_greeting', customGreeting);
-      document.documentElement.style.setProperty('--color-brand-crimson', accentColor);
-      document.documentElement.style.setProperty('--color-primary-container', accentColor);
+      if (error) {
+        throw error;
+      }
+
+      // Limpiar cache de memoria
+      clearStoreConfigCache();
+
+      // Guardar también en localStorage para reactividad client-side inmediata
+      if (typeof window !== 'undefined') {
+        setCurrencyConfig({ currency, rate: exchangeRate > 0 ? exchangeRate : 6.96 });
+        localStorage.setItem('zairen_cart_promo_enabled', String(freeShippingEnabled));
+        localStorage.setItem('zairen_shipping_cost', String(shippingCost));
+        localStorage.setItem('zairen_shipping_threshold', String(freeShippingThreshold));
+        localStorage.setItem('zairen_sucursales', JSON.stringify(sucursales));
+        localStorage.setItem('zairen_accent_color', accentColor);
+        localStorage.setItem('zairen_blur_intensity', blurIntensity);
+        localStorage.setItem('zairen_custom_greeting', customGreeting);
+        localStorage.setItem('zairen_socials', JSON.stringify(socials));
+        document.documentElement.style.setProperty('--color-brand-crimson', accentColor);
+        document.documentElement.style.setProperty('--color-primary-container', accentColor);
+        window.dispatchEvent(new Event('zairen-config-updated'));
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success('Configuración guardada en la base de datos', {
+        description: `Moneda: ${currency} // Redes activas: ${socials.filter(s => s.enabled).length} // Envíos guardados`,
+      });
+    } catch (err: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Error al guardar en Supabase: ' + (err?.message || 'Verifica permisos'));
     }
-
-    toast.success('Configuración guardada exitosamente', {
-      description: `Moneda: ${currency} (1 USD = ${exchangeRate} Bs) // Acento: ${accentColor} // Blur: ${blurIntensity}`,
-    });
   };
 
   const activeSocialsCount = socials.filter((s) => s.enabled && s.url.trim() !== '').length;
@@ -779,17 +876,6 @@ export function ConfiguracionWeb() {
               Texto predeterminado que precede las consultas directas en WhatsApp y modal de producto.
             </span>
           </div>
-        </div>
-
-        {/* Botón Inferior */}
-        <div className="flex justify-end pt-2">
-          <button
-            type="submit"
-            className="px-8 py-3 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
-          >
-            <span className="material-symbols-outlined text-[18px]">save</span>
-            <span>Guardar Todos los Cambios</span>
-          </button>
         </div>
       </form>
     </div>

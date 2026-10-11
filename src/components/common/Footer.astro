@@ -38,6 +38,8 @@ import { siteConfig } from '../../config/site';
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
           {/* TikTok */}
           <a
+            id="footer-social-tiktok"
+            data-social-id="tiktok"
             href="https://tiktok.com/@zairenlab"
             target="_blank"
             rel="noopener noreferrer"
@@ -51,6 +53,8 @@ import { siteConfig } from '../../config/site';
 
           {/* Instagram */}
           <a
+            id="footer-social-instagram"
+            data-social-id="instagram"
             href="https://instagram.com/zairenlab"
             target="_blank"
             rel="noopener noreferrer"
@@ -66,6 +70,8 @@ import { siteConfig } from '../../config/site';
 
           {/* WhatsApp */}
           <a
+            id="footer-social-whatsapp"
+            data-social-id="whatsapp"
             href={`https://wa.me/${siteConfig.whatsapp.number}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -79,6 +85,8 @@ import { siteConfig } from '../../config/site';
 
           {/* X / Twitter */}
           <a
+            id="footer-social-twitter"
+            data-social-id="twitter"
             href="https://x.com/zairenlab"
             target="_blank"
             rel="noopener noreferrer"
@@ -198,3 +206,39 @@ import { siteConfig } from '../../config/site';
     color: #FFFFFF !important;
   }
 </style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  async function syncFooterSocials() {
+    try {
+      const { data } = await supabase
+        .from('configuracion')
+        .select('redes_sociales')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (data && Array.isArray(data.redes_sociales)) {
+        data.redes_sociales.forEach((social: any) => {
+          const btn = document.querySelector(`[data-social-id="${social.id}"]`) as HTMLAnchorElement;
+          if (btn) {
+            if (social.activo && social.url && social.url.trim() !== '') {
+              btn.style.display = 'flex';
+              btn.href = social.url;
+            } else {
+              btn.style.display = 'none';
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // Fallback a visualización estándar
+    }
+  }
+
+  // Ejecutar al cargar la página
+  if (typeof window !== 'undefined') {
+    syncFooterSocials();
+    window.addEventListener('zairen-config-updated', syncFooterSocials);
+  }
+</script>
