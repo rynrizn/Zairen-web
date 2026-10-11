@@ -55,9 +55,6 @@ export function addItem(item: Omit<CartItem, 'cantidad'>) {
   } else {
     $cart.set([...current, { ...item, cantidad: 1 }]);
   }
-
-  // Abrir automáticamente el drawer para confirmar la adición
-  $isDrawerOpen.set(true);
 }
 
 /**
