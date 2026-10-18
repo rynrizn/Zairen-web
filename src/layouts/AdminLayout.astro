@@ -90,8 +90,8 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
               title="Alternar modo claro / oscuro"
               class="w-8 h-8 rounded-none bg-[#141416] hover:bg-[#1c1b1b] border border-white/[0.08] text-[#8F8F8C] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
             >
-              <span class="material-symbols-outlined text-[18px] dark:hidden">dark_mode</span>
-              <span class="material-symbols-outlined text-[18px] hidden dark:inline">light_mode</span>
+              <span id="theme-icon-dark" class="material-symbols-outlined text-[18px]">dark_mode</span>
+              <span id="theme-icon-light" class="material-symbols-outlined text-[18px]">light_mode</span>
             </button>
           </div>
         </div>
@@ -179,5 +179,20 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
         });
       }
     </script>
+
+    <style>
+      :global(html.light) #theme-icon-light {
+        display: none !important;
+      }
+      :global(html.light) #theme-icon-dark {
+        display: inline-block !important;
+      }
+      :global(html.dark) #theme-icon-dark {
+        display: none !important;
+      }
+      :global(html.dark) #theme-icon-light {
+        display: inline-block !important;
+      }
+    </style>
   </body>
 </html>

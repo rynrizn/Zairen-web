@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface TurnstileWidgetProps {
-  onVerify: (token: string) => void;
+  onVerify?: ((token: string) => void) | string;
   className?: string;
+  id?: string;
 }
 
 declare global {
@@ -23,7 +24,7 @@ declare global {
   }
 }
 
-export function TurnstileWidget({ onVerify, className = '' }: TurnstileWidgetProps) {
+export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidgetProps) {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -68,7 +69,17 @@ export function TurnstileWidget({ onVerify, className = '' }: TurnstileWidgetPro
                   if (isMounted) {
                     setIsVerified(true);
                     setIsVerifying(false);
-                    onVerify(token);
+                    if (typeof onVerify === 'function') {
+                      onVerify(token);
+                    } else if (typeof onVerify === 'string') {
+                      const fnName = onVerify.replace(/^window\./, '');
+                      if (typeof (window as any)[fnName] === 'function') {
+                        (window as any)[fnName](token);
+                      }
+                    }
+                    if (typeof document !== 'undefined') {
+                      document.dispatchEvent(new CustomEvent('turnstile:verified', { detail: { token } }));
+                    }
                   }
                 } else {
                   if (isMounted) {

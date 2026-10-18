@@ -164,11 +164,16 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 
   let isTurnstileVerified = false;
 
-  // Callback global invocado por TurnstileWidget una vez verificado criptográficamente
+  // Callback global y CustomEvent para Turnstile
   (window as any).__onLoginTurnstileVerify = (token: string) => {
     isTurnstileVerified = true;
     submitBtn.disabled = false;
   };
+
+  document.addEventListener('turnstile:verified', () => {
+    isTurnstileVerified = true;
+    submitBtn.disabled = false;
+  });
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
