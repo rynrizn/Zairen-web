@@ -52,12 +52,21 @@ Documento de entrega y especificación técnica de las modificaciones realizadas
   5. Asigna el stock físico en `public.inventario` (almacén CENTRAL).
   6. Permite eliminar prendas existentes de la base de datos.
 
-### ✅ Fase 7: Corrección Visual del Modo Claro en Admin (Skill Impeccable)
-- **Corrección de iconos**: Resuelto el fallo donde aparecían ambos iconos (`dark_mode` y `light_mode`) simultáneamente en `AdminLayout.astro`. Ahora solo es visible el icono que permite alternar al modo opuesto.
-- **Contraste y Legibilidad en Modo Claro**:
-  - Corrección del selector `.text-white` en `src/styles/global.css`: Se preserva el color blanco puro en botones carmesí (`#dc143c`), insignias de estado y alertas, evitando textos oscuros sobre fondo rojo.
-  - Mapeo de superficies para modo claro: fondos tipo papel japonés washi (`#F6F4EE`, `#FFFFFF`, `#F7F5F0`), bordes sutiles (`#E2DDD3`), tipografía color grafito (`#0A0A0B`) y gris cálido (`#5C5852`).
-  - Formularios, tablas e inputs optimizados con bordes y enfoques carmesí de alta legibilidad.
+### ✅ Fase 7: Corrección Visual Integral del Modo Claro (Catálogo Público & Panel Admin)
+- **Eliminación del Conflicto de Selección Global**: Se descubrió que la clase `selection:bg-[#dc143c]` en el `<body>` causaba que selectores de atributo como `[class*="bg-[#dc143c]"] *` coincidieran con el cuerpo entero del documento, forzando texto blanco sobre fondos blancos en modo claro. Se desacopló la selección nativa a CSS (`::selection`) y se eliminaron los selectores de subcadena.
+- **Contraste y Legibilidad Impeccable (Catálogo y Admin)**:
+  - Textos principales (`text-white`, `text-[#FAF9F6]`, `text-[#e5e2e1]`) mapeados a grafito sumi-iro (`#0A0A0B`).
+  - Textos secundarios y metadatos (`text-[#8F8F8C]`, `text-[#ac8888]`) mapeados a gris piedra cálido (`#5C5852`, contraste WCAG AA > 4.5:1).
+  - Textos destacados en rosa pálido (`text-[#ffb3b3]`, `text-[#e6bdbc]`) adaptados a carmesí nítido (`#dc143c`) en modo claro.
+  - Botones y badges coloreados (`bg-[#dc143c]`, `bg-[#ff2d55]`, `bg-[#047857]`, etc.) preservan texto blanco puro (`#FFFFFF !important`).
+  - Botones interactivos con hover (`hover:text-white`) en contenedores claros preservan legibilidad oscura en lugar de volverse invisibles.
+  - Insignias de estado en tablas y dashboards (Pendiente, Confirmado, Entregado, Cancelado) optimizadas con fondos pastel suaves y tipografía contrastante de alta legibilidad.
+- **Logotipo de Cabecera del Catálogo Entero & Sin Cortes**:
+  - En `src/components/catalogo/CatalogoGrid.tsx`, se retiró el `overflow-hidden` restrictivo del encabezado y se ajustaron las proporciones del isotipo watermark oficial (`h-28 w-28 md:h-36 md:w-36` con `object-contain` y `p-1`).
+  - Ahora el logo se aprecia de forma 100% íntegra, mostrando perfectamente las puntas superior e inferior sin ningún tipo de recorte.
+- **Auditoría de Restricciones (CONSTRAINTS.md)**:
+  - Eliminación definitiva de menciones residuales de términos restringidos en archivos legados (`StatementMarquee.astro`, `HeroPortada.astro` y array de cobertura en `ConfiguracionWeb.tsx`).
+
 
 ### ✅ Fase 8: Limpieza de Imágenes Locales
 - Eliminadas las carpetas `public/brand/` y `public/editorial/`.
