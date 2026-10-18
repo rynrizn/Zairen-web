@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { MatrizStock, type StockBySize } from './MatrizStock';
 import { uploadImageToCloudinary } from '../../../lib/imageUploader';
+import { supabase } from '../../../lib/supabase';
 
 export interface InventarioItem {
   id: string;
@@ -165,46 +166,196 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     toast.success('Imagen principal reasignada');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleDeleteProduct = async () => {
+    if (!product) return;
+    if (!confirm(`¿Estás seguro de eliminar "${nombre}" del catálogo y de la base de datos?`)) return;
+
+    const toastLoading = toast.loading('Eliminando prenda...');
+    try {
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
+      if (isUUID) {
+        await supabase.from('producto').delete().eq('id', product.id);
+      }
+      toast.dismiss(toastLoading);
+      toast.success('Prenda eliminada con éxito');
+      onClose();
+      // Notificar recarga
+      window.dispatchEvent(new CustomEvent('inventory-changed'));
+    } catch (err: any) {
+      toast.dismiss(toastLoading);
+      toast.error('Error al eliminar: ' + (err?.message || 'Error desconocido'));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nombre.trim()) {
       toast.error('El nombre de la prenda es obligatorio');
       return;
     }
 
-    const tallasArray = tallasTexto
-      .split(',')
-      .map((t) => t.trim().toUpperCase())
-      .filter(Boolean);
+    const toastLoading = toast.loading('Guardando prenda en la base de datos...');
 
-    const coleccionFinal = seccionNueva.trim() !== '' ? seccionNueva.trim() : coleccion;
-    const tipoFinal = tipoNuevo.trim() !== '' ? tipoNuevo.trim() : tipo;
+    try {
+      const tallasArray = tallasTexto
+        .split(',')
+        .map((t) => t.trim().toUpperCase())
+        .filter(Boolean);
 
-    const updatedItem: InventarioItem = {
-      id: product?.id || `prod-${Date.now()}`,
-      sku,
-      nombre,
-      slug: product?.slug || nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-      coleccion: coleccionFinal,
-      seccion: coleccionFinal,
-      tipo: tipoFinal,
-      precio,
-      costo,
-      stock,
-      estadoComercial,
-      tallas: tallasArray.length > 0 ? tallasArray : ['S', 'M', 'L', 'XL'],
-      descripcion,
-      imagen: imagenes[0] || 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop',
-      imagenDorsal: imagenes[1] || undefined,
-      imagenes,
-      publicado,
-      destacado,
-    };
+      const coleccionFinal = seccionNueva.trim() !== '' ? seccionNueva.trim() : coleccion;
+      const tipoFinal = tipoNuevo.trim() !== '' ? tipoNuevo.trim() : tipo;
 
-    onSave(updatedItem);
-    toast.success(product ? 'Prenda actualizada con éxito' : 'Nueva prenda registrada en inventario', {
-      description: `SKU: ${sku} • Stock total: ${Object.values(stock).reduce((a, b) => a + b, 0)} uds`,
-    });
+      // 1. Asegurar o crear la colección en Supabase
+      let coleccionId: string | null = null;
+      try {
+        const { data: existingCol } = await supabase
+          .from('coleccion')
+          .select('id')
+          .ilike('nombre', coleccionFinal)
+          .maybeSingle();
+
+        if (existingCol) {
+          coleccionId = existingCol.id;
+        } else {
+          const colSlug = coleccionFinal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const { data: newCol, error: colErr } = await supabase
+            .from('coleccion')
+            .insert({
+              nombre: coleccionFinal,
+              slug: `${colSlug}-${Date.now().toString().slice(-4)}`,
+              activa: true,
+            })
+            .select('id')
+            .single();
+
+          if (!colErr && newCol) {
+            coleccionId = newCol.id;
+          }
+        }
+      } catch (colErr) {
+        console.warn('Coleccion error:', colErr);
+      }
+
+      if (!coleccionId) {
+        const { data: firstCol } = await supabase.from('coleccion').select('id').limit(1).maybeSingle();
+        if (firstCol) coleccionId = firstCol.id;
+      }
+
+      // 2. Insertar o actualizar producto
+      const baseSlug = product?.slug || nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const finalSlug = product ? baseSlug : `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+      const productPayload: any = {
+        nombre,
+        slug: finalSlug,
+        descripcion,
+        precio_venta: precio,
+        stock_minimo: 4,
+        activo: true,
+        publicado,
+        destacado,
+        estado_comercial: ['preventa', 'promocion', 'oferta', 'nuevo'].includes(estadoComercial) ? estadoComercial : 'ninguno',
+      };
+      if (coleccionId) {
+        productPayload.coleccion_id = coleccionId;
+      }
+
+      let savedProductId = product?.id;
+      const isUUID = product?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
+
+      if (isUUID) {
+        const { error: updErr } = await supabase.from('producto').update(productPayload).eq('id', savedProductId);
+        if (updErr) throw updErr;
+      } else {
+        const { data: newP, error: insErr } = await supabase.from('producto').insert(productPayload).select('id').single();
+        if (insErr) throw insErr;
+        savedProductId = newP.id;
+      }
+
+      // 3. Guardar Imágenes en public.imagen
+      if (savedProductId) {
+        try {
+          await supabase.from('imagen').delete().eq('producto_id', savedProductId);
+          const validImgs = imagenes.filter(Boolean);
+          if (validImgs.length > 0) {
+            const imgRows = validImgs.map((url, idx) => ({
+              producto_id: savedProductId,
+              url_imagen: url,
+              es_portada: idx === 0,
+              orden: idx,
+              tipo: idx === 0 ? 'frontal' : idx === 1 ? 'dorsal' : 'galeria',
+            }));
+            await supabase.from('imagen').insert(imgRows);
+          }
+        } catch (imgErr) {
+          console.warn('Imagen error:', imgErr);
+        }
+
+        // 4. Guardar Tallas como atributos
+        try {
+          await supabase.from('atributo_producto').delete().eq('producto_id', savedProductId).eq('clave', 'talla');
+          if (tallasArray.length > 0) {
+            const attrRows = tallasArray.map((talla, idx) => ({
+              producto_id: savedProductId,
+              clave: 'talla',
+              valor: talla,
+              orden: idx,
+            }));
+            await supabase.from('atributo_producto').insert(attrRows);
+          }
+        } catch (attrErr) {
+          console.warn('Atributo error:', attrErr);
+        }
+
+        // 5. Guardar inventario
+        try {
+          const totalStock = Object.values(stock).reduce((a, b) => a + Number(b || 0), 0);
+          const { data: centralUbic } = await supabase.from('ubicacion').select('id').eq('nombre', 'CENTRAL').maybeSingle();
+          if (centralUbic) {
+            await supabase.from('inventario').upsert({
+              producto_id: savedProductId,
+              ubicacion_id: centralUbic.id,
+              cantidad: totalStock,
+              cantidad_reservada: 0,
+            }, { onConflict: 'producto_id,ubicacion_id' });
+          }
+        } catch (invErr) {
+          console.warn('Inventario error:', invErr);
+        }
+      }
+
+      toast.dismiss(toastLoading);
+
+      const updatedItem: InventarioItem = {
+        id: savedProductId || `prod-${Date.now()}`,
+        sku,
+        nombre,
+        slug: finalSlug,
+        coleccion: coleccionFinal,
+        seccion: coleccionFinal,
+        tipo: tipoFinal,
+        precio,
+        costo,
+        stock,
+        estadoComercial,
+        tallas: tallasArray.length > 0 ? tallasArray : ['S', 'M', 'L', 'XL'],
+        descripcion,
+        imagen: imagenes[0] || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
+        imagenDorsal: imagenes[1] || undefined,
+        imagenes,
+        publicado,
+        destacado,
+      };
+
+      onSave(updatedItem);
+      toast.success(product ? 'Prenda actualizada con éxito' : 'Nueva prenda registrada en inventario', {
+        description: `Colección: ${coleccionFinal} • Stock total: ${Object.values(stock).reduce((a, b) => a + b, 0)} uds`,
+      });
+      window.dispatchEvent(new CustomEvent('inventory-changed'));
+    } catch (err: any) {
+      toast.dismiss(toastLoading);
+      toast.error('Error al guardar en Supabase: ' + (err?.message || 'Verifica la conexión'));
+    }
   };
 
   return (
@@ -532,20 +683,33 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
         </div>
 
         {/* Acciones de Guardar */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/[0.08]"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
-          >
-            Guardar Producto
-          </button>
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/[0.06]">
+          {product ? (
+            <button
+              type="button"
+              onClick={handleDeleteProduct}
+              className="px-4 py-2.5 rounded-none bg-red-950/60 hover:bg-red-700 text-red-200 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-red-800/60 flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[16px]">delete</span>
+              <span>Eliminar Prenda</span>
+            </button>
+          ) : <div></div>}
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/[0.08]"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
+            >
+              Guardar Producto
+            </button>
+          </div>
         </div>
       </form>
     </div>

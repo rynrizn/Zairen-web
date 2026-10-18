@@ -1,115 +1,99 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ProductoEditor, type InventarioItem } from './ProductoEditor';
-
-const initialInventoryData: InventarioItem[] = [
-  {
-    id: 'prod-1',
-    sku: 'ZRN-044',
-    nombre: 'Samurai Mecha Kanji // Oversized Tee',
-    slug: 'samurai-mecha-kanji-oversized-tee',
-    coleccion: 'Anime Mecha // Drop 01',
-    precio: 145.0,
-    costo: 55.0,
-    stock: { S: 4, M: 18, L: 12, XL: 0 },
-    tejido: 'Algodón Peinado 280 GSM',
-    construccion: 'Cuello Ribete 3.5cm // Doble Pespunte',
-    estampado: 'Serigrafía tacto cero 4 tintas Neón',
-    imagen: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop',
-    imagenDorsal: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop',
-    publicado: true,
-    destacado: true,
-  },
-  {
-    id: 'prod-2',
-    sku: 'ZRN-091',
-    nombre: 'Cyber-Spine 420GSM // Heavy Hoodie',
-    slug: 'cyber-spine-heavy-hoodie',
-    coleccion: 'Cyberpunk Tokyo // Spec',
-    precio: 280.0,
-    costo: 110.0,
-    stock: { S: 12, M: 25, L: 19, XL: 6 },
-    tejido: 'French Terry Pesado 420 GSM',
-    construccion: 'Capucha forrada triple capa // Ojales metálicos',
-    estampado: 'Bordado industrial 3D + Serigrafía reflectiva',
-    imagen: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=800&auto=format&fit=crop',
-    publicado: true,
-    destacado: false,
-  },
-  {
-    id: 'prod-3',
-    sku: 'ZRN-CG04',
-    nombre: 'Cyber Geisha // Oversized Wireframe Tee',
-    slug: 'cyber-geisha-oversized-wireframe-tee',
-    coleccion: 'Anime Mecha // Drop 01',
-    precio: 140.0,
-    costo: 52.0,
-    stock: { S: 6, M: 8, L: 8, XL: 0 },
-    tejido: 'Algodón peinado lavado 240 GSM',
-    construccion: 'Corte Boxy Drop Shoulder',
-    estampado: 'Serigrafía Neón reactiva a luz UV',
-    imagen: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop',
-    publicado: true,
-    destacado: false,
-  },
-  {
-    id: 'prod-4',
-    sku: 'ZRN-TV09',
-    nombre: 'Tokyo Vanguard // Boxy Tee Acid Wash',
-    slug: 'tokyo-vanguard-boxy-tee',
-    coleccion: 'Streetwear Zen // Core',
-    precio: 130.0,
-    costo: 48.0,
-    stock: { S: 0, M: 7, L: 5, XL: 3 },
-    tejido: 'Algodón pesado tratado con ácido 260 GSM',
-    construccion: 'Costuras reforzadas en hombros',
-    estampado: 'Kanji desgastado vintage print',
-    imagen: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=800&auto=format&fit=crop',
-    publicado: true,
-    destacado: false,
-  },
-  {
-    id: 'prod-5',
-    sku: 'ZRN-ZKS88',
-    nombre: 'Zen Kanji Shadow // Box Cut Heavy Tee',
-    slug: 'zen-kanji-shadow-box-cut',
-    coleccion: 'Streetwear Zen // Core',
-    precio: 125.0,
-    costo: 45.0,
-    stock: { S: 2, M: 0, L: 4, XL: 0 },
-    tejido: 'Algodón orgánico 260 GSM',
-    construccion: 'Cuello ancho estilo Shibuya',
-    estampado: 'Kanji monocromático en espalda completa',
-    imagen: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop',
-    publicado: true,
-    destacado: false,
-  },
-  {
-    id: 'prod-6',
-    sku: 'ZRN-078',
-    nombre: 'Void Modular // Tactical Cargo Pant',
-    slug: 'void-modular-tactical-cargo',
-    coleccion: 'Cyberpunk Tokyo // Spec',
-    precio: 310.0,
-    costo: 135.0,
-    stock: { S: 1, M: 8, L: 10, XL: 4 },
-    tejido: 'Ripstop Cordura impermeable con spandex',
-    construccion: 'Bolsillos modulares desmontables y correas Fidlock',
-    estampado: 'Termotransferencia técnica reflectiva 3M',
-    imagen: 'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?q=80&w=800&auto=format&fit=crop',
-    publicado: true,
-    destacado: false,
-  },
-];
+import { supabase } from '../../../lib/supabase';
 
 export function InventarioManager() {
-  const [items, setItems] = useState<InventarioItem[]>(initialInventoryData);
+  const [items, setItems] = useState<InventarioItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [coleccionesList, setColeccionesList] = useState<string[]>(['Todas']);
   const [selectedItem, setSelectedItem] = useState<InventarioItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selectedColeccion, setSelectedColeccion] = useState<string>('Todas');
   const [selectedEstado, setSelectedEstado] = useState<'Todos' | 'Disponible' | 'Pocas Uds' | 'Agotado'>('Todos');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  const fetchInventory = async () => {
+    setIsLoading(true);
+    try {
+      const { data: dbCols } = await supabase.from('coleccion').select('id, nombre, slug').order('orden');
+      if (dbCols && dbCols.length > 0) {
+        setColeccionesList(['Todas', ...dbCols.map((c: any) => c.nombre)]);
+      }
+
+      const { data: dbProducts, error } = await supabase
+        .from('producto')
+        .select(`
+          id,
+          nombre,
+          slug,
+          descripcion,
+          precio_venta,
+          stock_minimo,
+          activo,
+          publicado,
+          destacado,
+          estado_comercial,
+          coleccion:coleccion_id (id, nombre, slug),
+          imagenes:imagen (id, url_imagen, es_portada, orden),
+          inventario:inventario (cantidad, cantidad_reservada),
+          atributos:atributo_producto (clave, valor)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (!error && dbProducts) {
+        const mapped: InventarioItem[] = dbProducts.map((p: any) => {
+          const tallas = p.atributos
+            ?.filter((a: any) => a.clave.toLowerCase() === 'talla')
+            ?.map((a: any) => a.valor) || ['S', 'M', 'L', 'XL'];
+
+          const totalStock = p.inventario?.reduce((acc: number, inv: any) => acc + (inv.cantidad || 0), 0) || 0;
+          const sortedImgs = (p.imagenes || []).sort((a: any, b: any) => (a.orden || 0) - (b.orden || 0));
+          const coverImg = sortedImgs.find((img: any) => img.es_portada) || sortedImgs[0];
+          const allImgUrls = sortedImgs.map((img: any) => img.url_imagen);
+
+          return {
+            id: p.id,
+            sku: `ZRN-${p.slug?.substring(0, 8).toUpperCase() || 'PRENDA'}`,
+            nombre: p.nombre,
+            slug: p.slug,
+            coleccion: p.coleccion?.nombre || 'General',
+            seccion: p.coleccion?.nombre || 'General',
+            tipo: 'Polera',
+            precio: Number(p.precio_venta),
+            costo: Math.round(Number(p.precio_venta) * 0.4),
+            stock: {
+              S: Math.floor(totalStock / 4),
+              M: Math.floor(totalStock / 4),
+              L: Math.floor(totalStock / 4),
+              XL: totalStock - Math.floor(totalStock / 4) * 3,
+            },
+            tallas,
+            descripcion: p.descripcion || '',
+            imagen: coverImg?.url_imagen || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
+            imagenDorsal: sortedImgs[1]?.url_imagen,
+            imagenes: allImgUrls.length > 0 ? allImgUrls : undefined,
+            estadoComercial: p.estado_comercial || 'disponible',
+            publicado: Boolean(p.publicado),
+            destacado: Boolean(p.destacado),
+          };
+        });
+        setItems(mapped);
+      }
+    } catch (err) {
+      console.warn('Error fetching inventory:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInventory();
+    const handleChanged = () => fetchInventory();
+    window.addEventListener('inventory-changed', handleChanged);
+    return () => window.removeEventListener('inventory-changed', handleChanged);
+  }, []);
 
   // Métricas calculadas
   const totalPrendas = useMemo(() => {
@@ -291,7 +275,7 @@ export function InventarioManager() {
             <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
               Colección:
             </span>
-            {['Todas', 'Anime Mecha', 'Streetwear Zen', 'Cyberpunk'].map((col) => (
+            {coleccionesList.map((col) => (
               <button
                 key={col}
                 type="button"
@@ -476,6 +460,27 @@ export function InventarioManager() {
                 </div>
               );
             })
+          ) : items.length === 0 ? (
+            <div className="text-center py-16 px-4 flex flex-col items-center justify-center space-y-4">
+              <div className="w-12 h-12 rounded-none bg-[#141416] border border-[#201f1f] flex items-center justify-center text-[#dc143c]">
+                <span className="material-symbols-outlined text-[28px]">inventory_2</span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-headline text-sm sm:text-base font-bold text-[#e5e2e1] uppercase">
+                  Catálogo Listo para Nuevos Productos
+                </h4>
+                <p className="font-mono text-xs text-[#ac8888] max-w-md">
+                  No hay prendas registradas en Supabase aún. Registra tu primera prenda con su colección para que aparezca automáticamente en la tienda web.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCreateNew}
+                className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
+              >
+                + Registrar Primera Prenda
+              </button>
+            </div>
           ) : (
             <div className="text-center py-16 text-xs font-mono text-[#ac8888]">
               No se encontraron prendas con los filtros aplicados.
