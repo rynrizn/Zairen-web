@@ -138,13 +138,13 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       {/* ========================================================== */}
       {/* 1. ENCABEZADO ZEN CON LOGO WATERMARK DERECHO DETRÁS DEL TEXTO */}
       {/* ========================================================== */}
-      <div className="relative overflow-hidden flex flex-col justify-center min-h-[120px] md:min-h-[140px] mb-10 pb-4 border-b border-[#dc143c]/30">
-        {/* Logotipo Oficial Watermark Suelto Sin Letras (Detrás del texto en el lado derecho) */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-15 select-none w-36 h-36 md:w-56 md:h-56 filter drop-shadow-[0_0_20px_rgba(220,20,60,0.4)]">
+      <div className="relative flex flex-col justify-center min-h-[130px] md:min-h-[150px] mb-10 pb-4 border-b border-[#dc143c]/30">
+        {/* Logotipo Oficial Watermark Suelto Sin Letras (Entero y completo, puntas superior e inferior visibles) */}
+        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-25 select-none h-28 w-28 md:h-36 md:w-36 filter drop-shadow-[0_0_24px_rgba(220,20,60,0.45)]">
           <img
             src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
-            alt="Zairen Lab"
-            className="w-full h-full object-contain"
+            alt="Zairen Lab Isotipo Oficial"
+            className="w-full h-full object-contain p-1"
           />
         </div>
 

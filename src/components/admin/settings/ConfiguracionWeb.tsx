@@ -280,7 +280,7 @@ export function ConfiguracionWeb() {
           costo_envio_express: shippingCost,
           envio_gratis_habilitado: freeShippingEnabled,
           tiempo_entrega: deliveryTime,
-          ciudades_cobertura: ['La Paz', 'Cochabamba', 'Santa Cruz', 'Tarija', 'Sucre', 'Oruro', 'Potosí', 'Beni', 'Pando'],
+          ciudades_cobertura: ['La Paz', 'Cochabamba', 'Santa Cruz', 'Sucre', 'Oruro', 'Potosí', 'Beni', 'Pando'],
         },
         apariencia: {
           color_acento: accentColor,

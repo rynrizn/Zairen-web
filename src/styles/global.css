@@ -46,6 +46,11 @@
   --font-price: "JetBrains Mono", monospace;
 }
 
+::selection {
+  background-color: #dc143c;
+  color: #FFFFFF;
+}
+
 @layer base {
   html {
     color-scheme: dark;
@@ -63,111 +68,262 @@
     overflow-x: hidden;
     transition: background-color 0.25s ease, color 0.25s ease;
   }
-
-  /* Modo Claro // Zairen Minimal Washi & Zen Glass */
-  html.light {
-    color-scheme: light;
-    background-color: #F6F4EE;
-    color: #0A0A0B;
-  }
-
-  html.light body {
-    background-color: #F6F4EE;
-    color: #0A0A0B;
-  }
-
-  html.light .bg-\[\#0A0A0A\],
-  html.light .bg-\[\#0a0a0a\],
-  html.light .bg-\[\#0e0e0e\],
-  html.light .bg-\[\#0E0F11\],
-  html.light .bg-\[\#0d0d0e\] {
-    background-color: #F6F4EE !important;
-  }
-
-  html.light .bg-\[\#141416\],
-  html.light .bg-\[\#141416\]\/95,
-  html.light .bg-\[\#141416\]\/90,
-  html.light .bg-\[\#141416\]\/80,
-  html.light .bg-\[\#141416\]\/60 {
-    background-color: #FFFFFF !important;
-  }
-
-  html.light .bg-\[\#1c1b1b\],
-  html.light .bg-\[\#1c1b1b\]\/95,
-  html.light .bg-\[\#1c1b1b\]\/90,
-  html.light .bg-\[\#1c1b1b\]\/80,
-  html.light .bg-\[\#201f1f\] {
-    background-color: #F7F5F0 !important;
-  }
-
-  html.light .bg-\[\#2a2a2a\] {
-    background-color: #ECE8DF !important;
-  }
-
-  html.light .border-\[\#1C1B1B\],
-  html.light .border-\[\#201f1f\],
-  html.light .border-\[\#2A2A2A\],
-  html.light .border-\[\#4A4A4A\],
-  html.light .border-white\/\[0\.08\],
-  html.light .border-white\/\[0\.06\],
-  html.light .border-white\/\[0\.12\],
-  html.light .border-white\/\[0\.04\] {
-    border-color: #E2DDD3 !important;
-  }
-
-  html.light .text-\[\#FAF9F6\],
-  html.light .text-\[\#e5e2e1\],
-  html.light .text-\[\#e8e8e8\],
-  html.light .text-white {
-    color: #0A0A0B !important;
-  }
-
-  html.light .text-\[\#8F8F8C\],
-  html.light .text-\[\#ac8888\] {
-    color: #5C5852 !important;
-  }
-
-  /* Excepciones críticas de contraste: preservar blanco en botones y badges carmesí */
-  html.light .bg-\[\#dc143c\],
-  html.light .bg-\[\#dc143c\] *,
-  html.light [class*="bg-[#dc143c]"],
-  html.light [class*="bg-[#dc143c]"] *,
-  html.light button.bg-\[\#dc143c\],
-  html.light a.bg-\[\#dc143c\],
-  html.light .bg-emerald-600,
-  html.light .bg-emerald-600 *,
-  html.light .text-white-force {
-    color: #FFFFFF !important;
-  }
-
-  html.light aside {
-    background-color: #FFFFFF !important;
-    border-color: #E2DDD3 !important;
-  }
-
-  html.light table thead tr {
-    background-color: #ECE8DF !important;
-  }
-
-  html.light input,
-  html.light select,
-  html.light textarea {
-    background-color: #FFFFFF !important;
-    color: #0A0A0B !important;
-    border-color: #D6D1C4 !important;
-  }
-
-  html.light input:focus,
-  html.light select:focus,
-  html.light textarea:focus {
-    border-color: #dc143c !important;
-  }
-
-  html.light input::placeholder,
-  html.light textarea::placeholder {
-    color: #8C8A84 !important;
-  }
 }
+
+/* ============================================================ */
+/* ☀️ MODO CLARO COMPLETO // ZAIREN MINIMAL WASHI & ZEN GLASS   */
+/* ============================================================ */
+
+html.light {
+  color-scheme: light;
+  background-color: #F6F4EE;
+  color: #0A0A0B;
+}
+
+html.light body {
+  background-color: #F6F4EE !important;
+  color: #0A0A0B !important;
+}
+
+/* 1. Fondos de Superficie Principal (#F6F4EE - Washi Paper Ivory) */
+html.light .bg-\[\#0A0A0A\],
+html.light .bg-\[\#0a0a0a\],
+html.light .bg-\[\#0e0e0e\],
+html.light .bg-\[\#0E0F11\],
+html.light .bg-\[\#0d0d0e\],
+html.light .bg-\[\#131313\] {
+  background-color: #F6F4EE !important;
+}
+
+html.light .bg-\[\#0A0A0A\]\/95,
+html.light .bg-\[\#0A0A0A\]\/90,
+html.light .bg-\[\#0E0F11\]\/98 {
+  background-color: rgba(246, 244, 238, 0.96) !important;
+}
+
+/* 2. Fondos de Tarjetas Primarias (#FFFFFF - Blanco Puro Washi) */
+html.light .bg-\[\#141416\],
+html.light .bg-\[\#1a191c\] {
+  background-color: #FFFFFF !important;
+}
+
+html.light .bg-\[\#141416\]\/95,
+html.light .bg-\[\#141416\]\/90,
+html.light .bg-\[\#141416\]\/80,
+html.light .bg-\[\#141416\]\/70,
+html.light .bg-\[\#141416\]\/60 {
+  background-color: #FFFFFF !important;
+}
+
+/* 3. Fondos de Contenedores Secundarios (#F7F5F0 - Crema Suave) */
+html.light .bg-\[\#1c1b1b\],
+html.light .bg-\[\#201f1f\] {
+  background-color: #F7F5F0 !important;
+}
+
+html.light .bg-\[\#1c1b1b\]\/95,
+html.light .bg-\[\#1c1b1b\]\/90,
+html.light .bg-\[\#1c1b1b\]\/80,
+html.light .bg-\[\#1c1b1b\]\/50,
+html.light .bg-\[\#201f1f\]\/50 {
+  background-color: #F7F5F0 !important;
+}
+
+/* 4. Fondos de Botones Terciarios, Chips y Sliders (#EDE8DF - Piedra Cálida) */
+html.light .bg-\[\#2a2a2a\],
+html.light .bg-\[\#262626\],
+html.light .bg-\[\#242323\],
+html.light .bg-\[\#262525\],
+html.light .bg-\[\#353534\] {
+  background-color: #EDE8DF !important;
+}
+
+/* 5. Bordes Limpios en Modo Claro (#DCD9D2 / #E2DDD3) */
+html.light .border-\[\#1C1B1B\],
+html.light .border-\[\#201f1f\],
+html.light .border-\[\#2A2A2A\],
+html.light .border-\[\#4A4A4A\],
+html.light .border-white\/\[0\.04\],
+html.light .border-white\/\[0\.06\],
+html.light .border-white\/\[0\.08\],
+html.light .border-white\/\[0\.12\],
+html.light .border-white\/10,
+html.light .border-white\/20 {
+  border-color: #DCD9D2 !important;
+}
+
+/* 6. Tipografía Primaria en Modo Claro (#0A0A0B - Sumi Graphite) */
+html.light .text-\[\#FAF9F6\],
+html.light .text-\[\#e5e2e1\],
+html.light .text-\[\#e8e8e8\],
+html.light .text-white {
+  color: #0A0A0B !important;
+}
+
+/* 7. Tipografía Secundaria y Metadatos en Modo Claro (#5C5852 - Warm Stone Gray, WCAG AA > 4.5:1) */
+html.light .text-\[\#8F8F8C\],
+html.light .text-\[\#ac8888\] {
+  color: #5C5852 !important;
+}
+
+/* 8. Textos de Acento Rosa Claro en Oscuro -> Carmesí en Modo Claro (#dc143c) */
+html.light .text-\[\#ffb3b3\],
+html.light .text-\[\#e6bdbc\] {
+  color: #dc143c !important;
+}
+
+/* 9. Badges de Estado Pastel en Modo Claro (Contraste Nítido) */
+html.light .text-\[\#fca5a5\],
+html.light .text-\[\#fecaca\] {
+  color: #991b1b !important;
+}
+html.light .text-\[\#ddd6fe\] {
+  color: #5b21b6 !important;
+}
+html.light .text-\[\#a7f3d0\] {
+  color: #065f46 !important;
+}
+html.light .text-amber-300,
+html.light .text-amber-400 {
+  color: #92400e !important;
+}
+html.light .text-emerald-300,
+html.light .text-emerald-400 {
+  color: #065f46 !important;
+}
+html.light .text-blue-300 {
+  color: #1e40af !important;
+}
+html.light .text-white\/20 {
+  color: rgba(10, 10, 11, 0.25) !important;
+}
+
+/* 10. Estados de Hover en Elementos Neutros */
+html.light .hover\:text-white:hover {
+  color: #0A0A0B !important;
+}
+html.light .hover\:bg-\[\#1c1b1b\]:hover,
+html.light .hover\:bg-\[\#201f1f\]:hover,
+html.light .hover\:bg-\[\#2a2a2a\]:hover {
+  background-color: #E5E1D7 !important;
+}
+
+/* 11. EXCEPCIONES CRÍTICAS: BOTONES Y BADGES DE COLOR CONSERVAN TEXTO BLANCO */
+html.light .bg-\[\#dc143c\],
+html.light .bg-\[\#dc143c\] *,
+html.light .bg-\[\#ff2d55\],
+html.light .bg-\[\#ff2d55\] *,
+html.light .bg-\[\#b91c1c\],
+html.light .bg-\[\#b91c1c\] *,
+html.light .bg-\[\#6d28d9\],
+html.light .bg-\[\#6d28d9\] *,
+html.light .bg-\[\#047857\],
+html.light .bg-\[\#047857\] *,
+html.light .bg-emerald-600,
+html.light .bg-emerald-600 *,
+html.light .bg-emerald-700,
+html.light .bg-emerald-700 *,
+html.light .bg-red-600,
+html.light .bg-red-600 *,
+html.light .bg-\[\#7f1d1d\],
+html.light .bg-\[\#7f1d1d\] *,
+html.light .hover\:bg-\[\#dc143c\]:hover,
+html.light .hover\:bg-\[\#dc143c\]:hover *,
+html.light .text-white-force {
+  color: #FFFFFF !important;
+}
+
+/* 12. Componentes Específicos: Aside Sidebar, Tablas, Formularios */
+html.light aside {
+  background-color: #FFFFFF !important;
+  border-color: #DCD9D2 !important;
+}
+
+html.light thead tr,
+html.light table th {
+  background-color: #EDE8DF !important;
+  color: #5C5852 !important;
+  border-color: #DCD9D2 !important;
+}
+
+html.light tbody tr {
+  border-color: #E2DDD3 !important;
+}
+
+html.light tbody tr:hover {
+  background-color: #F0ECE4 !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #0A0A0B !important;
+  border-color: #D6D1C4 !important;
+}
+
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #dc143c !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #8C8A84 !important;
+}
+
+html.light select option {
+  background-color: #FFFFFF !important;
+  color: #0A0A0B !important;
+}
+
+/* 13. Badges de Estado en Tablas y Dashboards en Modo Claro */
+html.light .bg-amber-950,
+html.light .bg-amber-950\/80,
+html.light .bg-amber-950\/50 {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border-color: #FCD34D !important;
+}
+
+html.light .bg-emerald-950,
+html.light .bg-emerald-950\/80,
+html.light .bg-emerald-950\/60 {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  border-color: #6EE7B7 !important;
+}
+
+html.light .bg-blue-950,
+html.light .bg-blue-950\/80 {
+  background-color: #DBEAFE !important;
+  color: #1E40AF !important;
+  border-color: #93C5FD !important;
+}
+
+html.light .bg-red-950,
+html.light .bg-red-950\/80,
+html.light .bg-red-950\/60 {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border-color: #FCA5A5 !important;
+}
+
+/* 14. Botones Alabastro Activos e Invertidos en Modo Claro */
+html.light button.bg-\[\#FAF9F6\],
+html.light a.bg-\[\#FAF9F6\] {
+  background-color: #0A0A0B !important;
+  color: #FAF9F6 !important;
+  border-color: #0A0A0B !important;
+}
+html.light button.bg-\[\#FAF9F6\]:hover,
+html.light a.bg-\[\#FAF9F6\]:hover {
+  background-color: #dc143c !important;
+  color: #FFFFFF !important;
+  border-color: #dc143c !important;
+}
+
 
 /* Zen subtle noise overlay */
 .bg-noise {

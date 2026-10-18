@@ -28,14 +28,15 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
 
   return (
     <button
+      id="theme-toggle-btn"
       type="button"
       onClick={toggleTheme}
       title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
       aria-label="Alternar tema claro/oscuro"
-      className={`w-9 h-9 flex items-center justify-center transition-colors cursor-pointer border ${className} ${
+      className={`theme-toggle-btn w-9 h-9 flex items-center justify-center transition-colors cursor-pointer border ${className} ${
         theme === 'dark'
           ? 'bg-[#141416] hover:bg-[#201f1f] text-[#8F8F8C] hover:text-[#FAF9F6] border-[#2A2A2A]'
-          : 'bg-[#FAF9F6] hover:bg-[#F0EFEB] text-[#141416] border-[#D4D2CD]'
+          : 'bg-[#FFFFFF] hover:bg-[#F0EFEB] text-[#141416] border-[#D4D2CD]'
       }`}
     >
       {theme === 'dark' ? (

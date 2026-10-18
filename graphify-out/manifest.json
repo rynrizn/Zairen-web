@@ -96,9 +96,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/settings/ConfiguracionWeb.tsx": {
-    "mtime": 1791696659.2811923,
-    "seen": 1792352948.4266858,
-    "ast_hash": "d51b502eab5f00937ce500d2d6a4677f",
+    "mtime": 1792355762.7680597,
+    "seen": 1792356542.1547616,
+    "ast_hash": "cd1b93b1e6356c913b90f8fe4238c703",
     "semantic_hash": ""
   },
   "src/components/admin/usuarios/UsuariosManager.tsx": {
@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "src/components/catalogo/CatalogoGrid.tsx": {
-    "mtime": 1791696163.8546877,
-    "seen": 1792352948.4277732,
-    "ast_hash": "9da5db1f7fe5e81148f0f336ef799ff8",
+    "mtime": 1792356375.6980405,
+    "seen": 1792356542.1554,
+    "ast_hash": "12c4add4148f465d7d66a38dd3a343fe",
     "semantic_hash": ""
   },
   "src/components/catalogo/DetalleProducto.tsx": {
@@ -156,9 +156,9 @@
     "semantic_hash": ""
   },
   "src/components/common/Navbar.astro": {
-    "mtime": 1791696139.4526618,
-    "seen": 1792352948.4304333,
-    "ast_hash": "3143fef4d5cf264167a61c3adc878819",
+    "mtime": 1792356427.5264635,
+    "seen": 1792356542.1581507,
+    "ast_hash": "3a97589631ac64a5c09b0550b46999d5",
     "semantic_hash": ""
   },
   "src/components/common/ShareButton.tsx": {
@@ -228,15 +228,15 @@
     "semantic_hash": ""
   },
   "src/layouts/AdminLayout.astro": {
-    "mtime": 1792351501.4686544,
-    "seen": 1792352948.4371305,
-    "ast_hash": "530b5b5ed81da6263deaeb944dd86dd7",
+    "mtime": 1792355634.9838307,
+    "seen": 1792356542.1645062,
+    "ast_hash": "3f2e9cc21d6fd54e40b2dd03b9076a54",
     "semantic_hash": ""
   },
   "src/layouts/Layout.astro": {
-    "mtime": 1791696188.0080178,
-    "seen": 1792352948.4371371,
-    "ast_hash": "9439631e59868d356375bf87a3b9ded6",
+    "mtime": 1792355617.8110085,
+    "seen": 1792356542.1645095,
+    "ast_hash": "b3960db35b32f79c6bdb1421ba17cc72",
     "semantic_hash": ""
   },
   "src/lib/cloudinary.ts": {
@@ -480,9 +480,9 @@
     "semantic_hash": ""
   },
   "src/components/common/ThemeToggle.tsx": {
-    "mtime": 1791568083.8645604,
-    "seen": 1791574096.255709,
-    "ast_hash": "02a86a54a82660ce714e9c53678fd107",
+    "mtime": 1792356445.8864408,
+    "seen": 1792356542.1597977,
+    "ast_hash": "99de04a134d09f759b0376b0c37f1bf1",
     "semantic_hash": ""
   },
   "src/components/home/BrandManifestoGrid.astro": {
@@ -492,9 +492,9 @@
     "semantic_hash": ""
   },
   "src/components/home/HeroPortada.astro": {
-    "mtime": 1792351642.423296,
-    "seen": 1792352948.4333463,
-    "ast_hash": "8a4350191ef46b0947d6b67913d82efa",
+    "mtime": 1792355726.0785308,
+    "seen": 1792356542.161359,
+    "ast_hash": "64fcf5c70f4f56dcada5d30bb6ee175d",
     "semantic_hash": ""
   },
   "src/components/home/RecentProductsCarousel.tsx": {
@@ -504,9 +504,9 @@
     "semantic_hash": ""
   },
   "src/components/home/StatementMarquee.astro": {
-    "mtime": 1791518263.9516218,
-    "seen": 1791574096.2557533,
-    "ast_hash": "4ef4fc66ba333dbe6680cf999ac9b258",
+    "mtime": 1792355859.1825035,
+    "seen": 1792356542.161809,
+    "ast_hash": "680f609e59ddc58865fb3cf974062d89",
     "semantic_hash": ""
   },
   "src/pages/marca.astro": {
@@ -855,6 +855,12 @@
     "mtime": 1792352856.9727263,
     "seen": 1792352948.476514,
     "ast_hash": "68ca810f40bf05568f68b3305e959c55",
+    "semantic_hash": ""
+  },
+  "scratch_page.html": {
+    "mtime": 1792354988.0470245,
+    "seen": 1792356542.1893373,
+    "ast_hash": "f6c415fb183e2381b64f1e5bae5cb14e",
     "semantic_hash": ""
   }
 }
