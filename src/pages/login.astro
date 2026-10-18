@@ -17,10 +17,12 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 
       <!-- Cabecera -->
       <div class="flex flex-col items-center text-center mb-8">
-        <div class="login-icon-box w-12 h-12 rounded-none bg-[#0e0e0e] border border-white/[0.08] flex items-center justify-center text-[#dc143c] mb-3 shadow-[0_0_16px_rgba(220,20,60,0.3)]">
-          <svg class="w-6 h-6" viewBox="0 0 64 64" fill="none">
-            <path d="M14 20H50M20 20V48M44 20V48M14 28H50M24 38H40" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <div class="mb-4">
+          <img
+            src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
+            alt="Zairen Lab Logo Oficial"
+            class="w-14 h-14 object-contain filter drop-shadow-[0_0_16px_rgba(220,20,60,0.45)]"
+          />
         </div>
         <h1 class="text-xl font-bold font-display uppercase tracking-tight text-[#e5e2e1]">
           {siteConfig.name} <span class="text-[#dc143c] font-mono text-sm">// CORE</span>

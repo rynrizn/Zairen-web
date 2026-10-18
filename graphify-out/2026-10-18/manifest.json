@@ -48,9 +48,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/inventario/InventarioManager.tsx": {
-    "mtime": 1791581705.1508746,
-    "seen": 1791584011.511038,
-    "ast_hash": "76350aabe7d8995975c2153cb05b8a9e",
+    "mtime": 1792352542.4776988,
+    "seen": 1792352948.423586,
+    "ast_hash": "7825e1f4e85d33b5ca6b3c660bbefec3",
     "semantic_hash": ""
   },
   "src/components/admin/inventario/InventarioTable.tsx": {
@@ -66,15 +66,15 @@
     "semantic_hash": ""
   },
   "src/components/admin/inventario/ProductoEditor.tsx": {
-    "mtime": 1791595126.7052562,
-    "seen": 1791595783.0676477,
-    "ast_hash": "8c162ef9b7135562b7479e05292df814",
+    "mtime": 1792351878.3538418,
+    "seen": 1792352948.4245765,
+    "ast_hash": "3988ee7436986bab06be695cdfa2764e",
     "semantic_hash": ""
   },
   "src/components/admin/layout/AdminSidebar.tsx": {
-    "mtime": 1791594774.2472095,
-    "seen": 1791595783.0676563,
-    "ast_hash": "c63d8719808ea80290dd64df8dff6085",
+    "mtime": 1791696233.1356847,
+    "seen": 1792352948.4245832,
+    "ast_hash": "84b1e6a66d4d6384028ee55c5e611122",
     "semantic_hash": ""
   },
   "src/components/admin/pedidos/PedidosTable.tsx": {
@@ -96,9 +96,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/settings/ConfiguracionWeb.tsx": {
-    "mtime": 1791595456.4773147,
-    "seen": 1791595783.0703058,
-    "ast_hash": "a6ed183baadc89364dea646873048a0f",
+    "mtime": 1792355762.7680597,
+    "seen": 1792356542.1547616,
+    "ast_hash": "cd1b93b1e6356c913b90f8fe4238c703",
     "semantic_hash": ""
   },
   "src/components/admin/usuarios/UsuariosManager.tsx": {
@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "src/components/catalogo/CatalogoGrid.tsx": {
-    "mtime": 1791594002.7755628,
-    "seen": 1791595783.0710838,
-    "ast_hash": "2f0857eff49a304ddad8b9e4f367103c",
+    "mtime": 1792356375.6980405,
+    "seen": 1792356542.1554,
+    "ast_hash": "12c4add4148f465d7d66a38dd3a343fe",
     "semantic_hash": ""
   },
   "src/components/catalogo/DetalleProducto.tsx": {
@@ -150,15 +150,15 @@
     "semantic_hash": "1bd02145e00494541cb402ec73383b4a"
   },
   "src/components/common/Footer.astro": {
-    "mtime": 1791594515.48008,
-    "seen": 1791595783.073929,
-    "ast_hash": "310c29589b1b3c5febb51731fe0d5cc0",
+    "mtime": 1791696793.4422562,
+    "seen": 1792352948.430419,
+    "ast_hash": "edbe77de6b862c299458c83e4ff022f0",
     "semantic_hash": ""
   },
   "src/components/common/Navbar.astro": {
-    "mtime": 1791583414.215465,
-    "seen": 1791584011.5128958,
-    "ast_hash": "431551479ecbf88bce2f050abc4a6320",
+    "mtime": 1792356427.5264635,
+    "seen": 1792356542.1581507,
+    "ast_hash": "3a97589631ac64a5c09b0550b46999d5",
     "semantic_hash": ""
   },
   "src/components/common/ShareButton.tsx": {
@@ -174,15 +174,15 @@
     "semantic_hash": ""
   },
   "src/components/common/SplashLoader.astro": {
-    "mtime": 1791568273.6960468,
-    "seen": 1791574096.2557025,
-    "ast_hash": "e04b0cc7d6a2c7f7580036452e1ff051",
+    "mtime": 1791696248.1622314,
+    "seen": 1792352948.431885,
+    "ast_hash": "7049877675bf59490771689e558db08e",
     "semantic_hash": ""
   },
   "src/components/common/TurnstileWidget.tsx": {
-    "mtime": 1791572838.6096091,
-    "seen": 1791574096.2557242,
-    "ast_hash": "5767d4a2737dc12326de33f0929dcbb1",
+    "mtime": 1792351268.3224216,
+    "seen": 1792352948.4323893,
+    "ast_hash": "d836be812a784bb32cb42e4efe12e863",
     "semantic_hash": ""
   },
   "src/components/common/WhatsAppContactModule.tsx": {
@@ -221,12 +221,6 @@
     "ast_hash": "9b013cc81755c77a841324d8d9eea061",
     "semantic_hash": ""
   },
-  "src/data/mockProducts.ts": {
-    "mtime": 1791352670.3742583,
-    "seen": 1791499573.9218519,
-    "ast_hash": "d4b59862ec90d4c03006cc0cb2dee8b9",
-    "semantic_hash": "d4b59862ec90d4c03006cc0cb2dee8b9"
-  },
   "src/env.d.ts": {
     "mtime": 1791520954.7852623,
     "seen": 1791574096.2579875,
@@ -234,15 +228,15 @@
     "semantic_hash": ""
   },
   "src/layouts/AdminLayout.astro": {
-    "mtime": 1791594855.2423153,
-    "seen": 1791595783.0858757,
-    "ast_hash": "e9d43bc95cf9f39524e64ec5368b07e0",
+    "mtime": 1792355634.9838307,
+    "seen": 1792356542.1645062,
+    "ast_hash": "3f2e9cc21d6fd54e40b2dd03b9076a54",
     "semantic_hash": ""
   },
   "src/layouts/Layout.astro": {
-    "mtime": 1791594278.8084126,
-    "seen": 1791595783.0858831,
-    "ast_hash": "0e31db8f514b92df4f4f0be114c536eb",
+    "mtime": 1792355617.8110085,
+    "seen": 1792356542.1645095,
+    "ast_hash": "b3960db35b32f79c6bdb1421ba17cc72",
     "semantic_hash": ""
   },
   "src/lib/cloudinary.ts": {
@@ -324,27 +318,27 @@
     "semantic_hash": ""
   },
   "src/pages/index.astro": {
-    "mtime": 1791572768.1966536,
-    "seen": 1791574096.259167,
-    "ast_hash": "80506ee5927bebd8472dc2d42a362245",
+    "mtime": 1791696900.4457407,
+    "seen": 1792352948.4438832,
+    "ast_hash": "cde565661e4862d0d60090db9d7bec06",
     "semantic_hash": ""
   },
   "src/pages/login.astro": {
-    "mtime": 1791583377.6595087,
-    "seen": 1791584011.5319686,
-    "ast_hash": "3a30fbe9508372a7b595f3e35e13db9c",
+    "mtime": 1792351327.1332972,
+    "seen": 1792352948.443889,
+    "ast_hash": "64530de60360e5b804c8c275cd1baa9a",
     "semantic_hash": ""
   },
   "src/pages/producto/[id].astro": {
-    "mtime": 1791572550.408087,
-    "seen": 1791574096.259187,
-    "ast_hash": "e6340db7c284e6faeab77db114819d8b",
+    "mtime": 1791696928.4532354,
+    "seen": 1792352948.4438992,
+    "ast_hash": "c63a81a3ccb39e2f657735243870714f",
     "semantic_hash": ""
   },
   "src/stores/cartStore.ts": {
-    "mtime": 1791583582.3437314,
-    "seen": 1791584011.5330637,
-    "ast_hash": "f8196070f64ed304bf259b7065a855c9",
+    "mtime": 1791696350.0219767,
+    "seen": 1792352948.4439034,
+    "ast_hash": "13922283b47af090366e260a5f2e9f5b",
     "semantic_hash": ""
   },
   "src/types/database.ts": {
@@ -419,24 +413,6 @@
     "ast_hash": "b71667a6212d06af0f371cf636fa9037",
     "semantic_hash": "b71667a6212d06af0f371cf636fa9037"
   },
-  "public/brand/zairen_logo_negativo.svg": {
-    "mtime": 1791339135.08831,
-    "seen": 1791574096.2627585,
-    "ast_hash": "8014093dd9f356cf760e6715a21b6575",
-    "semantic_hash": "8014093dd9f356cf760e6715a21b6575"
-  },
-  "public/brand/zairen_logo_oficial.svg": {
-    "mtime": 1791339135.08831,
-    "seen": 1791574096.2627647,
-    "ast_hash": "db15330f0d92252b7675d20d1866a3d9",
-    "semantic_hash": "db15330f0d92252b7675d20d1866a3d9"
-  },
-  "public/favicon.svg": {
-    "mtime": 1791339135.08831,
-    "seen": 1791574096.262823,
-    "ast_hash": "db15330f0d92252b7675d20d1866a3d9",
-    "semantic_hash": ""
-  },
   "src/assets/brand/zairen_logo_negativo.svg": {
     "mtime": 1791352670.3391588,
     "seen": 1791499573.9219108,
@@ -504,9 +480,9 @@
     "semantic_hash": ""
   },
   "src/components/common/ThemeToggle.tsx": {
-    "mtime": 1791568083.8645604,
-    "seen": 1791574096.255709,
-    "ast_hash": "02a86a54a82660ce714e9c53678fd107",
+    "mtime": 1792356445.8864408,
+    "seen": 1792356542.1597977,
+    "ast_hash": "99de04a134d09f759b0376b0c37f1bf1",
     "semantic_hash": ""
   },
   "src/components/home/BrandManifestoGrid.astro": {
@@ -516,9 +492,9 @@
     "semantic_hash": ""
   },
   "src/components/home/HeroPortada.astro": {
-    "mtime": 1791517849.365613,
-    "seen": 1791574096.2557423,
-    "ast_hash": "84cf235339f82f22ab0abe6fd4636af0",
+    "mtime": 1792355726.0785308,
+    "seen": 1792356542.161359,
+    "ast_hash": "64fcf5c70f4f56dcada5d30bb6ee175d",
     "semantic_hash": ""
   },
   "src/components/home/RecentProductsCarousel.tsx": {
@@ -528,15 +504,15 @@
     "semantic_hash": ""
   },
   "src/components/home/StatementMarquee.astro": {
-    "mtime": 1791518263.9516218,
-    "seen": 1791574096.2557533,
-    "ast_hash": "4ef4fc66ba333dbe6680cf999ac9b258",
+    "mtime": 1792355859.1825035,
+    "seen": 1792356542.161809,
+    "ast_hash": "680f609e59ddc58865fb3cf974062d89",
     "semantic_hash": ""
   },
   "src/pages/marca.astro": {
-    "mtime": 1791572791.7296743,
-    "seen": 1791574096.2591794,
-    "ast_hash": "2c39c2b586fc53aa3b7610af2f821764",
+    "mtime": 1792351681.151333,
+    "seen": 1792352948.443894,
+    "ast_hash": "a9cad0159a925adffd6bbd8f49c97373",
     "semantic_hash": ""
   },
   ".agents/skills/impeccable/SKILL.md": {
@@ -845,84 +821,6 @@
     "ast_hash": "512a9cfb183d7a9ff3afde7a10245192",
     "semantic_hash": ""
   },
-  "public/brand/zairen_brand_wordmark.png": {
-    "mtime": 1791172442.0,
-    "seen": 1791574096.2627325,
-    "ast_hash": "ede12d5e1462f389192c9facf7cabf6d",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logo_grises.svg": {
-    "mtime": 1791339135.1039324,
-    "seen": 1791574096.2627385,
-    "ast_hash": "24b8f88976d1fc45b7605ad38442e137",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logo_monocromo_blanco.svg": {
-    "mtime": 1791339135.1039324,
-    "seen": 1791574096.2627447,
-    "ast_hash": "ef32196dbfb3231dba6867b58fd7f4a4",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logo_monocromo_negro.svg": {
-    "mtime": 1791339135.1039324,
-    "seen": 1791574096.2627509,
-    "ast_hash": "ea0acf6e63b5a76d64d64833f8be0d2f",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logo_positivo.svg": {
-    "mtime": 1791339135.08831,
-    "seen": 1791574096.2627704,
-    "ast_hash": "db15330f0d92252b7675d20d1866a3d9",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logotipo_horizontal.svg": {
-    "mtime": 1791339135.3183084,
-    "seen": 1791574096.2627764,
-    "ast_hash": "ebd1119c2ff87bc368fe90f06065c377",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logotipo_horizontal_negativo.svg": {
-    "mtime": 1791339135.3183084,
-    "seen": 1791574096.2627819,
-    "ast_hash": "038be3f6383c6a1dcb02d7ecba4ec68f",
-    "semantic_hash": ""
-  },
-  "public/brand/zairen_logotipo_vertical.svg": {
-    "mtime": 1791339135.3183084,
-    "seen": 1791574096.2627873,
-    "ast_hash": "2323fd4a083d1cc13f9d02984f514cdb",
-    "semantic_hash": ""
-  },
-  "public/editorial/editorial_female_washed.png": {
-    "mtime": 1791172442.0,
-    "seen": 1791574096.2627926,
-    "ast_hash": "01c5224884020207ec51114cbc5896f1",
-    "semantic_hash": ""
-  },
-  "public/editorial/editorial_male_oversized.png": {
-    "mtime": 1791172442.0,
-    "seen": 1791574096.2627983,
-    "ast_hash": "60c0ed3949e820810454b0c05979c280",
-    "semantic_hash": ""
-  },
-  "public/editorial/editorial_white_heavyweight.png": {
-    "mtime": 1791172442.0,
-    "seen": 1791574096.2628045,
-    "ast_hash": "5ebc90e71a8003a5d9fedee0a697c693",
-    "semantic_hash": ""
-  },
-  "public/editorial/hero_polera_plain_black.png": {
-    "mtime": 1791517314.4023416,
-    "seen": 1791574096.262811,
-    "ast_hash": "8545110b8225a0972d69f98334836b90",
-    "semantic_hash": ""
-  },
-  "public/editorial/hero_polera_zairen.png": {
-    "mtime": 1791514288.1742074,
-    "seen": 1791574096.2628162,
-    "ast_hash": "924efdd579bdc4eb84d8e1617de751b2",
-    "semantic_hash": ""
-  },
   "src/components/admin/metricas/MetricasManager.tsx": {
     "mtime": 1791595564.2581377,
     "seen": 1791595783.0676622,
@@ -933,6 +831,36 @@
     "mtime": 1791595569.595511,
     "seen": 1791595783.0898013,
     "ast_hash": "a0441384744570de484b8a9c220bca59",
+    "semantic_hash": ""
+  },
+  "src/lib/configuracion.ts": {
+    "mtime": 1791696572.8551633,
+    "seen": 1792352948.4376035,
+    "ast_hash": "c11ff92dd4602ba82f1f6ea1250106f7",
+    "semantic_hash": ""
+  },
+  "src/pages/api/verify-turnstile.ts": {
+    "mtime": 1791695738.5079603,
+    "seen": 1792352948.4433587,
+    "ast_hash": "0fdc077e3faf50401f946094e5d73e93",
+    "semantic_hash": ""
+  },
+  "PRODUCCION.md": {
+    "mtime": 1792352900.917873,
+    "seen": 1792352948.476024,
+    "ast_hash": "16d8eaa2e10f45ce1325265eebb28580",
+    "semantic_hash": ""
+  },
+  "docs/plan-produccion-real.md": {
+    "mtime": 1792352856.9727263,
+    "seen": 1792352948.476514,
+    "ast_hash": "68ca810f40bf05568f68b3305e959c55",
+    "semantic_hash": ""
+  },
+  "scratch_page.html": {
+    "mtime": 1792354988.0470245,
+    "seen": 1792356542.1893373,
+    "ast_hash": "f6c415fb183e2381b64f1e5bae5cb14e",
     "semantic_hash": ""
   }
 }

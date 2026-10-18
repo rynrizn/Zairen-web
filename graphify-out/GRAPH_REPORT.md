@@ -1,7 +1,7 @@
 # Graph Report - Zairen-web  (2026-10-18)
 
 ## Corpus Check
-- 140 files · ~192,131 words
+- 140 files · ~192,261 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 15 file(s) not represented in the graph (top: (none) 5, .toml 4, .css 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e3187d76`
+- Built from commit: `042fb23c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
