@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 export interface ClienteRecord {
   id: string;
@@ -23,187 +24,80 @@ export interface ClienteRecord {
   }[];
 }
 
-const mockClientes: ClienteRecord[] = [
-  {
-    id: 'cli-1',
-    name: 'Mateo Rojas',
-    initials: 'MR',
-    phone: '+591 78945612',
-    city: 'La Paz - Sopocachi',
-    address: 'Calle 20 #410, Edif. Solaris Apto 4B',
-    category: 'VIP',
-    totalSpent: 1240.0,
-    ordersCount: 5,
-    lastOrderDate: 'Hoy 14:26',
-    notes: 'Coleccionista de Mecha Drop. Talla preferida: XL.',
-    orders: [
-      {
-        id: 'ord-128',
-        ticketNumber: '#0128',
-        date: 'Hoy 14:26',
-        items: 'Samurai Mecha Kanji XL, Cyber Geisha M',
-        total: 280.0,
-        status: 'Pendiente',
-      },
-      {
-        id: 'ord-094',
-        ticketNumber: '#0094',
-        date: '12 Sep 2026',
-        items: 'Cyber-Spine Heavy Hoodie XL',
-        total: 280.0,
-        status: 'Entregado',
-      },
-      {
-        id: 'ord-072',
-        ticketNumber: '#0072',
-        date: '28 Ago 2026',
-        items: 'Void Modular Cargo Pant XL, Zen Kanji L',
-        total: 435.0,
-        status: 'Entregado',
-      },
-    ],
-  },
-  {
-    id: 'cli-2',
-    name: 'Lucía Fernández',
-    initials: 'LF',
-    phone: '+591 60129481',
-    city: 'Cochabamba - Cala Cala',
-    address: 'Av. Libertador Bolívar #1420',
-    category: 'Recurrente',
-    totalSpent: 490.0,
-    ordersCount: 3,
-    lastOrderDate: 'Hoy 14:04',
-    orders: [
-      {
-        id: 'ord-127',
-        ticketNumber: '#0127',
-        date: 'Hoy 14:04',
-        items: 'Tokyo Vanguard Boxy Tee S',
-        total: 130.0,
-        status: 'Pendiente',
-      },
-      {
-        id: 'ord-102',
-        ticketNumber: '#0102',
-        date: '18 Sep 2026',
-        items: 'Cyber Geisha Oversized Tee S',
-        total: 140.0,
-        status: 'Entregado',
-      },
-    ],
-  },
-  {
-    id: 'cli-3',
-    name: 'Carlos Mamani',
-    initials: 'CM',
-    phone: '+591 76543210',
-    city: 'Santa Cruz - Equipetrol',
-    address: 'Calle 8 Este #45, Edif. Platinum PH 2',
-    category: 'Nuevo',
-    totalSpent: 125.0,
-    ordersCount: 1,
-    lastOrderDate: 'Hoy 13:30',
-    orders: [
-      {
-        id: 'ord-126',
-        ticketNumber: '#0126',
-        date: 'Hoy 13:30',
-        items: 'Zen Kanji Shadow Heavy Tee L',
-        total: 125.0,
-        status: 'Pendiente',
-      },
-    ],
-  },
-  {
-    id: 'cli-4',
-    name: 'Alejandro Cruz',
-    initials: 'AC',
-    phone: '+591 71549920',
-    city: 'La Paz - San Miguel',
-    address: 'Calle 21 Calacoto #850, Torre Cesur 3A',
-    category: 'VIP',
-    totalSpent: 980.0,
-    ordersCount: 4,
-    lastOrderDate: 'Hoy 11:20',
-    orders: [
-      {
-        id: 'ord-125',
-        ticketNumber: '#0125',
-        date: 'Hoy 11:20',
-        items: 'Void Modular Cargo M, Tokyo Vanguard L',
-        total: 440.0,
-        status: 'Confirmado',
-      },
-      {
-        id: 'ord-088',
-        ticketNumber: '#0088',
-        date: '02 Sep 2026',
-        items: 'Samurai Mecha Kanji M',
-        total: 145.0,
-        status: 'Entregado',
-      },
-    ],
-  },
-  {
-    id: 'cli-5',
-    name: 'Valentina Paz',
-    initials: 'VP',
-    phone: '+591 79901412',
-    city: 'Cochabamba - Recoleta',
-    address: 'Av. América Este #320',
-    category: 'Recurrente',
-    totalSpent: 560.0,
-    ordersCount: 2,
-    lastOrderDate: 'Ayer',
-    orders: [
-      {
-        id: 'ord-124',
-        ticketNumber: '#0124',
-        date: 'Ayer 18:40',
-        items: 'Cyber-Spine Heavy Hoodie S',
-        total: 280.0,
-        status: 'Confirmado',
-      },
-      {
-        id: 'ord-066',
-        ticketNumber: '#0066',
-        date: '15 Ago 2026',
-        items: 'Cyber-Spine Heavy Hoodie S',
-        total: 280.0,
-        status: 'Entregado',
-      },
-    ],
-  },
-  {
-    id: 'cli-6',
-    name: 'Daniel Choque',
-    initials: 'DC',
-    phone: '+591 72088193',
-    city: 'La Paz - Miraflores',
-    address: 'Av. Saavedra #1230, Edif. Illimani Piso 7',
-    category: 'VIP',
-    totalSpent: 890.0,
-    ordersCount: 4,
-    lastOrderDate: '24 Oct',
-    orders: [
-      {
-        id: 'ord-120',
-        ticketNumber: '#0120',
-        date: '24 Oct 16:15',
-        items: 'Samurai Mecha Kanji L, Zen Kanji Shadow L',
-        total: 270.0,
-        status: 'Entregado',
-      },
-    ],
-  },
-];
-
 export function ClientesTable() {
-  const [clientes, setClientes] = useState<ClienteRecord[]>(mockClientes);
+  const [clientes, setClientes] = useState<ClienteRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [selectedCliente, setSelectedCliente] = useState<ClienteRecord | null>(null);
+
+  useEffect(() => {
+    async function loadClientes() {
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('cliente')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching clientes:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const mapped: ClienteRecord[] = data.map((c: any) => {
+            const rawName = c.nombre || 'Cliente Particular';
+            const initials = rawName
+              .split(' ')
+              .map((w: string) => w[0])
+              .slice(0, 2)
+              .join('')
+              .toUpperCase() || 'CP';
+
+            const purchases = Number(c.cantidad_compras) || 0;
+            const category: 'VIP' | 'Recurrente' | 'Nuevo' =
+              c.tipo_cliente === 'VIP' ? 'VIP' : purchases > 1 ? 'Recurrente' : 'Nuevo';
+
+            const lastDate = c.ultimo_contacto
+              ? new Date(c.ultimo_contacto).toLocaleDateString('es-BO')
+              : c.created_at
+              ? new Date(c.created_at).toLocaleDateString('es-BO')
+              : 'Reciente';
+
+            return {
+              id: c.id,
+              name: rawName,
+              initials,
+              phone: c.telefono || '+591 00000000',
+              city: c.ciudad || 'Bolivia',
+              address: c.direccion || 'Sin dirección registrada',
+              category,
+              totalSpent: Number(c.total_gastado) || 0,
+              ordersCount: purchases,
+              lastOrderDate: lastDate,
+              notes: c.notas || undefined,
+              orders: [],
+            };
+          });
+
+          setClientes(mapped);
+        } else {
+          setClientes([]);
+        }
+      } catch (err) {
+        console.error('Failed to load clientes from Supabase:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadClientes();
+  }, []);
 
   // Estadísticas
   const totalClientes = clientes.length;
@@ -321,78 +215,92 @@ export function ClientesTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04] text-[#e5e2e1]">
-            {filteredClientes.map((cliente) => {
-              const cleanPhone = cliente.phone.replace(/\D/g, '');
-              const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-                `Hola ${cliente.name}, te escribimos de ZAIREN LAB.`
-              )}`;
+            {loading ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-xs font-mono text-[#ac8888] animate-pulse">
+                  Cargando directorio de clientes desde Supabase...
+                </td>
+              </tr>
+            ) : filteredClientes.length > 0 ? (
+              filteredClientes.map((cliente) => {
+                const cleanPhone = cliente.phone.replace(/\D/g, '');
+                const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+                  `Hola ${cliente.name}, te escribimos de ZAIREN LAB.`
+                )}`;
 
-              return (
-                <tr key={cliente.id} className="hover:bg-[#201f1f]/50 transition-colors">
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-none bg-[#201f1f] text-white font-headline text-xs font-bold flex items-center justify-center shrink-0 border border-white/[0.08]">
-                        {cliente.initials}
+                return (
+                  <tr key={cliente.id} className="hover:bg-[#201f1f]/50 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-none bg-[#201f1f] text-white font-headline text-xs font-bold flex items-center justify-center shrink-0 border border-white/[0.08]">
+                          {cliente.initials}
+                        </div>
+                        <div>
+                          <span className="font-bold text-white block">{cliente.name}</span>
+                          {cliente.notes && (
+                            <span className="font-mono text-[10px] text-[#ac8888] truncate max-w-xs block">
+                              {cliente.notes}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-bold text-white block">{cliente.name}</span>
-                        {cliente.notes && (
-                          <span className="font-mono text-[10px] text-[#ac8888] truncate max-w-xs block">
-                            {cliente.notes}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] font-bold uppercase tracking-wider ${
-                        cliente.category === 'VIP'
-                          ? 'bg-[#dc143c]/20 text-[#dc143c] border border-[#dc143c]/40'
-                          : cliente.category === 'Recurrente'
-                          ? 'bg-blue-950 text-blue-300 border border-blue-800/40'
-                          : 'bg-[#201f1f] text-[#ac8888] border border-white/[0.06]'
-                      }`}
-                    >
-                      {cliente.category}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 font-mono text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#ffb3b3]">{cliente.phone}</span>
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-6 h-6 rounded-none bg-emerald-950 text-emerald-400 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-colors"
-                        title="Abrir WhatsApp"
+                    </td>
+                    <td className="py-3.5 px-3">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] font-bold uppercase tracking-wider ${
+                          cliente.category === 'VIP'
+                            ? 'bg-[#dc143c]/20 text-[#dc143c] border border-[#dc143c]/40'
+                            : cliente.category === 'Recurrente'
+                            ? 'bg-blue-950 text-blue-300 border border-blue-800/40'
+                            : 'bg-[#201f1f] text-[#ac8888] border border-white/[0.06]'
+                        }`}
                       >
-                        <span className="material-symbols-outlined text-[14px]">chat</span>
-                      </a>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-[#ac8888]">{cliente.city}</td>
-                  <td className="py-3.5 px-3 text-right font-price font-bold text-white">
-                    Bs {cliente.totalSpent.toFixed(2)}
-                  </td>
-                  <td className="py-3.5 px-3 text-center font-mono font-bold text-white">
-                    {cliente.ordersCount}
-                  </td>
-                  <td className="py-3.5 px-3 font-mono text-[11px] text-[#ac8888]">
-                    {cliente.lastOrderDate}
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCliente(cliente)}
-                      className="px-3 py-1 rounded-none bg-[#141416] hover:bg-[#dc143c] text-[#e5e2e1] hover:text-white font-mono text-[11px] uppercase transition-all cursor-pointer border border-white/[0.06]"
-                    >
-                      Historial
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
+                        {cliente.category}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 font-mono text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#ffb3b3]">{cliente.phone}</span>
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-6 h-6 rounded-none bg-emerald-950 text-emerald-400 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-colors"
+                          title="Abrir WhatsApp"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">chat</span>
+                        </a>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-[#ac8888]">{cliente.city}</td>
+                    <td className="py-3.5 px-3 text-right font-price font-bold text-white">
+                      Bs {cliente.totalSpent.toFixed(2)}
+                    </td>
+                    <td className="py-3.5 px-3 text-center font-mono font-bold text-white">
+                      {cliente.ordersCount}
+                    </td>
+                    <td className="py-3.5 px-3 font-mono text-[11px] text-[#ac8888]">
+                      {cliente.lastOrderDate}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCliente(cliente)}
+                        className="px-3 py-1 rounded-none bg-[#141416] hover:bg-[#dc143c] text-[#e5e2e1] hover:text-white font-mono text-[11px] uppercase transition-all cursor-pointer border border-white/[0.06]"
+                      >
+                        Historial
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-xs font-mono text-[#ac8888]">
+                  No hay clientes registrados en la base de datos.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

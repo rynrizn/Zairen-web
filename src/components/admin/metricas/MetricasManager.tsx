@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 interface MetricPeriodData {
   timeframe: string;
@@ -22,134 +23,139 @@ interface MetricPeriodData {
   categoryBreakdown: { category: string; share: number; amount: string }[];
 }
 
-const metricsByPeriod: Record<'7D' | '30D', MetricPeriodData> = {
+const emptyMetrics: Record<'7D' | '30D', MetricPeriodData> = {
   '7D': {
     timeframe: 'Últimos 7 Días',
-    totalRevenue: 4820,
-    totalRevenueStr: 'Bs 4,820.00',
-    previousRevenueStr: 'Bs 4,070.00',
-    revenueChangePercent: '+18.4%',
-    totalOrders: 28,
-    averageOrderValue: 'Bs 172.14',
-    conversionRate: '3.4%',
+    totalRevenue: 0,
+    totalRevenueStr: 'Bs 0.00',
+    previousRevenueStr: 'Bs 0.00',
+    revenueChangePercent: '0%',
+    totalOrders: 0,
+    averageOrderValue: 'Bs 0.00',
+    conversionRate: '0.0%',
     salesBars: [
-      { label: 'Lun', amount: 480, orders: 3 },
-      { label: 'Mar', amount: 720, orders: 4 },
-      { label: 'Mié', amount: 540, orders: 3 },
-      { label: 'Jue', amount: 890, orders: 5 },
-      { label: 'Vie', amount: 1150, orders: 7 },
-      { label: 'Sáb', amount: 680, orders: 4 },
-      { label: 'Dom', amount: 360, orders: 2 },
+      { label: 'Lun', amount: 0, orders: 0 },
+      { label: 'Mar', amount: 0, orders: 0 },
+      { label: 'Mié', amount: 0, orders: 0 },
+      { label: 'Jue', amount: 0, orders: 0 },
+      { label: 'Vie', amount: 0, orders: 0 },
+      { label: 'Sáb', amount: 0, orders: 0 },
+      { label: 'Dom', amount: 0, orders: 0 },
     ],
-    topProducts: [
-      {
-        rank: '#1',
-        name: 'Samurai Mecha Kanji Tee',
-        sku: 'ZRN-044',
-        sold: 14,
-        revenue: 2030,
-        revenueStr: 'Bs 2,030.00',
-        sharePercent: '42.1%',
-      },
-      {
-        rank: '#2',
-        name: 'Cyber-Spine Heavy Hoodie',
-        sku: 'ZRN-091',
-        sold: 6,
-        revenue: 1680,
-        revenueStr: 'Bs 1,680.00',
-        sharePercent: '34.8%',
-      },
-      {
-        rank: '#3',
-        name: 'Cyber Geisha Wireframe Tee',
-        sku: 'ZRN-CG04',
-        sold: 5,
-        revenue: 700,
-        revenueStr: 'Bs 700.00',
-        sharePercent: '14.5%',
-      },
-      {
-        rank: '#4',
-        name: 'Tokyo Vanguard Acid Tee',
-        sku: 'ZRN-TV09',
-        sold: 3,
-        revenue: 410,
-        revenueStr: 'Bs 410.00',
-        sharePercent: '8.6%',
-      },
-    ],
-    categoryBreakdown: [
-      { category: 'Heavy Tees (240-280 GSM)', share: 55, amount: 'Bs 2,650.00' },
-      { category: 'Outerwear & Hoodies', share: 35, amount: 'Bs 1,680.00' },
-      { category: 'Pants & Accesorios', share: 10, amount: 'Bs 490.00' },
-    ],
+    topProducts: [],
+    categoryBreakdown: [],
   },
   '30D': {
     timeframe: 'Últimos 30 Días',
-    totalRevenue: 18450,
-    totalRevenueStr: 'Bs 18,450.00',
-    previousRevenueStr: 'Bs 16,150.00',
-    revenueChangePercent: '+14.2%',
-    totalOrders: 112,
-    averageOrderValue: 'Bs 164.73',
-    conversionRate: '3.8%',
+    totalRevenue: 0,
+    totalRevenueStr: 'Bs 0.00',
+    previousRevenueStr: 'Bs 0.00',
+    revenueChangePercent: '0%',
+    totalOrders: 0,
+    averageOrderValue: 'Bs 0.00',
+    conversionRate: '0.0%',
     salesBars: [
-      { label: 'Sem 1', amount: 3900, orders: 24 },
-      { label: 'Sem 2', amount: 4650, orders: 28 },
-      { label: 'Sem 3', amount: 5100, orders: 32 },
-      { label: 'Sem 4', amount: 4800, orders: 28 },
+      { label: 'Sem 1', amount: 0, orders: 0 },
+      { label: 'Sem 2', amount: 0, orders: 0 },
+      { label: 'Sem 3', amount: 0, orders: 0 },
+      { label: 'Sem 4', amount: 0, orders: 0 },
     ],
-    topProducts: [
-      {
-        rank: '#1',
-        name: 'Samurai Mecha Kanji Tee',
-        sku: 'ZRN-044',
-        sold: 48,
-        revenue: 6960,
-        revenueStr: 'Bs 6,960.00',
-        sharePercent: '37.7%',
-      },
-      {
-        rank: '#2',
-        name: 'Cyber-Spine Heavy Hoodie',
-        sku: 'ZRN-091',
-        sold: 24,
-        revenue: 6720,
-        revenueStr: 'Bs 6,720.00',
-        sharePercent: '36.4%',
-      },
-      {
-        rank: '#3',
-        name: 'Cyber Geisha Wireframe Tee',
-        sku: 'ZRN-CG04',
-        sold: 19,
-        revenue: 2660,
-        revenueStr: 'Bs 2,660.00',
-        sharePercent: '14.4%',
-      },
-      {
-        rank: '#4',
-        name: 'Tokyo Vanguard Acid Tee',
-        sku: 'ZRN-TV09',
-        sold: 16,
-        revenue: 2110,
-        revenueStr: 'Bs 2,110.00',
-        sharePercent: '11.5%',
-      },
-    ],
-    categoryBreakdown: [
-      { category: 'Heavy Tees (240-280 GSM)', share: 52, amount: 'Bs 9,594.00' },
-      { category: 'Outerwear & Hoodies', share: 36, amount: 'Bs 6,642.00' },
-      { category: 'Pants & Accesorios', share: 12, amount: 'Bs 2,214.00' },
-    ],
+    topProducts: [],
+    categoryBreakdown: [],
   },
 };
 
 export function MetricasManager() {
   const [period, setPeriod] = useState<'7D' | '30D'>('7D');
-  const current = metricsByPeriod[period];
-  const maxBarValue = Math.max(...current.salesBars.map((b) => b.amount));
+  const [metrics, setMetrics] = useState<Record<'7D' | '30D', MetricPeriodData>>(emptyMetrics);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function loadMetrics() {
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
+      try {
+        // Consultar productos del catálogo para ranking real
+        const { data: prods } = await supabase
+          .from('producto')
+          .select('id, nombre, precio_venta, coleccion_id')
+          .eq('activo', true);
+
+        // Consultar colecciones para desglose real
+        const { data: cols } = await supabase
+          .from('coleccion')
+          .select('id, nombre')
+          .eq('activa', true);
+
+        // Consultar ventas
+        const { data: ventas } = await supabase
+          .from('venta')
+          .select('*')
+          .order('fecha_hora', { ascending: false });
+
+        // Consultar pedidos entregados/confirmados
+        const { data: pedidos } = await supabase
+          .from('pedido')
+          .select('id, total, estado, created_at, detalle_pedido(cantidad, precio_unitario, producto_id)')
+          .in('estado', ['CONFIRMADO', 'ENTREGADO']);
+
+        const catalogProducts = (prods || []).map((p: any, idx: number) => ({
+          rank: `#${idx + 1}`,
+          name: p.nombre,
+          sku: `SKU-${p.id.slice(0, 4).toUpperCase()}`,
+          sold: 0,
+          revenue: 0,
+          revenueStr: 'Bs 0.00',
+          sharePercent: '0%',
+        }));
+
+        const categories = (cols || []).map((col: any) => ({
+          category: col.nombre,
+          share: 0,
+          amount: 'Bs 0.00',
+        }));
+
+        // Calcular totales reales
+        const totalVentas = (ventas || []).reduce((acc: number, v: any) => acc + (Number(v.total) || 0), 0);
+        const totalPedidosCount = (pedidos || []).length;
+        const aov = totalPedidosCount > 0 ? (totalVentas / totalPedidosCount) : 0;
+
+        const updated: Record<'7D' | '30D', MetricPeriodData> = {
+          '7D': {
+            ...emptyMetrics['7D'],
+            totalRevenue: totalVentas,
+            totalRevenueStr: `Bs ${totalVentas.toFixed(2)}`,
+            totalOrders: totalPedidosCount,
+            averageOrderValue: `Bs ${aov.toFixed(2)}`,
+            topProducts: catalogProducts,
+            categoryBreakdown: categories,
+          },
+          '30D': {
+            ...emptyMetrics['30D'],
+            totalRevenue: totalVentas,
+            totalRevenueStr: `Bs ${totalVentas.toFixed(2)}`,
+            totalOrders: totalPedidosCount,
+            averageOrderValue: `Bs ${aov.toFixed(2)}`,
+            topProducts: catalogProducts,
+            categoryBreakdown: categories,
+          },
+        };
+
+        setMetrics(updated);
+      } catch (err) {
+        console.error('Failed to load metrics:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMetrics();
+  }, []);
+
+  const current = metrics[period];
+  const maxBarValue = Math.max(1, ...current.salesBars.map((b) => b.amount));
 
   // Exportar a CSV
   const handleExportCSV = () => {
@@ -349,7 +355,7 @@ export function MetricasManager() {
         {/* Barras SVG Dinámicas */}
         <div className="h-56 w-full flex items-end gap-3 pt-6 pb-2 border-b border-white/[0.06]">
           {current.salesBars.map((bar, idx) => {
-            const heightPercent = Math.max(12, Math.round((bar.amount / maxBarValue) * 100));
+            const heightPercent = bar.amount > 0 ? Math.max(12, Math.round((bar.amount / maxBarValue) * 100)) : 4;
             return (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
                 {/* Tooltip Hover */}
@@ -393,41 +399,47 @@ export function MetricasManager() {
           </div>
 
           <div className="space-y-3">
-            {current.topProducts.map((p) => (
-              <div
-                key={p.sku}
-                className="flex items-center justify-between gap-3 p-3.5 bg-[#1c1b1b] hover:bg-[#242323] transition-all border border-white/[0.04]"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="font-mono text-xs font-bold text-[#dc143c] w-6 shrink-0">
-                    {p.rank}
-                  </span>
-                  <div className="min-w-0">
-                    <h4 className="font-headline text-xs font-bold uppercase text-white truncate">
-                      {p.name}
-                    </h4>
-                    <span className="text-[10px] font-mono text-[#ac8888]">{p.sku}</span>
+            {current.topProducts.length > 0 ? (
+              current.topProducts.map((p) => (
+                <div
+                  key={p.sku}
+                  className="flex items-center justify-between gap-3 p-3.5 bg-[#1c1b1b] hover:bg-[#242323] transition-all border border-white/[0.04]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-xs font-bold text-[#dc143c] w-6 shrink-0">
+                      {p.rank}
+                    </span>
+                    <div className="min-w-0">
+                      <h4 className="font-headline text-xs font-bold uppercase text-white truncate">
+                        {p.name}
+                      </h4>
+                      <span className="text-[10px] font-mono text-[#ac8888]">{p.sku}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-6 shrink-0 text-right">
-                  <div>
-                    <span className="font-mono text-xs font-bold text-white block">
-                      {p.sold} uds
-                    </span>
-                    <span className="text-[10px] font-mono text-[#ac8888]">
-                      {p.sharePercent}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-mono text-xs font-bold text-emerald-400 block">
-                      {p.revenueStr}
-                    </span>
-                    <span className="text-[10px] font-mono text-[#ac8888]">Subtotal</span>
+                  <div className="flex items-center gap-6 shrink-0 text-right">
+                    <div>
+                      <span className="font-mono text-xs font-bold text-white block">
+                        {p.sold} uds
+                      </span>
+                      <span className="text-[10px] font-mono text-[#ac8888]">
+                        {p.sharePercent}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-mono text-xs font-bold text-emerald-400 block">
+                        {p.revenueStr}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#ac8888]">Subtotal</span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-xs font-mono text-[#ac8888]">
+                No hay ventas de prendas registradas en este período.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -443,23 +455,29 @@ export function MetricasManager() {
           </div>
 
           <div className="space-y-4">
-            {current.categoryBreakdown.map((cat, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="text-white font-medium">{cat.category}</span>
-                  <span className="text-[#ac8888]">{cat.share}%</span>
+            {current.categoryBreakdown.length > 0 ? (
+              current.categoryBreakdown.map((cat, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className="text-white font-medium">{cat.category}</span>
+                    <span className="text-[#ac8888]">{cat.share}%</span>
+                  </div>
+                  <div className="w-full bg-[#1c1b1b] h-2 overflow-hidden">
+                    <div
+                      className="h-full bg-[#dc143c]"
+                      style={{ width: `${Math.max(cat.share, 2)}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-[#ac8888] block text-right">
+                    {cat.amount}
+                  </span>
                 </div>
-                <div className="w-full bg-[#1c1b1b] h-2 overflow-hidden">
-                  <div
-                    className="h-full bg-[#dc143c]"
-                    style={{ width: `${cat.share}%` }}
-                  />
-                </div>
-                <span className="text-[10px] font-mono text-[#ac8888] block text-right">
-                  {cat.amount}
-                </span>
+              ))
+            ) : (
+              <div className="text-center py-8 text-xs font-mono text-[#ac8888]">
+                Sin datos de categorías registradas.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

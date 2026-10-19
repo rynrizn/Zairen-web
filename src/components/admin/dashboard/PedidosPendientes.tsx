@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 export interface PendingOrder {
   id: string;
@@ -11,50 +12,108 @@ export interface PendingOrder {
   total: number;
 }
 
-const initialOrders: PendingOrder[] = [
-  {
-    id: 'ord-128',
-    orderNumber: '#128',
-    clientName: 'Mateo Rojas',
-    timeAgo: 'Hace 12 min',
-    paymentMethod: 'Efectivo contra entrega',
-    itemsSummary: '2 items: Samurai Mecha Kanji XL, Cyber Geisha M',
-    total: 280.0,
-  },
-  {
-    id: 'ord-127',
-    orderNumber: '#127',
-    clientName: 'Lucía Fernández',
-    timeAgo: 'Hace 34 min',
-    paymentMethod: 'QR Simple / Transferencia',
-    itemsSummary: '1 item: Tokyo Vanguard S',
-    total: 130.0,
-  },
-  {
-    id: 'ord-126',
-    orderNumber: '#126',
-    clientName: 'Carlos Mamani',
-    timeAgo: 'Hace 1 hora',
-    paymentMethod: 'Efectivo contra entrega',
-    itemsSummary: '1 item: Zen Kanji Shadow L',
-    total: 125.0,
-  },
-];
-
 export function PedidosPendientes() {
-  const [orders, setOrders] = useState<PendingOrder[]>(initialOrders);
+  const [orders, setOrders] = useState<PendingOrder[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const handleConfirm = (order: PendingOrder) => {
-    setOrders((prev) => prev.filter((o) => o.id !== order.id));
-    toast.success(`Pedido ${order.orderNumber} confirmado`, {
-      description: `Cliente: ${order.clientName} • Total: Bs ${order.total.toFixed(2)}`,
-    });
+  useEffect(() => {
+    async function loadPendingOrders() {
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('pedido')
+          .select(`
+            id,
+            numero_orden,
+            cliente_nombre,
+            created_at,
+            total,
+            observacion,
+            detalle_pedido (
+              cantidad,
+              precio_unitario,
+              producto:producto_id (nombre)
+            )
+          `)
+          .eq('estado', 'PENDIENTE')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          console.error('Error fetching pending orders:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const mapped: PendingOrder[] = data.map((p: any) => {
+            const count = p.detalle_pedido?.length || 0;
+            const summary = p.detalle_pedido && p.detalle_pedido.length > 0
+              ? p.detalle_pedido.map((d: any) => `${d.cantidad}x ${d.producto?.nombre || 'Producto'}`).join(', ')
+              : 'Sin detalles de items';
+
+            const createdDate = new Date(p.created_at);
+            const diffMin = Math.max(1, Math.floor((Date.now() - createdDate.getTime()) / 60000));
+            const timeAgo = diffMin < 60 ? `Hace ${diffMin} min` : `Hace ${Math.floor(diffMin / 60)}h`;
+
+            return {
+              id: p.id,
+              orderNumber: `#${String(p.numero_orden || '---').padStart(4, '0')}`,
+              clientName: p.cliente_nombre || 'Cliente Particular',
+              timeAgo,
+              paymentMethod: p.observacion?.includes('QR') ? 'QR Simple' : 'Transferencia / Efectivo',
+              itemsSummary: `${count} item(s): ${summary}`,
+              total: Number(p.total) || 0,
+            };
+          });
+          setOrders(mapped);
+        } else {
+          setOrders([]);
+        }
+      } catch (err) {
+        console.error('Failed to load pending orders:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPendingOrders();
+  }, []);
+
+  const handleConfirm = async (order: PendingOrder) => {
+    try {
+      if (isSupabaseConfigured) {
+        await supabase
+          .from('pedido')
+          .update({ estado: 'CONFIRMADO' })
+          .eq('id', order.id);
+      }
+      setOrders((prev) => prev.filter((o) => o.id !== order.id));
+      toast.success(`Pedido ${order.orderNumber} confirmado`, {
+        description: `Cliente: ${order.clientName} • Total: Bs ${order.total.toFixed(2)}`,
+      });
+    } catch (err) {
+      toast.error('Error al confirmar pedido');
+    }
   };
 
-  const handleReject = (order: PendingOrder) => {
+  const handleReject = async (order: PendingOrder) => {
     if (confirm(`¿Rechazar y liberar stock para el pedido ${order.orderNumber}?`)) {
-      setOrders((prev) => prev.filter((o) => o.id !== order.id));
-      toast.info(`Pedido ${order.orderNumber} cancelado`);
+      try {
+        if (isSupabaseConfigured) {
+          await supabase
+            .from('pedido')
+            .update({ estado: 'CANCELADO' })
+            .eq('id', order.id);
+        }
+        setOrders((prev) => prev.filter((o) => o.id !== order.id));
+        toast.info(`Pedido ${order.orderNumber} cancelado`);
+      } catch (err) {
+        toast.error('Error al cancelar pedido');
+      }
     }
   };
 
@@ -94,7 +153,11 @@ export function PedidosPendientes() {
 
       {/* Lista de Pedidos */}
       <div className="grid grid-cols-1 gap-3">
-        {orders.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-8 text-xs font-mono text-[#ac8888] animate-pulse">
+            Consultando estado de pedidos en tiempo real...
+          </div>
+        ) : orders.length > 0 ? (
           orders.map((order) => (
             <div
               key={order.id}
@@ -152,8 +215,14 @@ export function PedidosPendientes() {
             </div>
           ))
         ) : (
-          <div className="text-center py-8 text-xs font-mono text-[#ac8888]">
-            ✓ Todos los pedidos han sido revisados y procesados.
+          <div className="text-center py-10 px-4 rounded-none bg-[#141416]/50 border border-dashed border-white/[0.06] flex flex-col items-center justify-center gap-2">
+            <span className="material-symbols-outlined text-[#8F8F8C] text-[28px]">verified</span>
+            <span className="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">
+              Al día: No hay pedidos pendientes por revisar
+            </span>
+            <span className="text-[11px] font-mono text-[#8F8F8C]">
+              Los pedidos realizados en la tienda se sincronizarán aquí inmediatamente.
+            </span>
           </div>
         )}
       </div>

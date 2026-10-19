@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '../../../lib/supabase';
 
 export interface POSProduct {
   id: string;
@@ -34,158 +35,100 @@ export interface SaleRecord {
   discount: number;
 }
 
-const mockCatalog: POSProduct[] = [
-  {
-    id: 'pos-1',
-    sku: 'ZRN-MK-01',
-    name: 'Samurai Mecha Kanji',
-    category: 'Anime Mecha',
-    price: 145.0,
-    image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=400&auto=format&fit=crop',
-    stock: { S: 4, M: 18, L: 12, XL: 0 },
-  },
-  {
-    id: 'pos-2',
-    sku: 'ZRN-CG-04',
-    name: 'Cyber Geisha Tee',
-    category: 'Anime Mecha',
-    price: 135.0,
-    image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=400&auto=format&fit=crop',
-    stock: { S: 6, M: 8, L: 8, XL: 2 },
-  },
-  {
-    id: 'pos-3',
-    sku: 'ZRN-VG-09',
-    name: 'Tokyo Vanguard Acid',
-    category: 'Streetwear Zen',
-    price: 130.0,
-    image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop',
-    stock: { S: 0, M: 7, L: 5, XL: 3 },
-  },
-  {
-    id: 'pos-4',
-    sku: 'ZRN-HD-12',
-    name: 'Zen Kanji Shadow',
-    category: 'Streetwear Zen',
-    price: 125.0,
-    image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=400&auto=format&fit=crop',
-    stock: { S: 2, M: 0, L: 4, XL: 0 },
-  },
-  {
-    id: 'pos-5',
-    sku: 'ZRN-AN-99',
-    name: 'Kuro Heavy Anorak',
-    category: 'Cyberpunk Outerwear',
-    price: 280.0,
-    image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=400&auto=format&fit=crop',
-    stock: { S: 2, M: 5, L: 8, XL: 4 },
-  },
-  {
-    id: 'pos-6',
-    sku: 'ZRN-TC-78',
-    name: 'Void Tactical Cargo',
-    category: 'Cyberpunk Outerwear',
-    price: 310.0,
-    image: 'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?q=80&w=400&auto=format&fit=crop',
-    stock: { S: 1, M: 8, L: 10, XL: 4 },
-  },
-];
-
-const initialRecentSales: SaleRecord[] = [
-  {
-    id: 'sal-1',
-    ticketNumber: '#V-2026-088',
-    time: '16:42',
-    clientName: 'Hiroshi Tanaka',
-    clientPhone: '+591 78912345',
-    itemsSummary: '2x Samurai Mecha Kanji (XL, M)',
-    paymentMethod: 'QR Simple',
-    total: 290.0,
-    discount: 0,
-  },
-  {
-    id: 'sal-2',
-    ticketNumber: '#V-2026-087',
-    time: '15:18',
-    clientName: 'Valeria Montenegro',
-    clientPhone: '+591 60192837',
-    itemsSummary: '1x Kuro Heavy Anorak (L)',
-    paymentMethod: 'Transferencia',
-    total: 280.0,
-    discount: 0,
-  },
-  {
-    id: 'sal-3',
-    ticketNumber: '#V-2026-086',
-    time: '14:05',
-    clientName: 'Cliente Mostrador (S/N)',
-    clientPhone: '',
-    itemsSummary: '1x Cyber Geisha Tee (M)',
-    paymentMethod: 'Efectivo',
-    total: 135.0,
-    discount: 0,
-  },
-  {
-    id: 'sal-4',
-    ticketNumber: '#V-2026-085',
-    time: '12:30',
-    clientName: 'Mateo Céspedes',
-    clientPhone: '+591 77123456',
-    itemsSummary: '2x Zen Kanji Hoodie, Tokyo Acid',
-    paymentMethod: 'QR Simple',
-    total: 255.0,
-    discount: 0,
-  },
-];
-
 export function POSTerminal() {
-  const [catalog] = useState<POSProduct[]>(mockCatalog);
-  const [cart, setCart] = useState<CartItem[]>([
-    {
-      id: 'cart-1',
-      productId: 'pos-1',
-      sku: 'ZRN-MK-01',
-      name: 'Samurai Mecha Kanji',
-      size: 'L',
-      price: 145.0,
-      quantity: 1,
-      image: mockCatalog[0].image,
-    },
-    {
-      id: 'cart-2',
-      productId: 'pos-3',
-      sku: 'ZRN-VG-09',
-      name: 'Tokyo Vanguard Acid',
-      size: 'M',
-      price: 130.0,
-      quantity: 1,
-      image: mockCatalog[2].image,
-    },
-  ]);
+  const [catalog, setCatalog] = useState<POSProduct[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [categoriesList, setCategoriesList] = useState<string[]>(['Todas']);
+  const [currentUser, setCurrentUser] = useState<string>('Admin Core');
 
-  // Selected sizes for each product card
-  const [selectedSizes, setSelectedSizes] = useState<{ [productId: string]: string }>({
-    'pos-1': 'L',
-    'pos-2': 'M',
-    'pos-3': 'M',
-    'pos-4': 'L',
-    'pos-5': 'L',
-    'pos-6': 'M',
-  });
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<{ [productId: string]: string }>({});
 
   const [search, setSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
-  const [customerMode, setCustomerMode] = useState<'registered' | 'counter'>('registered');
-  const [clientName, setClientName] = useState<string>('Andrés Villena');
-  const [clientPhone, setClientPhone] = useState<string>('+591 789 45210');
-  const [coupon, setCoupon] = useState<string>('DROP01');
-  const [discount, setDiscount] = useState<number>(15.0);
+  const [customerMode, setCustomerMode] = useState<'registered' | 'counter'>('counter');
+  const [clientName, setClientName] = useState<string>('');
+  const [clientPhone, setClientPhone] = useState<string>('');
+  const [coupon, setCoupon] = useState<string>('');
+  const [discount, setDiscount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<'QR Simple' | 'Transferencia' | 'Efectivo'>('QR Simple');
-  const [cashGiven, setCashGiven] = useState<string>('300');
-  const [recentSales, setRecentSales] = useState<SaleRecord[]>(initialRecentSales);
+  const [cashGiven, setCashGiven] = useState<string>('');
+  const [recentSales, setRecentSales] = useState<SaleRecord[]>([]);
 
   // Modal de Recibo Térmico
   const [activeReceipt, setActiveReceipt] = useState<SaleRecord | null>(null);
+
+  useEffect(() => {
+    async function loadRealProducts() {
+      setIsLoading(true);
+      try {
+        const { data: dbProducts } = await supabase
+          .from('producto')
+          .select(`
+            id,
+            nombre,
+            slug,
+            precio_venta,
+            activo,
+            coleccion:coleccion_id (id, nombre, slug),
+            imagenes:imagen (url_imagen, es_portada, orden),
+            inventario:inventario (cantidad, cantidad_reservada)
+          `)
+          .eq('activo', true)
+          .order('created_at', { ascending: false });
+
+        if (dbProducts && dbProducts.length > 0) {
+          const cats = new Set<string>(['Todas']);
+          const mapped: POSProduct[] = dbProducts.map((p: any) => {
+            const catName = p.coleccion?.nombre || 'General';
+            cats.add(catName);
+
+            const sortedImgs = (p.imagenes || []).sort((a: any, b: any) => (a.orden || 0) - (b.orden || 0));
+            const coverImg = sortedImgs.find((img: any) => img.es_portada) || sortedImgs[0];
+
+            const totalStock = p.inventario?.reduce((acc: number, inv: any) => acc + (inv.cantidad || 0), 0) || 0;
+
+            return {
+              id: p.id,
+              sku: `ZRN-${p.slug?.substring(0, 8).toUpperCase() || 'PRENDA'}`,
+              name: p.nombre,
+              category: catName,
+              price: Number(p.precio_venta) || 0,
+              image: coverImg?.url_imagen || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
+              stock: {
+                S: Math.floor(totalStock / 4) || 0,
+                M: Math.floor(totalStock / 4) || 0,
+                L: Math.floor(totalStock / 4) || 0,
+                XL: Math.max(0, totalStock - Math.floor(totalStock / 4) * 3) || 0,
+              },
+            };
+          });
+
+          setCatalog(mapped);
+          setCategoriesList(Array.from(cats));
+
+          const defaultSizes: { [productId: string]: string } = {};
+          mapped.forEach((p) => {
+            defaultSizes[p.id] = 'M';
+          });
+          setSelectedSizes(defaultSizes);
+        } else {
+          setCatalog([]);
+        }
+
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user?.email) {
+          setCurrentUser(userData.user.email.split('@')[0]);
+        }
+      } catch (err) {
+        console.warn('Error loading POS products:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadRealProducts();
+  }, []);
 
   // Filtrado de catálogo
   const filteredCatalog = useMemo(() => {
@@ -328,7 +271,9 @@ export function POSTerminal() {
             <span className="material-symbols-outlined text-[18px] text-[#dc143c]">payments</span>
             <div className="flex flex-col">
               <span className="font-mono text-[10px] text-[#ac8888] uppercase">Turno Actual</span>
-              <span className="font-headline text-sm text-white font-bold">Bs 1,240.00</span>
+              <span className="font-headline text-sm text-white font-bold">
+                Bs {recentSales.reduce((acc, s) => acc + s.total, 0).toFixed(2)}
+              </span>
             </div>
           </div>
 
@@ -343,8 +288,8 @@ export function POSTerminal() {
           <div className="flex items-center gap-2.5 px-3 py-1.5 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
             <span className="material-symbols-outlined text-[18px] text-[#34d399]">badge</span>
             <div className="flex flex-col">
-              <span className="font-mono text-[10px] text-[#ac8888] uppercase">Vendedor</span>
-              <span className="font-headline text-xs text-[#34d399] font-bold">Kenji S. // SuperAdmin</span>
+              <span className="font-mono text-[10px] text-[#ac8888] uppercase">Operador</span>
+              <span className="font-headline text-xs text-[#34d399] font-bold">{currentUser} // Admin</span>
             </div>
           </div>
         </div>
@@ -375,7 +320,7 @@ export function POSTerminal() {
 
             {/* Fast Collection Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              {['Todas', 'Anime Mecha', 'Streetwear Zen', 'Cyberpunk Outerwear'].map((cat) => (
+              {categoriesList.map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -394,6 +339,11 @@ export function POSTerminal() {
 
           {/* Catalog Compact Grid (Cards) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {filteredCatalog.length === 0 && (
+              <div className="col-span-full py-12 text-center text-[#ac8888] font-mono text-xs bg-[#141416] border border-white/[0.04]">
+                {isLoading ? 'Sincronizando inventario con la base de datos...' : 'No hay prendas registradas o disponibles en esta categoría.'}
+              </div>
+            )}
             {filteredCatalog.map((product) => {
               const currentSize = selectedSizes[product.id] || 'M';
               const availableInSize = product.stock[currentSize] ?? 0;
@@ -827,56 +777,64 @@ export function POSTerminal() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04] text-[#e5e2e1]">
-              {recentSales.map((sale) => (
-                <tr key={sale.id} className="hover:bg-[#201f1f]/50 transition-colors">
-                  <td className="py-3 px-4 font-mono text-[11px] text-[#ac8888]">{sale.time}</td>
-                  <td className="py-3 px-3 font-mono text-xs font-bold text-[#dc143c]">
-                    {sale.ticketNumber}
-                  </td>
-                  <td className="py-3 px-3 font-semibold text-white">{sale.clientName}</td>
-                  <td className="py-3 px-4 text-[#ac8888] truncate max-w-xs">
-                    {sale.itemsSummary}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className="font-mono text-[10px] px-2 py-0.5 rounded-none bg-[#141416] text-[#ffb3b3] border border-white/[0.04]">
-                      {sale.paymentMethod}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right font-price font-bold text-white whitespace-nowrap">
-                    Bs {sale.total.toFixed(2)}
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <span className="px-2 py-0.5 rounded-none bg-emerald-950 text-emerald-400 font-mono text-[10px] font-bold">
-                      CONFIRMADO
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setActiveReceipt(sale)}
-                        className="p-1.5 rounded-none bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-white transition-colors cursor-pointer"
-                        title="Ver Comprobante Térmico"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">print</span>
-                      </button>
-                      {sale.clientPhone && (
-                        <a
-                          href={`https://wa.me/${sale.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                            `Hola ${sale.clientName}, tu comprobante de compra ${sale.ticketNumber} por Bs ${sale.total.toFixed(2)} en ZAIREN LAB ha sido emitido.`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-none bg-[#141416] hover:bg-emerald-600 text-[#ac8888] hover:text-white transition-colors"
-                          title="Enviar por WhatsApp"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">chat</span>
-                        </a>
-                      )}
-                    </div>
+              {recentSales.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center text-[#ac8888] font-mono text-xs">
+                    No hay ventas registradas en este turno.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recentSales.map((sale) => (
+                  <tr key={sale.id} className="hover:bg-[#201f1f]/50 transition-colors">
+                    <td className="py-3 px-4 font-mono text-[11px] text-[#ac8888]">{sale.time}</td>
+                    <td className="py-3 px-3 font-mono text-xs font-bold text-[#dc143c]">
+                      {sale.ticketNumber}
+                    </td>
+                    <td className="py-3 px-3 font-semibold text-white">{sale.clientName}</td>
+                    <td className="py-3 px-4 text-[#ac8888] truncate max-w-xs">
+                      {sale.itemsSummary}
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="font-mono text-[10px] px-2 py-0.5 rounded-none bg-[#141416] text-[#ffb3b3] border border-white/[0.04]">
+                        {sale.paymentMethod}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right font-price font-bold text-white whitespace-nowrap">
+                      Bs {sale.total.toFixed(2)}
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="px-2 py-0.5 rounded-none bg-emerald-950 text-emerald-400 font-mono text-[10px] font-bold">
+                        CONFIRMADO
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setActiveReceipt(sale)}
+                          className="p-1.5 rounded-none bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-white transition-colors cursor-pointer"
+                          title="Ver Comprobante Térmico"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">print</span>
+                        </button>
+                        {sale.clientPhone && (
+                          <a
+                            href={`https://wa.me/${sale.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                              `Hola ${sale.clientName}, tu comprobante de compra ${sale.ticketNumber} por Bs ${sale.total.toFixed(2)} en ZAIREN LAB ha sido emitido.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-none bg-[#141416] hover:bg-emerald-600 text-[#ac8888] hover:text-white transition-colors"
+                            title="Enviar por WhatsApp"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">chat</span>
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

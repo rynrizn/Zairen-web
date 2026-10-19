@@ -12,27 +12,27 @@
     "semantic_hash": ""
   },
   "src/components/admin/clientes/ClientesTable.tsx": {
-    "mtime": 1791582824.1167529,
-    "seen": 1791584011.5109446,
-    "ast_hash": "48b8bf5780a1cae0c4db3c08105c154d",
+    "mtime": 1792374335.1493592,
+    "seen": 1792374978.4021165,
+    "ast_hash": "27455fe1624ab2e79b886e912a5f220a",
     "semantic_hash": ""
   },
   "src/components/admin/dashboard/AlertasInventario.tsx": {
-    "mtime": 1791583776.155607,
-    "seen": 1791584011.5109518,
-    "ast_hash": "9593f5a13a1329a3ec90e65998e6b629",
+    "mtime": 1792373928.1700568,
+    "seen": 1792374978.40212,
+    "ast_hash": "ab5a93a9a3c04e769b67dde59f5b1187",
     "semantic_hash": ""
   },
   "src/components/admin/dashboard/DonutColecciones.tsx": {
-    "mtime": 1791583776.1615582,
-    "seen": 1791584011.5109587,
-    "ast_hash": "c722a8d015d401a16d7b26701739a2c0",
+    "mtime": 1792373951.1542473,
+    "seen": 1792374978.4021227,
+    "ast_hash": "815a654df7b2183a823c70e611299f03",
     "semantic_hash": ""
   },
   "src/components/admin/dashboard/PedidosPendientes.tsx": {
-    "mtime": 1791583776.1620948,
-    "seen": 1791584011.5109642,
-    "ast_hash": "7fc79e589d08242c7271eda0fedaf4c7",
+    "mtime": 1792373887.9079072,
+    "seen": 1792374978.4021254,
+    "ast_hash": "08f769718a124645e299aeb6971d26a2",
     "semantic_hash": ""
   },
   "src/components/admin/dashboard/TopVendidos.tsx": {
@@ -78,15 +78,15 @@
     "semantic_hash": ""
   },
   "src/components/admin/pedidos/PedidosTable.tsx": {
-    "mtime": 1791582824.1167529,
-    "seen": 1791584011.5110714,
-    "ast_hash": "362719c5254e131a8549e2234120e3ee",
+    "mtime": 1792374175.6983545,
+    "seen": 1792374978.4048061,
+    "ast_hash": "6c0243196578800d889f183f32739c64",
     "semantic_hash": ""
   },
   "src/components/admin/pos/POSTerminal.tsx": {
-    "mtime": 1791582824.1105826,
-    "seen": 1791584011.5110774,
-    "ast_hash": "1f4ee9de011dc95f61bbb74ba7781946",
+    "mtime": 1792373731.2373612,
+    "seen": 1792374978.404809,
+    "ast_hash": "6695cd738d459e138e1f206c23eae3c4",
     "semantic_hash": ""
   },
   "src/components/admin/preview/SimuladorCatalogo.tsx": {
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/usuarios/UsuariosManager.tsx": {
-    "mtime": 1791583883.4926052,
-    "seen": 1791584011.5110967,
-    "ast_hash": "5ec75cbfc604bb60df4eaf65be56c600",
+    "mtime": 1792374585.9753683,
+    "seen": 1792374978.405671,
+    "ast_hash": "9f5120a87325da1ae42273418d3f907e",
     "semantic_hash": ""
   },
   "src/components/catalogo/CarritoDrawer.tsx": {
@@ -264,15 +264,15 @@
     "semantic_hash": ""
   },
   "src/pages/admin/clientes.astro": {
-    "mtime": 1791567780.4121914,
-    "seen": 1791574096.2591033,
-    "ast_hash": "05cd0ee7516b474ceeeb9961c794e247",
+    "mtime": 1792374209.7423544,
+    "seen": 1792374978.421745,
+    "ast_hash": "db2fdfd707465975330a60956971b3cd",
     "semantic_hash": ""
   },
   "src/pages/admin/index.astro": {
-    "mtime": 1791595605.4169059,
-    "seen": 1791595783.0887046,
-    "ast_hash": "318bb20012e2c5d0f1e18be1008bc581",
+    "mtime": 1792373845.485226,
+    "seen": 1792374978.4217494,
+    "ast_hash": "3dea72595cd5b91adf6e45175de5e18e",
     "semantic_hash": ""
   },
   "src/pages/admin/interfaz-web.astro": {
@@ -288,27 +288,27 @@
     "semantic_hash": ""
   },
   "src/pages/admin/pedidos.astro": {
-    "mtime": 1791567836.8936946,
-    "seen": 1791574096.259129,
-    "ast_hash": "c4c9ed6e7eea59f7cdb2149c0602a66b",
+    "mtime": 1792374008.727769,
+    "seen": 1792374978.4225287,
+    "ast_hash": "763377b0ac25378cbcb6e6f14ea88f84",
     "semantic_hash": ""
   },
   "src/pages/admin/registrar-ventas.astro": {
-    "mtime": 1791567852.520564,
-    "seen": 1791574096.2591352,
-    "ast_hash": "7ce581992780651a1fb9be26ab4b448d",
+    "mtime": 1792373476.672245,
+    "seen": 1792374978.4225311,
+    "ast_hash": "39ed761d1cd2f4898b93ea9430c1efa1",
     "semantic_hash": ""
   },
   "src/pages/admin/usuarios.astro": {
-    "mtime": 1791567865.0712721,
-    "seen": 1791574096.2591414,
-    "ast_hash": "dc09cc73e84c7101ddc653486a4504f0",
+    "mtime": 1792374495.2389674,
+    "seen": 1792374978.422534,
+    "ast_hash": "754f794d3a2fde1c91c913c1c7ed8c7a",
     "semantic_hash": ""
   },
   "src/pages/admin/ventas.astro": {
-    "mtime": 1791567881.0918412,
-    "seen": 1791574096.2591474,
-    "ast_hash": "7ce581992780651a1fb9be26ab4b448d",
+    "mtime": 1792373454.2886684,
+    "seen": 1792374978.4225361,
+    "ast_hash": "39ed761d1cd2f4898b93ea9430c1efa1",
     "semantic_hash": ""
   },
   "src/pages/catalogo.astro": {
@@ -822,15 +822,15 @@
     "semantic_hash": ""
   },
   "src/components/admin/metricas/MetricasManager.tsx": {
-    "mtime": 1791595564.2581377,
-    "seen": 1791595783.0676622,
-    "ast_hash": "83a1cfad61db6de6fc080654286644c3",
+    "mtime": 1792374465.5014524,
+    "seen": 1792374978.4048026,
+    "ast_hash": "04f5f35377fe7031c71a228e9c334a51",
     "semantic_hash": ""
   },
   "src/pages/admin/metricas.astro": {
-    "mtime": 1791595569.595511,
-    "seen": 1791595783.0898013,
-    "ast_hash": "a0441384744570de484b8a9c220bca59",
+    "mtime": 1792373526.7519073,
+    "seen": 1792374978.422525,
+    "ast_hash": "f701c7dcecca15c82be831b842dbbec6",
     "semantic_hash": ""
   },
   "src/lib/configuracion.ts": {

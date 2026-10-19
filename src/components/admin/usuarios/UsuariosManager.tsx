@@ -15,47 +15,18 @@ export interface UsuarioRecord {
   isActive: boolean;
 }
 
-const initialUsuarios: UsuarioRecord[] = [
-  {
-    id: 'usr-1',
-    name: 'Kenji S.',
-    initials: 'KS',
-    email: 'admin@zairenlab.com',
-    role: 'SuperAdmin',
-    location: 'Nodo Central La Paz',
-    lastLogin: 'En línea ahora',
-    isActive: true,
-  },
-  {
-    id: 'usr-2',
-    name: 'Renata Vega',
-    initials: 'RV',
-    email: 'renata.v@zairenlab.com',
-    role: 'Vendedor POS',
-    location: 'Showroom Sopocachi',
-    lastLogin: 'Hoy 14:10',
-    isActive: true,
-  },
-  {
-    id: 'usr-3',
-    name: 'Mauricio Ticona',
-    initials: 'MT',
-    email: 'mauricio.t@zairenlab.com',
-    role: 'Almacenero',
-    location: 'Almacén Central El Alto',
-    lastLogin: 'Hoy 09:30',
-    isActive: true,
-  },
-];
-
 export function UsuariosManager() {
-  const [usuarios, setUsuarios] = useState<UsuarioRecord[]>(initialUsuarios);
+  const [usuarios, setUsuarios] = useState<UsuarioRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedUser, setSelectedUser] = useState<UsuarioRecord | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     async function loadProfiles() {
-      if (!isSupabaseConfigured) return;
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
       try {
         const { data, error } = await supabase.from('perfil').select('*');
         if (!error && data && data.length > 0) {
@@ -78,14 +49,38 @@ export function UsuariosManager() {
               email: p.nombre_completo ? `${p.nombre_completo.toLowerCase().replace(/\s+/g, '.')}@zairenlab.com` : 'usuario@zairenlab.com',
               role,
               location: 'Nodo Central',
-              lastLogin: 'Registrado en Supabase',
+              lastLogin: 'Registrado en BD',
               isActive: p.activo,
             };
           });
           setUsuarios(mapped);
+        } else {
+          // Fallback: consultar el usuario actual en sesión
+          const { data: authData } = await supabase.auth.getUser();
+          if (authData?.user) {
+            const email = authData.user.email || 'admin@zairenlab.com';
+            const name = authData.user.user_metadata?.nombre_completo || 'Administrador Central';
+            const initials = name.slice(0, 2).toUpperCase();
+            setUsuarios([
+              {
+                id: authData.user.id,
+                name,
+                initials,
+                email,
+                role: 'SuperAdmin',
+                location: 'Nodo Central',
+                lastLogin: 'En línea ahora',
+                isActive: true,
+              },
+            ]);
+          } else {
+            setUsuarios([]);
+          }
         }
       } catch (e) {
         console.warn('Error cargando perfiles:', e);
+      } finally {
+        setLoading(false);
       }
     }
     loadProfiles();
@@ -260,7 +255,9 @@ export function UsuariosManager() {
           </div>
           <div>
             <span className="font-mono text-[10px] text-[#ac8888] uppercase block">Nodos Asignados</span>
-            <span className="font-headline text-lg font-bold text-[#ffb3b3]">3 ubicaciones</span>
+            <span className="font-headline text-lg font-bold text-[#ffb3b3]">
+              {new Set(usuarios.map((u) => u.location)).size} ubicaciones
+            </span>
           </div>
         </div>
       </div>
@@ -280,59 +277,73 @@ export function UsuariosManager() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04] text-[#e5e2e1]">
-            {usuarios.map((user) => (
-              <tr key={user.id} className="hover:bg-[#201f1f]/50 transition-colors">
-                <td className="py-3.5 px-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-none bg-[#201f1f] text-white font-headline text-xs font-bold flex items-center justify-center shrink-0 border border-white/[0.08]">
-                      {user.initials}
-                    </div>
-                    <span className="font-bold text-white">{user.name}</span>
-                  </div>
-                </td>
-                <td className="py-3.5 px-4 font-mono text-xs text-[#ac8888]">{user.email}</td>
-                <td className="py-3.5 px-3">
-                  <span
-                    className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] font-bold uppercase tracking-wider border ${
-                      user.role === 'SuperAdmin'
-                        ? 'bg-[#dc143c]/20 text-[#dc143c] border-[#dc143c]/40'
-                        : user.role === 'Vendedor POS'
-                        ? 'bg-blue-950 text-blue-300 border-blue-800/40'
-                        : 'bg-amber-950 text-amber-300 border-amber-800/40'
-                    }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-[#e5e2e1]">{user.location}</td>
-                <td className="py-3.5 px-3 font-mono text-[11px] text-[#ac8888]">
-                  {user.lastLogin}
-                </td>
-                <td className="py-3.5 px-3 text-center">
-                  <button
-                    type="button"
-                    onClick={() => handleToggleStatus(user.id)}
-                    className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] font-bold uppercase transition-all cursor-pointer border ${
-                      user.isActive
-                        ? 'bg-emerald-950 text-emerald-400 border-emerald-800 hover:bg-emerald-900'
-                        : 'bg-red-950 text-red-400 border-red-800 hover:bg-red-900'
-                    }`}
-                  >
-                    {user.isActive ? 'Activo' : 'Inactivo'}
-                  </button>
-                </td>
-                <td className="py-3.5 px-4 text-right">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(user)}
-                    className="p-1.5 rounded-none bg-[#141416] hover:bg-[#dc143c] text-[#ac8888] hover:text-white transition-colors cursor-pointer border border-[#201f1f]"
-                    title="Editar Permisos"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">edit</span>
-                  </button>
+            {loading ? (
+              <tr>
+                <td colSpan={7} className="py-12 text-center text-xs font-mono text-[#ac8888] animate-pulse">
+                  Verificando operadores autorizados en Supabase...
                 </td>
               </tr>
-            ))}
+            ) : usuarios.length > 0 ? (
+              usuarios.map((user) => (
+                <tr key={user.id} className="hover:bg-[#201f1f]/50 transition-colors">
+                  <td className="py-3.5 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-none bg-[#201f1f] text-white font-headline text-xs font-bold flex items-center justify-center shrink-0 border border-white/[0.08]">
+                        {user.initials}
+                      </div>
+                      <span className="font-bold text-white">{user.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-xs text-[#ac8888]">{user.email}</td>
+                  <td className="py-3.5 px-3">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] font-bold uppercase tracking-wider border ${
+                        user.role === 'SuperAdmin'
+                          ? 'bg-[#dc143c]/20 text-[#dc143c] border-[#dc143c]/40'
+                          : user.role === 'Vendedor POS'
+                          ? 'bg-blue-950 text-blue-300 border-blue-800/40'
+                          : 'bg-amber-950 text-amber-300 border-amber-800/40'
+                      }`}
+                    >
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-[#e5e2e1]">{user.location}</td>
+                  <td className="py-3.5 px-3 font-mono text-[11px] text-[#ac8888]">
+                    {user.lastLogin}
+                  </td>
+                  <td className="py-3.5 px-3 text-center">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(user.id)}
+                      className={`px-2.5 py-0.5 rounded-none font-mono text-[10px] font-bold uppercase transition-all cursor-pointer border ${
+                        user.isActive
+                          ? 'bg-emerald-950 text-emerald-400 border-emerald-800 hover:bg-emerald-900'
+                          : 'bg-red-950 text-red-400 border-red-800 hover:bg-red-900'
+                      }`}
+                    >
+                      {user.isActive ? 'Activo' : 'Inactivo'}
+                    </button>
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(user)}
+                      className="p-1.5 rounded-none bg-[#141416] hover:bg-[#dc143c] text-[#ac8888] hover:text-white transition-colors cursor-pointer border border-[#201f1f]"
+                      title="Editar Permisos"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="py-12 text-center text-xs font-mono text-[#ac8888]">
+                  No hay operadores registrados en el sistema.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

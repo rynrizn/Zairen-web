@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 
 interface AlertItem {
   id: string;
@@ -10,43 +11,81 @@ interface AlertItem {
   minThreshold: number;
 }
 
-const initialAlerts: AlertItem[] = [
-  {
-    id: 'alt-1',
-    name: 'Zen Kanji Shadow Box Cut',
-    sku: 'ZRN-ZKS88',
-    size: 'M',
-    currentStock: 0,
-    minThreshold: 4,
-  },
-  {
-    id: 'alt-2',
-    name: 'Samurai Mecha Kanji Tee',
-    sku: 'ZRN-044',
-    size: 'XL',
-    currentStock: 2,
-    minThreshold: 4,
-  },
-  {
-    id: 'alt-3',
-    name: 'Void Modular Cargo Pant',
-    sku: 'ZRN-078',
-    size: 'S',
-    currentStock: 1,
-    minThreshold: 3,
-  },
-];
-
 export function AlertasInventario() {
-  const [alerts, setAlerts] = useState<AlertItem[]>(initialAlerts);
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const handleRestock = (item: AlertItem) => {
+  useEffect(() => {
+    async function loadAlerts() {
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('inventario')
+          .select(`
+            id,
+            cantidad,
+            producto:producto_id (
+              id,
+              nombre,
+              stock_minimo
+            )
+          `);
+
+        if (error) {
+          console.error('Error loading inventory alerts:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const critical = data
+            .filter((item: any) => {
+              const min = item.producto?.stock_minimo ?? 3;
+              return (Number(item.cantidad) || 0) <= min;
+            })
+            .map((item: any) => ({
+              id: item.id,
+              name: item.producto?.nombre || 'Producto',
+              sku: `SKU-${item.id.slice(0, 6).toUpperCase()}`,
+              size: 'Estándar',
+              currentStock: Number(item.cantidad) || 0,
+              minThreshold: item.producto?.stock_minimo ?? 3,
+            }));
+          setAlerts(critical);
+        } else {
+          setAlerts([]);
+        }
+      } catch (err) {
+        console.error('Failed to load inventory alerts:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAlerts();
+  }, []);
+
+  const handleRestock = async (item: AlertItem) => {
     const qty = prompt(`Ingresar unidades a reponer para ${item.name} (${item.size}):`, '10');
-    if (qty && !isNaN(Number(qty)) && Number(qty) > 0) {
-      setAlerts((prev) => prev.filter((a) => a.id !== item.id));
-      toast.success(`Se ingresaron +${qty} unidades de ${item.name} (${item.size})`, {
-        description: 'Inventario actualizado y registrado en Kardex',
-      });
+    const num = Number(qty);
+    if (qty && !isNaN(num) && num > 0) {
+      try {
+        if (isSupabaseConfigured) {
+          await supabase
+            .from('inventario')
+            .update({ cantidad: item.currentStock + num })
+            .eq('id', item.id);
+        }
+        setAlerts((prev) => prev.filter((a) => a.id !== item.id));
+        toast.success(`Se ingresaron +${num} unidades de ${item.name}`, {
+          description: 'Inventario actualizado correctamente',
+        });
+      } catch (err) {
+        toast.error('Error al actualizar inventario');
+      }
     }
   };
 
@@ -68,7 +107,11 @@ export function AlertasInventario() {
       </div>
 
       <div className="divide-y divide-white/[0.04]">
-        {alerts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-6 text-xs font-mono text-[#ac8888] animate-pulse">
+            Verificando niveles de inventario...
+          </div>
+        ) : alerts.length > 0 ? (
           alerts.map((item) => (
             <div key={item.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
               <div>

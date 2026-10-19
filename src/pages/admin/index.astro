@@ -6,6 +6,63 @@ import { siteConfig } from '../../config/site';
 import { PedidosPendientes } from '../../components/admin/dashboard/PedidosPendientes';
 import { DonutColecciones } from '../../components/admin/dashboard/DonutColecciones';
 import { AlertasInventario } from '../../components/admin/dashboard/AlertasInventario';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+
+let totalVentasMes = 0;
+let pedidosPendientesCount = 0;
+let totalStockUds = 0;
+let skusActivos = 0;
+let bajoStockCount = 0;
+let alertaVarianteTexto = 'Niveles de inventario óptimos';
+
+if (isSupabaseConfigured) {
+  try {
+    // 1. Pedidos pendientes
+    const { count: pendingCount } = await supabase
+      .from('pedido')
+      .select('*', { count: 'exact', head: true })
+      .eq('estado', 'PENDIENTE');
+    pedidosPendientesCount = pendingCount || 0;
+
+    // 2. Ventas del mes
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+    const { data: ventasMes } = await supabase
+      .from('venta')
+      .select('total')
+      .gte('fecha_hora', startOfMonth);
+    if (ventasMes && ventasMes.length > 0) {
+      totalVentasMes = ventasMes.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
+    }
+
+    // 3. Inventario y productos
+    const { data: invData } = await supabase
+      .from('inventario')
+      .select('cantidad, cantidad_reservada, producto_id, producto:producto_id(nombre, stock_minimo, activo)');
+    
+    if (invData && invData.length > 0) {
+      totalStockUds = invData.reduce((acc, item) => acc + (Number(item.cantidad) || 0), 0);
+      skusActivos = invData.length;
+      
+      const low = invData.filter((item: any) => {
+        const min = item.producto?.stock_minimo ?? 3;
+        return (Number(item.cantidad) || 0) <= min;
+      });
+      bajoStockCount = low.length;
+      if (bajoStockCount > 0) {
+        const nombres = Array.from(new Set(low.map((i: any) => i.producto?.nombre).filter(Boolean)));
+        alertaVarianteTexto = `Alerta: ${nombres.slice(0, 2).join(', ')}`;
+      }
+    } else {
+      const { data: prodData } = await supabase
+        .from('producto')
+        .select('id, nombre, stock_minimo, activo')
+        .eq('activo', true);
+      skusActivos = prodData?.length || 0;
+    }
+  } catch (err) {
+    console.error('Error fetching dashboard stats:', err);
+  }
+}
 ---
 
 <AdminLayout title={`Panel // ${siteConfig.name}`} activePath="panel">
@@ -48,49 +105,58 @@ import { AlertasInventario } from '../../components/admin/dashboard/AlertasInven
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
         <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Ventas del Mes</div>
-        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">Bs 18,450.00</div>
-        <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
-          <span>↑ +14.2%</span>
-          <span class="text-[#8F8F8C]">vs mes anterior</span>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">
+          Bs {totalVentasMes.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </div>
+        <div class="text-xs font-mono text-[#8F8F8C] mt-2 flex items-center gap-1">
+          <span>{totalVentasMes > 0 ? 'Ventas facturadas en el mes' : 'Sin ventas registradas este mes'}</span>
         </div>
       </div>
 
       <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
         <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Pedidos Pendientes</div>
-        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">3 Órdenes</div>
-        <div class="text-xs font-mono text-amber-400 mt-2 flex items-center gap-1">
-          <span class="w-1.5 h-1.5 bg-amber-400"></span>
-          <span>Requieren atención inmediata</span>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">{pedidosPendientesCount} Órdenes</div>
+        <div class="text-xs font-mono mt-2 flex items-center gap-1">
+          {pedidosPendientesCount > 0 ? (
+            <span class="text-amber-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-amber-400"></span>
+              Requieren atención inmediata
+            </span>
+          ) : (
+            <span class="text-emerald-400">Al día: No hay pendientes</span>
+          )}
         </div>
       </div>
 
       <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
         <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Prendas en Stock</div>
-        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">340 uds</div>
+        <div class="text-2xl md:text-3xl font-bold font-mono text-[#FAF9F6]">{totalStockUds} uds</div>
         <div class="text-xs font-mono text-[#8F8F8C] mt-2">
-          <span>8 SKUs activos en catálogo</span>
+          <span>{skusActivos} SKUs activos en catálogo</span>
         </div>
       </div>
 
       <div class="p-6 bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all relative">
         <div class="text-xs font-mono text-[#8F8F8C] uppercase tracking-widest mb-2">Bajo Stock Crítico</div>
-        <div class="text-2xl md:text-3xl font-bold font-mono text-[#f87171]">2 Variantes</div>
+        <div class={`text-2xl md:text-3xl font-bold font-mono ${bajoStockCount > 0 ? 'text-[#f87171]' : 'text-[#FAF9F6]'}`}>
+          {bajoStockCount} Variantes
+        </div>
         <div class="text-xs font-mono text-[#8F8F8C] mt-2">
-          <span>Alerta: Tallas S y XL</span>
+          <span>{alertaVarianteTexto}</span>
         </div>
       </div>
     </div>
 
     <!-- Pedidos Pendientes Island -->
-    <PedidosPendientes client:load />
+    <PedidosPendientes client:only="react" />
 
     <!-- Resumen de Stock & Colecciones + Acceso Directo a Métricas -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div>
-        <DonutColecciones client:visible />
+        <DonutColecciones client:only="react" />
       </div>
       <div>
-        <AlertasInventario client:visible />
+        <AlertasInventario client:only="react" />
       </div>
       <div class="p-6 bg-[#141416] border border-[#201f1f] flex flex-col justify-between">
         <div>

@@ -8,6 +8,6 @@ import { MetricasManager } from '../../components/admin/metricas/MetricasManager
 
 <AdminLayout title={`Métricas & Reportes // ${siteConfig.name}`} activePath="metricas">
   <div class="max-w-[1440px] mx-auto px-4 md:px-8 pb-12">
-    <MetricasManager client:load />
+    <MetricasManager client:only="react" />
   </div>
 </AdminLayout>

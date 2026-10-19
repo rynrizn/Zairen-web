@@ -37720,7 +37720,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/imageUploader.ts",
-      "source_location": "L121",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -37732,7 +37732,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/imageUploader.ts",
-      "source_location": "L129",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -59177,5 +59177,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "25598c9234a8f383ee19587415a195bc06f0eb9a"
+  "built_at_commit": "7d52b3f8934a83a6359d0a71c6bc7bf3eebace2b"
 }
