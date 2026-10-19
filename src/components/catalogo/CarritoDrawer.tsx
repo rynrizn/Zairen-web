@@ -44,11 +44,17 @@ export function CarritoDrawer() {
         setCurrencyTick((t) => t + 1);
       };
 
+      const handleTurnstileVerified = () => {
+        setTurnstileVerified(true);
+      };
+
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('zairen-currency-changed', handleCurrencyChange);
+      document.addEventListener('turnstile:verified', handleTurnstileVerified);
       return () => {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('zairen-currency-changed', handleCurrencyChange);
+        document.removeEventListener('turnstile:verified', handleTurnstileVerified);
       };
     }
   }, []);

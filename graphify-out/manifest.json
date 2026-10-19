@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "src/components/catalogo/CarritoDrawer.tsx": {
-    "mtime": 1792366478.986474,
-    "seen": 1792370310.9688735,
-    "ast_hash": "da00769bed8d0a4537d56ec8d3e88a64",
+    "mtime": 1792376376.3643541,
+    "seen": 1792376465.739544,
+    "ast_hash": "7edee232b5ec63048783c74a1468e81b",
     "semantic_hash": ""
   },
   "src/components/catalogo/CatalogoGrid.tsx": {
@@ -180,9 +180,9 @@
     "semantic_hash": ""
   },
   "src/components/common/TurnstileWidget.tsx": {
-    "mtime": 1792366502.125162,
-    "seen": 1792370310.9712865,
-    "ast_hash": "9a47b0e03ade15cf0da98ddfd54f08c8",
+    "mtime": 1792376359.5933578,
+    "seen": 1792376465.743576,
+    "ast_hash": "946f4b2183e9eda42b4a3406a67cd774",
     "semantic_hash": ""
   },
   "src/components/common/WhatsAppContactModule.tsx": {
@@ -330,9 +330,9 @@
     "semantic_hash": ""
   },
   "src/pages/producto/[id].astro": {
-    "mtime": 1792357697.8929842,
-    "seen": 1792370310.9787831,
-    "ast_hash": "c63a81a3ccb39e2f657735243870714f",
+    "mtime": 1792376324.6846278,
+    "seen": 1792376465.7547648,
+    "ast_hash": "598bf0367b49016a2949aac919d45dcb",
     "semantic_hash": ""
   },
   "src/stores/cartStore.ts": {

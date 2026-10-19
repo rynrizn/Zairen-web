@@ -153,12 +153,12 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
       initializeTurnstile();
     }
 
-    // Verificación de respaldo si el script es bloqueado silenciosamente por AdBlocker / Brave
+    // Verificación de respaldo si el widget no completa la verificación en 3.5s (bloqueado por AdBlocker, sandbox o red)
     const timeoutCheck = setTimeout(() => {
-      if (isMounted && !window.turnstile && !isVerified) {
+      if (isMounted && !isVerified) {
         setIsBlocked(true);
       }
-    }, 3000);
+    }, 3500);
 
     return () => {
       isMounted = false;
@@ -191,14 +191,14 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
         {isBlocked && !isVerified && (
           <div className="w-full mt-2 p-2.5 bg-[#141416] border border-amber-500/30 text-center space-y-2">
             <p className="text-[11px] font-mono text-amber-300">
-              🛡️ Bloqueador detectado (Cloudflare detenido).
+              🛡️ Verificación asistida // Bloqueador detectado
             </p>
             <button
               type="button"
               onClick={handleManualVerification}
               className="w-full py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
             >
-              ✓ Confirmar que no soy un bot
+              ✓ Confirmar que no soy un bot (Continuar pedido)
             </button>
           </div>
         )}

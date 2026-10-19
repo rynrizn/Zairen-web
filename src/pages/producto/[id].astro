@@ -15,14 +15,42 @@ if (!id) {
   return Astro.redirect('/');
 }
 
-// Buscar producto en la base de datos
-const { data: dbProd, error } = await supabase
-  .from('vw_catalogo_publico')
-  .select('*')
-  .or(`slug.eq.${id},id_producto.eq.${id}`)
-  .maybeSingle();
+// Validar si el identificador es un UUID o un slug
+const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-if (error || !dbProd) {
+let dbProd: any = null;
+
+// 1. Búsqueda primaria en la vista pública
+if (isUuid) {
+  const { data, error } = await supabase
+    .from('vw_catalogo_publico')
+    .select('*')
+    .eq('id_producto', id)
+    .maybeSingle();
+  if (!error && data) dbProd = data;
+} else {
+  const { data, error } = await supabase
+    .from('vw_catalogo_publico')
+    .select('*')
+    .eq('slug', id)
+    .maybeSingle();
+  if (!error && data) dbProd = data;
+}
+
+// 2. Fallback de contingencia directamente a la tabla base producto
+if (!dbProd) {
+  const query = supabase.from('producto').select('*');
+  const { data, error } = isUuid
+    ? await query.eq('id_producto', id).maybeSingle()
+    : await query.eq('slug', id).maybeSingle();
+
+  if (!error && data) {
+    dbProd = data;
+  }
+}
+
+if (!dbProd) {
+  console.warn(`[Zairen Lab] Producto no encontrado con id/slug: "${id}". Redirigiendo al catálogo.`);
   return Astro.redirect('/');
 }
 
@@ -43,7 +71,7 @@ const product = {
   estadoComercial: dbProd.estado_comercial || 'disponible',
 };
 
-let productImages = [product.imagen];
+let productImages: string[] = [product.imagen];
 if (product.imagenDorsal) productImages.push(product.imagenDorsal);
 
 try {
@@ -54,7 +82,11 @@ try {
     .order('orden', { ascending: true });
 
   if (dbImgs && dbImgs.length > 0) {
-    productImages = dbImgs.map((img) => img.url_imagen);
+    const additional = dbImgs.map((img) => img.url_imagen).filter(Boolean);
+    const combined = Array.from(new Set([product.imagen, product.imagenDorsal, ...additional].filter(Boolean))) as string[];
+    if (combined.length > 0) {
+      productImages = combined;
+    }
   }
 } catch (e) {}
 ---
