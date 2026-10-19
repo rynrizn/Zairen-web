@@ -336,8 +336,10 @@ export function CarritoDrawer() {
               </div>
             </div>
 
-            {/* Widget de Verificación Cloudflare Turnstile Anti-Bot */}
-            <TurnstileWidget onVerify={() => setTurnstileVerified(true)} />
+            {/* Widget de Verificación Cloudflare Turnstile Anti-Bot (Solo cuando el drawer está abierto) */}
+            {isOpen && (
+              <TurnstileWidget onVerify={() => setTurnstileVerified(true)} />
+            )}
 
             {/* Botón Primario WhatsApp Checkout Ortogonal */}
             <button

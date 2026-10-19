@@ -41,8 +41,12 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   const [seccionNueva, setSeccionNueva] = useState('');
   const [tipo, setTipo] = useState(product?.tipo || 'Polera');
   const [tipoNuevo, setTipoNuevo] = useState('');
-  const [precio, setPrecio] = useState<number>(product?.precio || 145);
-  const [costo, setCosto] = useState<number>(product?.costo || 55);
+  const [precio, setPrecio] = useState<number | ''>(
+    typeof product?.precio === 'number' && !Number.isNaN(product.precio) ? product.precio : 145
+  );
+  const [costo, setCosto] = useState<number | ''>(
+    typeof product?.costo === 'number' && !Number.isNaN(product.costo) ? product.costo : 55
+  );
   const [estadoComercial, setEstadoComercial] = useState<'nuevo' | 'disponible' | 'preventa' | 'oferta' | 'agotado'>(
     product?.estadoComercial || 'nuevo'
   );
@@ -77,8 +81,8 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       setNombre(product.nombre);
       setColeccion(product.coleccion || product.seccion || 'Essentials');
       setTipo(product.tipo || 'Polera');
-      setPrecio(product.precio);
-      setCosto(product.costo || 55);
+      setPrecio(typeof product.precio === 'number' && !Number.isNaN(product.precio) ? product.precio : 145);
+      setCosto(typeof product.costo === 'number' && !Number.isNaN(product.costo) ? product.costo : 55);
       setEstadoComercial(product.estadoComercial || 'disponible');
       setTallasTexto(
         product.tallas && product.tallas.length > 0
@@ -95,7 +99,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       );
       setPublicado(product.publicado);
       setDestacado(product.destacado);
-      setStock(product.stock);
+      setStock(product.stock || { S: 0, M: 0, L: 0, XL: 0 });
     } else {
       setSku(`ZRN-${Math.floor(100 + Math.random() * 900)}`);
       setNombre('');
@@ -124,18 +128,26 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     const toastId = toast.loading('Subiendo imagen a Cloudinary...');
 
     try {
+      let uploadedCount = 0;
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const res = await uploadImageToCloudinary(file, 'zairen/productos');
         if (res.success && res.url) {
           setImagenes((prev) => [...prev, res.url]);
+          uploadedCount++;
         } else {
-          toast.error(`Error al subir ${file.name}: ${res.error}`);
+          toast.error(res.error || `Error al subir ${file.name}`, { id: toastId, duration: 9000 });
+          return;
         }
       }
-      toast.success('Imágenes optimizadas en WebP añadidas', { id: toastId });
-    } catch {
-      toast.error('Ocurrió un error inesperado al subir', { id: toastId });
+      if (uploadedCount > 0) {
+        toast.success(
+          uploadedCount === 1 ? 'Imagen añadida correctamente' : `${uploadedCount} imágenes añadidas correctamente`,
+          { id: toastId }
+        );
+      }
+    } catch (err: any) {
+      toast.error('Error al subir: ' + (err?.message || 'Error desconocido'), { id: toastId });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -245,11 +257,14 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       const baseSlug = product?.slug || nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const finalSlug = product ? baseSlug : `${baseSlug}-${Date.now().toString().slice(-4)}`;
 
+      const precioNum = typeof precio === 'number' && !Number.isNaN(precio) ? precio : (parseFloat(String(precio)) || 0);
+      const costoNum = typeof costo === 'number' && !Number.isNaN(costo) ? costo : (parseFloat(String(costo)) || 0);
+
       const productPayload: any = {
         nombre,
         slug: finalSlug,
         descripcion,
-        precio_venta: precio,
+        precio_venta: precioNum,
         stock_minimo: 4,
         activo: true,
         publicado,
@@ -334,8 +349,8 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
         coleccion: coleccionFinal,
         seccion: coleccionFinal,
         tipo: tipoFinal,
-        precio,
-        costo,
+        precio: precioNum,
+        costo: costoNum,
         stock,
         estadoComercial,
         tallas: tallasArray.length > 0 ? tallasArray : ['S', 'M', 'L', 'XL'],
@@ -349,7 +364,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
 
       onSave(updatedItem);
       toast.success(product ? 'Prenda actualizada con éxito' : 'Nueva prenda registrada en inventario', {
-        description: `Colección: ${coleccionFinal} • Stock total: ${Object.values(stock).reduce((a, b) => a + b, 0)} uds`,
+        description: `Colección: ${coleccionFinal} • Stock total: ${Object.values(stock).reduce((a, b) => a + Number(b || 0), 0)} uds`,
       });
       window.dispatchEvent(new CustomEvent('inventory-changed'));
     } catch (err: any) {
@@ -492,8 +507,16 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                 <input
                   type="number"
                   step="0.5"
-                  value={precio}
-                  onChange={(e) => setPrecio(parseFloat(e.target.value))}
+                  value={precio === '' || Number.isNaN(precio) ? '' : precio}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setPrecio('');
+                    } else {
+                      const num = parseFloat(val);
+                      setPrecio(Number.isNaN(num) ? '' : num);
+                    }
+                  }}
                   className="w-full bg-[#1c1b1b] text-white font-price font-bold text-sm px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                   required
                 />
@@ -506,8 +529,16 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                 <input
                   type="number"
                   step="0.5"
-                  value={costo}
-                  onChange={(e) => setCosto(parseFloat(e.target.value))}
+                  value={costo === '' || Number.isNaN(costo) ? '' : costo}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setCosto('');
+                    } else {
+                      const num = parseFloat(val);
+                      setCosto(Number.isNaN(num) ? '' : num);
+                    }
+                  }}
                   className="w-full bg-[#1c1b1b] text-[#ac8888] font-price text-sm px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                 />
               </div>

@@ -27,12 +27,30 @@ declare global {
 export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidgetProps) {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
   const siteKey =
     import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAFTjTa89HLCIKoL8';
+
+  const handleManualVerification = () => {
+    setIsVerified(true);
+    setIsBlocked(false);
+    setErrorMessage(null);
+    if (typeof onVerify === 'function') {
+      onVerify('manual_adblock_fallback');
+    } else if (typeof onVerify === 'string') {
+      const fnName = onVerify.replace(/^window\./, '');
+      if (typeof (window as any)[fnName] === 'function') {
+        (window as any)[fnName]('manual_adblock_fallback');
+      }
+    }
+    if (typeof document !== 'undefined') {
+      document.dispatchEvent(new CustomEvent('turnstile:verified', { detail: { token: 'manual_adblock_fallback' } }));
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -47,7 +65,7 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
             window.turnstile.reset(widgetIdRef.current);
           }
 
-          const id = window.turnstile.render(turnstileContainerRef.current, {
+          const renderedId = window.turnstile.render(turnstileContainerRef.current, {
             sitekey: siteKey,
             theme: 'dark',
             callback: async (token: string) => {
@@ -99,7 +117,7 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
             },
             'error-callback': () => {
               if (isMounted) {
-                setErrorMessage('No se pudo cargar el desafío de seguridad Cloudflare.');
+                setIsBlocked(true);
               }
             },
             'expired-callback': () => {
@@ -109,10 +127,10 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
               }
             },
           });
-          widgetIdRef.current = id;
+          widgetIdRef.current = renderedId;
         } catch (e) {
           if (isMounted) {
-            setErrorMessage('Error al inicializar Cloudflare Turnstile.');
+            setIsBlocked(true);
           }
         }
       }
@@ -127,7 +145,7 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
       script.onload = initializeTurnstile;
       script.onerror = () => {
         if (isMounted) {
-          setErrorMessage('Error de red al conectar con Cloudflare Turnstile.');
+          setIsBlocked(true);
         }
       };
       document.head.appendChild(script);
@@ -135,13 +153,21 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
       initializeTurnstile();
     }
 
+    // Verificación de respaldo si el script es bloqueado silenciosamente por AdBlocker / Brave
+    const timeoutCheck = setTimeout(() => {
+      if (isMounted && !window.turnstile && !isVerified) {
+        setIsBlocked(true);
+      }
+    }, 3000);
+
     return () => {
       isMounted = false;
+      clearTimeout(timeoutCheck);
     };
   }, [siteKey, onVerify, isVerified]);
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full ${className}`} id={id}>
       <div className="flex flex-col items-center justify-center p-3 bg-[#0e0e0e] border border-white/[0.08] rounded-none">
         {/* Contenedor del widget oficial de Cloudflare */}
         <div ref={turnstileContainerRef} className="my-1 min-h-[65px] flex items-center justify-center" />
@@ -162,7 +188,22 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
           </div>
         )}
 
-        {errorMessage && (
+        {isBlocked && !isVerified && (
+          <div className="w-full mt-2 p-2.5 bg-[#141416] border border-amber-500/30 text-center space-y-2">
+            <p className="text-[11px] font-mono text-amber-300">
+              🛡️ Bloqueador detectado (Cloudflare detenido).
+            </p>
+            <button
+              type="button"
+              onClick={handleManualVerification}
+              className="w-full py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              ✓ Confirmar que no soy un bot
+            </button>
+          </div>
+        )}
+
+        {errorMessage && !isBlocked && (
           <div className="mt-2 text-xs font-mono text-[#ff5449] text-center">
             {errorMessage}
           </div>

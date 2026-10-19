@@ -324,9 +324,9 @@
     "semantic_hash": ""
   },
   "src/pages/login.astro": {
-    "mtime": 1792351327.1332972,
-    "seen": 1792352948.443889,
-    "ast_hash": "64530de60360e5b804c8c275cd1baa9a",
+    "mtime": 1792357044.536268,
+    "seen": 1792357165.178308,
+    "ast_hash": "1942761d7977ffac150f24d0d6af8edc",
     "semantic_hash": ""
   },
   "src/pages/producto/[id].astro": {
@@ -846,21 +846,15 @@
     "semantic_hash": ""
   },
   "PRODUCCION.md": {
-    "mtime": 1792352900.917873,
-    "seen": 1792352948.476024,
-    "ast_hash": "16d8eaa2e10f45ce1325265eebb28580",
+    "mtime": 1792356683.549152,
+    "seen": 1792357165.2073207,
+    "ast_hash": "6e2dcd395f402bf1ae23eea2dbe40ba4",
     "semantic_hash": ""
   },
   "docs/plan-produccion-real.md": {
     "mtime": 1792352856.9727263,
     "seen": 1792352948.476514,
     "ast_hash": "68ca810f40bf05568f68b3305e959c55",
-    "semantic_hash": ""
-  },
-  "scratch_page.html": {
-    "mtime": 1792354988.0470245,
-    "seen": 1792356542.1893373,
-    "ast_hash": "f6c415fb183e2381b64f1e5bae5cb14e",
     "semantic_hash": ""
   }
 }

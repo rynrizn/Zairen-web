@@ -87,8 +87,11 @@ export function MatrizStock({ stock, onChange, readOnly = false }: MatrizStockPr
                   <input
                     type="number"
                     min="0"
-                    value={count}
-                    onChange={(e) => handleSetDirect(size, parseInt(e.target.value, 10))}
+                    value={Number.isNaN(count) || count === undefined ? 0 : count}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      handleSetDirect(size, Number.isNaN(val) ? 0 : val);
+                    }}
                     className="w-12 text-center font-price text-sm bg-[#141416] text-white font-bold py-1 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
                   />
                   <button
