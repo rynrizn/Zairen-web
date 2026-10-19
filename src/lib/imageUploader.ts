@@ -105,8 +105,8 @@ async function sendToCloudinary(
 
 /**
  * Sube una imagen directamente a Cloudinary sin firma (Unsigned).
- * Intenta primero en WebP optimizado; si el preset rechaza WebP, reintenta con el archivo original.
- * Retorna un objeto UploadResult consistente con diagnósticos claros.
+ * Transforma OBLIGATORIAMENTE la imagen a .webp en el cliente antes de enviarla
+ * para que a Cloudinary solo ingresen recursos en formato .webp.
  */
 export async function uploadImageToCloudinary(
   file: File,
@@ -115,50 +115,30 @@ export async function uploadImageToCloudinary(
   const folder = typeof folderOrOptions === 'string' ? folderOrOptions : folderOrOptions?.folder;
 
   try {
-    // 1. Intentar convertir a WebP para máxima optimización
-    let webpBlob: Blob | null = null;
-    try {
-      webpBlob = await convertToWebP(file);
-    } catch (conversionErr) {
-      console.warn('[ImageUploader] No se pudo convertir a WebP, usando archivo original:', conversionErr);
-    }
+    // 1. Transformar automáticamente la imagen a WebP en el navegador
+    const webpBlob = await convertToWebP(file);
+    const cleanFileName = file.name.replace(/\.[^/.]+$/, '') + '.webp';
 
-    // 2. Si se convirtió a WebP, intentar subir el WebP
-    if (webpBlob) {
-      const cleanFileName = file.name.replace(/\.[^/.]+$/, '') + '.webp';
-      const resWebP = await sendToCloudinary(webpBlob, cleanFileName, folder);
+    // 2. Subir el archivo WebP convertido a Cloudinary
+    const resWebP = await sendToCloudinary(webpBlob, cleanFileName, folder);
 
-      if (resWebP.ok) {
-        return {
-          success: true,
-          url: resWebP.data.secure_url || resWebP.data.url,
-          secureUrl: resWebP.data.secure_url,
-          publicId: resWebP.data.public_id,
-        };
-      }
-
-      console.warn('[ImageUploader] Falló subida WebP:', resWebP.data?.error?.message, '-> Reintentando con archivo original...');
-    }
-
-    // 3. Subir archivo original (JPG, PNG, etc.) directamente como fallback
-    const resOrig = await sendToCloudinary(file, file.name, folder);
-    if (resOrig.ok) {
+    if (resWebP.ok) {
       return {
         success: true,
-        url: resOrig.data.secure_url || resOrig.data.url,
-        secureUrl: resOrig.data.secure_url,
-        publicId: resOrig.data.public_id,
+        url: resWebP.data.secure_url || resWebP.data.url,
+        secureUrl: resWebP.data.secure_url,
+        publicId: resWebP.data.public_id,
       };
     }
 
-    // 4. Manejo detallado y amigable de errores de configuración en Cloudinary
-    const rawError = resOrig.data?.error?.message || `Error ${resOrig.status}`;
+    // 3. Manejo detallado y amigable de errores de configuración en Cloudinary
+    const rawError = resWebP.data?.error?.message || `Error ${resWebP.status}`;
     let userFriendlyMsg = rawError;
 
     if (rawError.includes('format') && rawError.includes('not allowed')) {
-      userFriendlyMsg = `Cloudinary rechazó el formato. En tu consola de Cloudinary ve a Settings > Upload > Upload presets > "${UPLOAD_PRESET}" y deja el campo "Allowed formats" en BLANCO (vacío).`;
+      userFriendlyMsg = `Cloudinary rechazó el formato .webp. En tu consola de Cloudinary tienes "Allowed formats: auto". Debes cambiarlo a "webp" (o dejarlo vacío) en Settings > Upload > Upload presets > Editar "${UPLOAD_PRESET}".`;
     } else if (rawError.includes('Upload preset must be whitelisted for unsigned uploads')) {
-      userFriendlyMsg = `Cloudinary: El preset "${UPLOAD_PRESET}" no está en modo Unsigned. En Cloudinary Console ve a Settings > Upload > Upload presets > "${UPLOAD_PRESET}" y cambia Signing Mode a "Unsigned".`;
+      userFriendlyMsg = `Cloudinary: El preset "${UPLOAD_PRESET}" no está en modo Unsigned. En Cloudinary Console cambia Signing Mode a "Unsigned".`;
     } else if (rawError.includes('Upload preset not found')) {
       userFriendlyMsg = `Cloudinary: No se encontró el preset "${UPLOAD_PRESET}".`;
     }
@@ -176,7 +156,7 @@ export async function uploadImageToCloudinary(
       success: false,
       url: '',
       secureUrl: '',
-      error: error?.message || 'Error inesperado de conexión con Cloudinary',
+      error: error?.message || 'Error al convertir o subir imagen WebP',
     };
   }
 }
