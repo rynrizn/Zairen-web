@@ -32,3 +32,14 @@ Thumbs.db
 .vscode/
 *.sublime-project
 *.sublime-workspace
+
+# Herramientas de IA, agentes y documentación interna privada
+.agents/
+.codex/
+graphify-out/
+tasks/
+docs/
+AGENTS.md
+CONSTRAINTS.md
+PRODUCCION.md
+
