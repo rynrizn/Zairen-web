@@ -54,19 +54,58 @@ if (!dbProd) {
   return Astro.redirect('/');
 }
 
+const stockPorTalla: Record<string, number> = {};
+if (dbProd.atributos && typeof dbProd.atributos === 'object') {
+  Object.entries(dbProd.atributos).forEach(([k, v]) => {
+    const match = k.toLowerCase().match(/^stock_([a-z0-9]+)$/);
+    if (match) {
+      const sizeKey = match[1].toUpperCase();
+      stockPorTalla[sizeKey] = parseInt(String(v), 10) || 0;
+    }
+  });
+}
+
+if (Object.keys(stockPorTalla).length === 0) {
+  try {
+    const { data: attrData } = await supabase
+      .from('atributo_producto')
+      .select('clave, valor')
+      .eq('producto_id', dbProd.id_producto)
+      .ilike('clave', 'stock_%');
+    if (attrData && attrData.length > 0) {
+      attrData.forEach((a: any) => {
+        const match = a.clave.toLowerCase().match(/^stock_([a-z0-9]+)$/);
+        if (match) {
+          stockPorTalla[match[1].toUpperCase()] = parseInt(String(a.valor), 10) || 0;
+        }
+      });
+    }
+  } catch (e) {}
+}
+
+const tallasConStock = Object.keys(stockPorTalla);
+const tallasFinal = tallasConStock.length > 0
+  ? tallasConStock
+  : (dbProd.tallas && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL']);
+
+const stockCalculado = Object.keys(stockPorTalla).length > 0
+  ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
+  : Number(dbProd.stock_disponible || 0);
+
 const product = {
   id: dbProd.id_producto,
   slug: dbProd.slug,
   nombre: dbProd.nombre,
   precio: Number(dbProd.precio_venta),
-  coleccion: dbProd.coleccion || 'DROP 01',
-  seccion: dbProd.coleccion || 'DROP 01',
+  coleccion: dbProd.coleccion || 'General',
+  seccion: dbProd.coleccion || 'General',
   tipo: 'Polera',
   descripcion: dbProd.descripcion || '',
   imagen: dbProd.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
   imagenDorsal: dbProd.imagen_dorsal,
-  tallas: dbProd.tallas && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL'],
-  stockDisponible: Number(dbProd.stock_disponible || 0),
+  tallas: tallasFinal,
+  stockPorTalla: Object.keys(stockPorTalla).length > 0 ? stockPorTalla : undefined,
+  stockDisponible: Math.max(Number(dbProd.stock_disponible || 0), stockCalculado),
   esPrioritario: Boolean(dbProd.es_prioritario),
   estadoComercial: dbProd.estado_comercial || 'disponible',
 };
@@ -114,6 +153,7 @@ try {
       imagenes={productImages}
       tallas={product.tallas}
       stockDisponible={product.stockDisponible}
+      stockPorTalla={product.stockPorTalla}
       estadoComercial={product.estadoComercial}
     />
   </main>
