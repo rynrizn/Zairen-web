@@ -444,3 +444,29 @@ html.light aside[class*="fixed top-0 right-0"] input {
   color: #0A0A0B !important;
   border-color: #D6D1C4 !important;
 }
+
+/* ============================================================ */
+/* ⛩️ ANIMACIONES ZEN Y TRANSICIONES SUAVES // ZAIREN LAB        */
+/* ============================================================ */
+
+@keyframes zenFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.zen-fade-in {
+  animation: zenFadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Transición suave para todos los componentes interactivos */
+button, a, input, select {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 200ms;
+}
