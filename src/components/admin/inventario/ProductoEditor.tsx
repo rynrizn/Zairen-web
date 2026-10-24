@@ -125,7 +125,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     }
 
     setIsUploading(true);
-    const toastId = toast.loading('Subiendo imagen a Cloudinary...');
+    const toastId = toast.loading('Convirtiendo a WebP y subiendo a Cloudinary...');
 
     try {
       let uploadedCount = 0;
@@ -136,18 +136,20 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
           setImagenes((prev) => [...prev, res.url]);
           uploadedCount++;
         } else {
-          toast.error(res.error || `Error al subir ${file.name}`, { id: toastId, duration: 9000 });
+          toast.error(res.error || `Error al procesar ${file.name}`, { id: toastId, duration: 9000 });
           return;
         }
       }
       if (uploadedCount > 0) {
         toast.success(
-          uploadedCount === 1 ? 'Imagen añadida correctamente' : `${uploadedCount} imágenes añadidas correctamente`,
+          uploadedCount === 1
+            ? 'Imagen convertida a .webp y guardada en Cloudinary'
+            : `${uploadedCount} imágenes convertidas a .webp y guardadas`,
           { id: toastId }
         );
       }
     } catch (err: any) {
-      toast.error('Error al subir: ' + (err?.message || 'Error desconocido'), { id: toastId });
+      toast.error('Error al procesar/subir imagen: ' + (err?.message || 'Error desconocido'), { id: toastId });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -645,7 +647,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                   ref={fileInputRef}
                   onChange={handleFileUpload}
                   multiple
-                  accept="image/png, image/jpeg, image/webp"
+                  accept="image/*"
                   className="hidden"
                 />
                 <button
@@ -657,7 +659,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                   <span className="material-symbols-outlined text-[16px] text-[#dc143c]">
                     cloud_upload
                   </span>
-                  <span>{isUploading ? 'Procesando WebP...' : 'Subir Imágenes'}</span>
+                  <span>{isUploading ? 'Convirtiendo WebP...' : 'Subir Fotos (.webp)'}</span>
                 </button>
 
                 <button
