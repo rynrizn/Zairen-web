@@ -21,22 +21,45 @@ if (isSupabaseConfigured) {
       .limit(100);
 
     if (!pError && dbProducts && dbProducts.length > 0) {
-      products = dbProducts.map((p) => ({
-        id: p.id_producto,
-        slug: p.slug,
-        nombre: p.nombre,
-        precio: Number(p.precio_venta),
-        coleccion: p.coleccion || 'General',
-        coleccionSlug: p.coleccion_slug || (p.coleccion ? p.coleccion.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : 'general'),
-        idColeccion: p.id_coleccion,
-        subtitulo: p.descripcion || 'Algodón pesado 280 GSM',
-        imagen: p.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
-        imagenDorsal: p.imagen_dorsal,
-        tallas: p.tallas && p.tallas.length > 0 ? p.tallas : ['S', 'M', 'L', 'XL'],
-        stockDisponible: Number(p.stock_disponible || 0),
-        esPrioritario: Boolean(p.es_prioritario),
-        estadoComercial: p.estado_comercial || 'ninguno',
-      }));
+      products = dbProducts.map((p) => {
+        const stockPorTalla: Record<string, number> = {};
+        if (p.atributos && typeof p.atributos === 'object') {
+          Object.entries(p.atributos).forEach(([k, v]) => {
+            const match = k.toLowerCase().match(/^stock_([a-z0-9]+)$/);
+            if (match) {
+              const sizeKey = match[1].toUpperCase();
+              stockPorTalla[sizeKey] = parseInt(String(v), 10) || 0;
+            }
+          });
+        }
+
+        const tallasConStock = Object.keys(stockPorTalla);
+        const tallasFinal = tallasConStock.length > 0
+          ? tallasConStock
+          : (p.tallas && p.tallas.length > 0 ? p.tallas : ['S', 'M', 'L', 'XL']);
+
+        const stockCalculado = Object.keys(stockPorTalla).length > 0
+          ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
+          : Number(p.stock_disponible || 0);
+
+        return {
+          id: p.id_producto,
+          slug: p.slug,
+          nombre: p.nombre,
+          precio: Number(p.precio_venta),
+          coleccion: p.coleccion || 'General',
+          coleccionSlug: p.coleccion_slug || (p.coleccion ? p.coleccion.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : 'general'),
+          idColeccion: p.id_coleccion,
+          subtitulo: p.descripcion || 'Algodón pesado 280 GSM',
+          imagen: p.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
+          imagenDorsal: p.imagen_dorsal,
+          tallas: tallasFinal,
+          stockPorTalla: Object.keys(stockPorTalla).length > 0 ? stockPorTalla : undefined,
+          stockDisponible: Math.max(Number(p.stock_disponible || 0), stockCalculado),
+          esPrioritario: Boolean(p.es_prioritario),
+          estadoComercial: p.estado_comercial || 'ninguno',
+        };
+      });
     }
 
     const { data: dbCols, error: cError } = await supabase
