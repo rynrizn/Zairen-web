@@ -44,12 +44,17 @@ export function DetalleProducto({
 
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const getStockForTalla = (t: string) => {
-    if (stockPorTalla && stockPorTalla[t] !== undefined) {
-      return stockPorTalla[t];
+    if (stockPorTalla && Object.keys(stockPorTalla).length > 0) {
+      return stockPorTalla[t] ?? 0;
     }
     if (tallas.length === 1) return stockDisponible;
     return stockDisponible > 0 ? 1 : 0;
   };
+
+  const totalStockAvailable = stockPorTalla && Object.keys(stockPorTalla).length > 0
+    ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
+    : stockDisponible;
+  const isSoldOut = totalStockAvailable <= 0 || estadoComercial === 'agotado';
 
   const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
@@ -58,7 +63,12 @@ export function DetalleProducto({
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  const isSoldOut = stockDisponible <= 0 || estadoComercial === 'agotado';
+  useEffect(() => {
+    const available = tallas.find((t) => getStockForTalla(t) > 0);
+    if (available && getStockForTalla(selectedTalla) <= 0) {
+      setSelectedTalla(available);
+    }
+  }, [tallas, stockPorTalla, stockDisponible]);
   const currentImage = safeImages[activeImageIndex] || safeImages[0];
   const seccionTexto = (seccion || coleccion).toUpperCase();
 
@@ -115,8 +125,9 @@ export function DetalleProducto({
   };
 
   const handleAddToCart = () => {
-    if (isSoldOut) {
-      toast.error('Prenda agotada temporalmente');
+    const stockForSelected = getStockForTalla(selectedTalla);
+    if (isSoldOut || stockForSelected <= 0) {
+      toast.error(`La talla ${selectedTalla} está agotada`);
       return;
     }
 
@@ -127,7 +138,7 @@ export function DetalleProducto({
       talla: selectedTalla,
       imagen: currentImage,
       sku: slug?.toUpperCase(),
-      stockDisponible: getStockForTalla(selectedTalla),
+      stockDisponible: stockForSelected,
     });
 
     setIsAdded(true);
@@ -345,13 +356,22 @@ export function DetalleProducto({
           <div className="bento-talla-grid">
             {tallas.map((talla) => {
               const isSelected = selectedTalla === talla;
+              const stockThisTalla = getStockForTalla(talla);
+              const isTallaAgotada = isSoldOut || stockThisTalla <= 0;
               return (
                 <button
                   key={talla}
                   type="button"
-                  onClick={() => setSelectedTalla(talla)}
-                  disabled={isSoldOut}
-                  className={`talla-btn ${isSelected ? 'talla-selected' : ''}`}
+                  onClick={() => !isTallaAgotada && setSelectedTalla(talla)}
+                  disabled={isTallaAgotada}
+                  title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla} (${stockThisTalla} disponibles)`}
+                  className={`talla-btn ${
+                    isTallaAgotada
+                      ? 'talla-disabled line-through opacity-30 cursor-not-allowed pointer-events-none'
+                      : isSelected
+                      ? 'talla-selected'
+                      : ''
+                  }`}
                 >
                   {talla}
                 </button>

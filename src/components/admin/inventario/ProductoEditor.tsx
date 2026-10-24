@@ -370,8 +370,18 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
         // 4. Guardar Tallas como atributos
         try {
           await supabase.from('atributo_producto').delete().eq('producto_id', savedProductId).eq('clave', 'talla');
-          if (tallasArray.length > 0) {
-            const attrRows = tallasArray.map((talla, idx) => ({
+          
+          // Guardar como 'talla' unicamente aquellas variantes con stock positivo real
+          const tallasConStockReal = Object.entries(stock)
+            .filter(([_, qty]) => Number(qty) > 0)
+            .map(([talla]) => talla.toUpperCase());
+
+          const finalTallasToSave = tallasConStockReal.length > 0
+            ? Array.from(new Set(tallasConStockReal))
+            : tallasArray;
+
+          if (finalTallasToSave.length > 0) {
+            const attrRows = finalTallasToSave.map((talla, idx) => ({
               producto_id: savedProductId,
               clave: 'talla',
               valor: talla,
