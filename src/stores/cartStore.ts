@@ -9,6 +9,7 @@ export interface CartItem {
   imagen: string;
   cantidad: number;
   sku?: string;
+  stockDisponible?: number;
 }
 
 // Cargar estado inicial desde localStorage de forma segura en navegador
@@ -44,16 +45,20 @@ export function addItem(item: Omit<CartItem, 'cantidad'>) {
   const current = $cart.get();
   const existing = current.find((i) => i.id === item.id && i.talla === item.talla);
 
+  const maxStock = item.stockDisponible ?? Infinity;
   if (existing) {
+    if (existing.cantidad >= maxStock) {
+      return; // No permitir sobrepasar el stock real
+    }
     $cart.set(
       current.map((i) =>
         i.id === item.id && i.talla === item.talla
-          ? { ...i, cantidad: i.cantidad + 1 }
+          ? { ...i, cantidad: i.cantidad + 1, stockDisponible: item.stockDisponible ?? i.stockDisponible }
           : i
       )
     );
   } else {
-    $cart.set([...current, { ...item, cantidad: 1 }]);
+    $cart.set([...current, { ...item, cantidad: Math.min(1, maxStock) }]);
   }
 }
 
@@ -73,9 +78,13 @@ export function updateQuantity(id: string, talla: string, cantidad: number) {
     return;
   }
   $cart.set(
-    $cart.get().map((i) =>
-      i.id === id && i.talla === talla ? { ...i, cantidad } : i
-    )
+    $cart.get().map((i) => {
+      if (i.id === id && i.talla === talla) {
+        const max = i.stockDisponible ?? Infinity;
+        return { ...i, cantidad: Math.min(cantidad, max) };
+      }
+      return i;
+    })
   );
 }
 

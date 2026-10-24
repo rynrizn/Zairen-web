@@ -19,6 +19,7 @@ export interface TarjetaPoleraProps {
   imagenes?: string[];
   tallas?: string[];
   stockDisponible?: number;
+  stockPorTalla?: Record<string, number>;
   esPrioritario?: boolean;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno' | 'disponible' | 'agotado';
 }
@@ -36,9 +37,22 @@ export function TarjetaPolera({
   imagenDorsal,
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
+  stockPorTalla,
   estadoComercial = 'ninguno',
 }: TarjetaPoleraProps) {
-  const [selectedTalla, setSelectedTalla] = useState<string>(tallas[0] || 'M');
+  // Determinar stock de cada talla
+  const getStockForTalla = (t: string) => {
+    if (stockPorTalla && stockPorTalla[t] !== undefined) {
+      return stockPorTalla[t];
+    }
+    // Si no hay desglose pero hay tallas y stock disponible total
+    if (tallas.length === 1) return stockDisponible;
+    return stockDisponible > 0 ? 1 : 0;
+  };
+
+  // Seleccionar por defecto la primera talla con stock disponible
+  const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
+  const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
 
   const isSoldOut = stockDisponible <= 0 || estadoComercial === 'agotado';
@@ -60,6 +74,7 @@ export function TarjetaPolera({
       talla: selectedTalla,
       imagen,
       sku: slug?.toUpperCase() || id.toUpperCase(),
+      stockDisponible: getStockForTalla(selectedTalla),
     });
 
     setIsAdded(true);
@@ -175,17 +190,22 @@ export function TarjetaPolera({
           <div className="flex items-center gap-1.5">
             {tallas.map((talla) => {
               const isSelected = selectedTalla === talla;
+              const stockThisTalla = getStockForTalla(talla);
+              const isTallaAgotada = isSoldOut || stockThisTalla <= 0;
               return (
                 <button
                   key={talla}
                   type="button"
-                  onClick={() => setSelectedTalla(talla)}
-                  disabled={isSoldOut}
-                  className={`w-7 h-7 text-xs font-mono font-bold flex items-center justify-center transition-all cursor-pointer border active:scale-90 ${
-                    isSelected
-                      ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)]'
-                      : 'bg-[#1c1b1b] text-[#e6bdbc] hover:bg-[#2a2a2a] hover:text-white border-white/[0.08]'
-                  } ${isSoldOut ? 'opacity-40 cursor-not-allowed' : ''}`}
+                  onClick={() => !isTallaAgotada && setSelectedTalla(talla)}
+                  disabled={isTallaAgotada}
+                  title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla} (${stockThisTalla} disponibles)`}
+                  className={`w-7 h-7 text-xs font-mono font-bold flex items-center justify-center transition-all border ${
+                    isTallaAgotada
+                      ? 'bg-[#141416]/50 text-[#8F8F8C]/40 border-white/[0.04] line-through cursor-not-allowed opacity-35'
+                      : isSelected
+                      ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)] cursor-pointer active:scale-90'
+                      : 'bg-[#1c1b1b] text-[#e6bdbc] hover:bg-[#2a2a2a] hover:text-white border-white/[0.08] cursor-pointer active:scale-90'
+                  }`}
                 >
                   {talla}
                 </button>
