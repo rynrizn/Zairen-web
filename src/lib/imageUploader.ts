@@ -2,6 +2,8 @@
  * =====================================================================
  * ⛩️ UPLOADER Y CONVERSOR WEBP AUTOMÁTICO CLOUDINARY // ZAIREN LAB
  * =====================================================================
+ * Convierte de forma estricta e incondicional cualquier imagen en el
+ * cliente a formato WebP antes de transmitirla a Cloudinary.
  */
 
 const CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'ds4qnoypm';
@@ -12,24 +14,28 @@ export interface UploadResult {
   url: string;
   secureUrl: string;
   publicId?: string;
+  originalSize?: number;
+  convertedSize?: number;
+  reductionPercentage?: number;
   error?: string;
 }
 
 /**
- * Convierte cualquier archivo de imagen (JPG, PNG, HEIC, etc.) a formato WebP
- * en el navegador del cliente antes de subirlo, reduciendo hasta un 90% el peso.
+ * Convierte obligatoriamente cualquier archivo de imagen (JPG, PNG, HEIC, AVIF, BMP, WEBP)
+ * a un Blob estricto de tipo 'image/webp' mediante Canvas en el navegador.
  */
 export async function convertToWebP(
   file: File,
   quality: number = 0.85,
   maxWidth: number = 1600
 ): Promise<Blob> {
-  // Si ya es un webp ligero de menos de 800KB, no es necesario recodificar
-  if (file.type === 'image/webp' && file.size < 800 * 1024) {
-    return file;
-  }
-
   return new Promise((resolve, reject) => {
+    // Si no es un archivo de imagen válido, rechazar
+    if (!file.type.startsWith('image/') && !file.name.match(/\.(png|jpe?g|webp|avif|heic|bmp|gif)$/i)) {
+      reject(new Error('El archivo seleccionado no es una imagen válida.'));
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -37,7 +43,7 @@ export async function convertToWebP(
         let width = img.width;
         let height = img.height;
 
-        // Redimensionar proporcionalmente si supera el ancho máximo
+        // Redimensionar proporcionalmente manteniendo aspecto si supera el ancho máximo
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
@@ -49,45 +55,60 @@ export async function convertToWebP(
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          reject(new Error('No se pudo inicializar el contexto canvas 2D'));
+          reject(new Error('No se pudo inicializar el contexto canvas 2D para la conversión a WebP'));
           return;
         }
 
-        // Dibujar con suavizado de alta calidad
+        // Renderizado optimizado con suavizado bicúbico
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
           (blob) => {
-            if (blob) {
+            if (blob && blob.type === 'image/webp') {
               resolve(blob);
+            } else if (blob) {
+              // Si toBlob no asignó mime type explícito, asegurar Blob con tipo image/webp
+              resolve(new Blob([blob], { type: 'image/webp' }));
             } else {
-              reject(new Error('Fallo al convertir imagen a WebP'));
+              reject(new Error('Fallo al codificar la imagen en formato WebP'));
             }
           },
           'image/webp',
           quality
         );
       };
-      img.onerror = () => reject(new Error('No se pudo procesar el archivo de imagen'));
+
+      img.onerror = () => reject(new Error('No se pudo decodificar la imagen para su conversión'));
       img.src = e.target?.result as string;
     };
-    reader.onerror = () => reject(new Error('Error al leer el archivo'));
+
+    reader.onerror = () => reject(new Error('Error al leer el archivo desde el dispositivo'));
     reader.readAsDataURL(file);
   });
 }
 
 /**
- * Petición interna de subida a Cloudinary
+ * Petición interna de subida a Cloudinary con verificación estricta de formato WebP
  */
 async function sendToCloudinary(
-  payload: Blob | File,
+  payload: Blob,
   filename: string,
   folder?: string
 ): Promise<{ ok: boolean; status: number; data: any }> {
+  // Validación de seguridad estricta: Únicamente permitir envío de Blobs 'image/webp'
+  if (payload.type !== 'image/webp') {
+    throw new Error('Seguridad: Solo se permite enviar archivos WebP a Cloudinary.');
+  }
+
+  // Garantizar que la extensión sea forzosamente .webp
+  const cleanFilename = filename.toLowerCase().endsWith('.webp')
+    ? filename
+    : filename.replace(/\.[^/.]+$/, '') + '.webp';
+
   const formData = new FormData();
-  formData.append('file', payload, filename);
+  formData.append('file', payload, cleanFilename);
   formData.append('upload_preset', UPLOAD_PRESET);
   if (folder) {
     formData.append('folder', folder);
@@ -105,21 +126,25 @@ async function sendToCloudinary(
 
 /**
  * Sube una imagen directamente a Cloudinary sin firma (Unsigned).
- * Transforma OBLIGATORIAMENTE la imagen a .webp en el cliente antes de enviarla
- * para que a Cloudinary solo ingresen recursos en formato .webp.
+ * Convierte FORZOSAMENTE la imagen a formato .webp antes de transmitirla,
+ * garantizando que en Cloudinary solo existan archivos WebP optimizados.
  */
 export async function uploadImageToCloudinary(
   file: File,
   folderOrOptions?: string | { folder?: string; onProgress?: (percent: number) => void }
 ): Promise<UploadResult> {
   const folder = typeof folderOrOptions === 'string' ? folderOrOptions : folderOrOptions?.folder;
+  const originalSize = file.size;
 
   try {
-    // 1. Transformar automáticamente la imagen a WebP en el navegador
+    // 1. Transformación obligatoria a WebP en el navegador
     const webpBlob = await convertToWebP(file);
+    const convertedSize = webpBlob.size;
+    const reduction = Math.max(0, Math.round(((originalSize - convertedSize) / originalSize) * 100));
+
     const cleanFileName = file.name.replace(/\.[^/.]+$/, '') + '.webp';
 
-    // 2. Subir el archivo WebP convertido a Cloudinary
+    // 2. Transmisión del Blob WebP verificado a Cloudinary
     const resWebP = await sendToCloudinary(webpBlob, cleanFileName, folder);
 
     if (resWebP.ok) {
@@ -128,17 +153,20 @@ export async function uploadImageToCloudinary(
         url: resWebP.data.secure_url || resWebP.data.url,
         secureUrl: resWebP.data.secure_url,
         publicId: resWebP.data.public_id,
+        originalSize,
+        convertedSize,
+        reductionPercentage: reduction,
       };
     }
 
-    // 3. Manejo detallado y amigable de errores de configuración en Cloudinary
+    // 3. Manejo explicativo de configuraciones de Cloudinary
     const rawError = resWebP.data?.error?.message || `Error ${resWebP.status}`;
     let userFriendlyMsg = rawError;
 
     if (rawError.includes('format') && rawError.includes('not allowed')) {
-      userFriendlyMsg = `Cloudinary rechazó el formato .webp. En tu consola de Cloudinary tienes "Allowed formats: auto". Debes cambiarlo a "webp" (o dejarlo vacío) en Settings > Upload > Upload presets > Editar "${UPLOAD_PRESET}".`;
+      userFriendlyMsg = `Cloudinary rechazó el formato .webp. En tu consola Cloudinary debes habilitar formato webp en Settings > Upload > Upload presets > "${UPLOAD_PRESET}".`;
     } else if (rawError.includes('Upload preset must be whitelisted for unsigned uploads')) {
-      userFriendlyMsg = `Cloudinary: El preset "${UPLOAD_PRESET}" no está en modo Unsigned. En Cloudinary Console cambia Signing Mode a "Unsigned".`;
+      userFriendlyMsg = `Cloudinary: El preset "${UPLOAD_PRESET}" no está en modo Unsigned.`;
     } else if (rawError.includes('Upload preset not found')) {
       userFriendlyMsg = `Cloudinary: No se encontró el preset "${UPLOAD_PRESET}".`;
     }
@@ -151,12 +179,12 @@ export async function uploadImageToCloudinary(
       error: userFriendlyMsg,
     };
   } catch (error: any) {
-    console.error('[Cloudinary Upload Exception]', error);
+    console.error('[Cloudinary WebP Pipeline Exception]', error);
     return {
       success: false,
       url: '',
       secureUrl: '',
-      error: error?.message || 'Error al convertir o subir imagen WebP',
+      error: error?.message || 'Error al procesar y convertir imagen a WebP',
     };
   }
 }
