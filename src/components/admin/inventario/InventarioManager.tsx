@@ -263,10 +263,10 @@ export function InventarioManager() {
         </div>
       </section>
 
-      {/* 2. Barra de Filtros y Búsqueda (Ortogonal) */}
-      <section className="bg-[#1c1b1b]/80 p-3 rounded-none border border-[#2A2A2A] shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-        {/* Input de Búsqueda */}
-        <div className="relative flex-1 min-w-[260px] max-w-xl">
+      {/* 2. Barra de Filtros y Búsqueda (Ortogonal y Contenida) */}
+      <section className="bg-[#1c1b1b]/80 p-3 rounded-none border border-[#2A2A2A] shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full max-w-full overflow-hidden">
+        {/* Input de Búsqueda Flexible */}
+        <div className="relative flex-1 w-full min-w-0 max-w-xl">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ac8888] text-[18px]">
             search
           </span>
@@ -288,48 +288,52 @@ export function InventarioManager() {
           )}
         </div>
 
-        {/* Grupo de Filtros */}
-        <div className="flex flex-wrap items-center gap-2 overflow-x-auto py-1">
+        {/* Grupo de Filtros con Scroll Horizontal Contenido */}
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 max-w-full py-1">
           {/* Colección */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A]">
-            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A] overflow-x-auto max-w-full scrollbar-none">
+            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase shrink-0">
               Colección:
             </span>
-            {coleccionesList.map((col) => (
-              <button
-                key={col}
-                type="button"
-                onClick={() => setSelectedColeccion(col)}
-                className={`px-3 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border ${
-                  selectedColeccion === col
-                    ? 'bg-[#dc143c] text-white font-bold border-[#dc143c]'
-                    : 'text-[#ac8888] hover:text-white border-transparent'
-                }`}
-              >
-                {col}
-              </button>
-            ))}
+            <div className="flex items-center gap-1 shrink-0">
+              {coleccionesList.map((col) => (
+                <button
+                  key={col}
+                  type="button"
+                  onClick={() => setSelectedColeccion(col)}
+                  className={`px-2.5 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border whitespace-nowrap ${
+                    selectedColeccion === col
+                      ? 'bg-[#dc143c] text-white font-bold border-[#dc143c]'
+                      : 'text-[#ac8888] hover:text-white border-transparent'
+                  }`}
+                >
+                  {col}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Estado de Stock */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A]">
-            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A] overflow-x-auto max-w-full scrollbar-none">
+            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase shrink-0">
               Estado:
             </span>
-            {(['Todos', 'Disponible', 'Pocas Uds', 'Agotado'] as const).map((est) => (
-              <button
-                key={est}
-                type="button"
-                onClick={() => setSelectedEstado(est)}
-                className={`px-2.5 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border ${
-                  selectedEstado === est
-                    ? 'bg-[#2a2a2a] text-[#FAF9F6] font-bold border-white/20'
-                    : 'text-[#ac8888] hover:text-white border-transparent'
-                }`}
-              >
-                {est}
-              </button>
-            ))}
+            <div className="flex items-center gap-1 shrink-0">
+              {(['Todos', 'Disponible', 'Pocas Uds', 'Agotado'] as const).map((est) => (
+                <button
+                  key={est}
+                  type="button"
+                  onClick={() => setSelectedEstado(est)}
+                  className={`px-2 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border whitespace-nowrap ${
+                    selectedEstado === est
+                      ? 'bg-[#2a2a2a] text-[#FAF9F6] font-bold border-white/20'
+                      : 'text-[#ac8888] hover:text-white border-transparent'
+                  }`}
+                >
+                  {est}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Selector de Vista */}
@@ -363,7 +367,7 @@ export function InventarioManager() {
       </section>
 
       {/* 3. Matriz Global de Stock - Ancho Completo a 12 Columnas */}
-      <div className="w-full bg-[#1c1b1b]/80 rounded-none p-6 border border-[#2A2A2A] shadow-xl flex flex-col space-y-4">
+      <div className="w-full bg-[#1c1b1b]/80 rounded-none p-3.5 sm:p-6 border border-[#2A2A2A] shadow-xl flex flex-col space-y-4">
         {/* Header de la Tabla */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
@@ -437,15 +441,15 @@ export function InventarioManager() {
                     </div>
                   </div>
 
-                  {/* Fila de Tallas y Stock Total */}
-                  <div className="flex items-center justify-between pt-2.5 border-t border-white/[0.06]">
-                    <div className="flex items-center gap-1.5 font-mono text-xs">
+                  {/* Fila de Tallas y Stock Total Adaptable */}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-2.5 border-t border-white/[0.06]">
+                    <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
                       {['S', 'M', 'L', 'XL'].map((talla) => {
                         const stockTalla = item.stock[talla] || 0;
                         return (
                           <span
                             key={talla}
-                            className={`px-2 py-0.5 rounded-none border text-[11px] font-bold ${
+                            className={`px-1.5 sm:px-2 py-0.5 rounded-none border text-[10px] sm:text-[11px] font-bold ${
                               stockTalla === 0
                                 ? 'bg-red-950/60 text-red-400 border-red-900/50'
                                 : stockTalla <= 3
@@ -459,7 +463,7 @@ export function InventarioManager() {
                       })}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 ml-auto sm:ml-0">
                       <span className="font-mono text-xs sm:text-sm font-bold text-[#FAF9F6]">
                         {totalItem} UDS
                       </span>
