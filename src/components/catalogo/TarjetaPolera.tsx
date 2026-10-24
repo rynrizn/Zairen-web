@@ -42,28 +42,39 @@ export function TarjetaPolera({
 }: TarjetaPoleraProps) {
   // Determinar stock de cada talla
   const getStockForTalla = (t: string) => {
-    if (stockPorTalla && stockPorTalla[t] !== undefined) {
-      return stockPorTalla[t];
+    if (stockPorTalla && Object.keys(stockPorTalla).length > 0) {
+      return stockPorTalla[t] ?? 0;
     }
     // Si no hay desglose pero hay tallas y stock disponible total
     if (tallas.length === 1) return stockDisponible;
     return stockDisponible > 0 ? 1 : 0;
   };
 
+  const totalStockAvailable = stockPorTalla && Object.keys(stockPorTalla).length > 0
+    ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
+    : stockDisponible;
+  const isSoldOut = totalStockAvailable <= 0 || estadoComercial === 'agotado';
+
   // Seleccionar por defecto la primera talla con stock disponible
   const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
 
-  const isSoldOut = stockDisponible <= 0 || estadoComercial === 'agotado';
+  useEffect(() => {
+    const available = tallas.find((t) => getStockForTalla(t) > 0);
+    if (available && getStockForTalla(selectedTalla) <= 0) {
+      setSelectedTalla(available);
+    }
+  }, [tallas, stockPorTalla, stockDisponible]);
   const isLowStock = stockDisponible > 0 && stockDisponible <= 4;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (isSoldOut) {
-      toast.error('Prenda agotada temporalmente');
+    const stockForSelected = getStockForTalla(selectedTalla);
+    if (isSoldOut || stockForSelected <= 0) {
+      toast.error(`La talla ${selectedTalla} está agotada`);
       return;
     }
 
@@ -74,7 +85,7 @@ export function TarjetaPolera({
       talla: selectedTalla,
       imagen,
       sku: slug?.toUpperCase() || id.toUpperCase(),
-      stockDisponible: getStockForTalla(selectedTalla),
+      stockDisponible: stockForSelected,
     });
 
     setIsAdded(true);
@@ -201,7 +212,7 @@ export function TarjetaPolera({
                   title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla} (${stockThisTalla} disponibles)`}
                   className={`w-7 h-7 text-xs font-mono font-bold flex items-center justify-center transition-all border ${
                     isTallaAgotada
-                      ? 'bg-[#141416]/50 text-[#8F8F8C]/40 border-white/[0.04] line-through cursor-not-allowed opacity-35'
+                      ? 'bg-[#141416]/50 text-[#8F8F8C]/40 border-white/[0.04] line-through cursor-not-allowed opacity-30 pointer-events-none'
                       : isSelected
                       ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)] cursor-pointer active:scale-90'
                       : 'bg-[#1c1b1b] text-[#e6bdbc] hover:bg-[#2a2a2a] hover:text-white border-white/[0.08] cursor-pointer active:scale-90'
