@@ -63,12 +63,30 @@ export function InventarioManager() {
             tipo: 'Polera',
             precio: Number(p.precio_venta) || 0,
             costo: Math.round((Number(p.precio_venta) || 0) * 0.4),
-            stock: {
-              S: Math.floor(totalStock / 4) || 0,
-              M: Math.floor(totalStock / 4) || 0,
-              L: Math.floor(totalStock / 4) || 0,
-              XL: Math.max(0, totalStock - Math.floor(totalStock / 4) * 3) || 0,
-            },
+            stock: (() => {
+              const stockMap: Record<string, number> = { S: 0, M: 0, L: 0, XL: 0 };
+              let hasSpecificStock = false;
+              p.atributos?.forEach((a: any) => {
+                if (a.clave && a.clave.toLowerCase().startsWith('stock_')) {
+                  const t = a.clave.replace(/stock_/i, '').toUpperCase();
+                  stockMap[t] = parseInt(a.valor, 10) || 0;
+                  hasSpecificStock = true;
+                }
+              });
+              if (hasSpecificStock) return stockMap;
+              // Si no hay atributos guardados pero solo hay 1 talla, asignarlo directo
+              if (tallas.length === 1) {
+                stockMap[tallas[0]] = totalStock;
+                return stockMap;
+              }
+              // Fallback
+              return {
+                S: Math.floor(totalStock / 4) || 0,
+                M: Math.floor(totalStock / 4) || 0,
+                L: Math.floor(totalStock / 4) || 0,
+                XL: Math.max(0, totalStock - Math.floor(totalStock / 4) * 3) || 0,
+              };
+            })(),
             tallas,
             descripcion: p.descripcion || '',
             imagen: coverImg?.url_imagen || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',

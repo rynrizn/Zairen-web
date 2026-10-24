@@ -9,6 +9,22 @@ interface AdminSidebarProps {
 export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
+
+  useEffect(() => {
+    async function fetchPendingCount() {
+      try {
+        const { count, error } = await supabase
+          .from('pedido')
+          .select('*', { count: 'exact', head: true })
+          .eq('estado', 'PENDIENTE');
+        if (!error && count !== null) {
+          setPendingOrdersCount(count);
+        }
+      } catch (e) {}
+    }
+    fetchPendingCount();
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,7 +72,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       label: 'Pedidos',
       path: '/admin/pedidos',
       id: 'pedidos',
-      badge: '3',
+      badge: pendingOrdersCount > 0 ? String(pendingOrdersCount) : undefined,
       icon: (
         <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
