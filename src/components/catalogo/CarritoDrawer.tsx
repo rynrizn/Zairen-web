@@ -81,10 +81,7 @@ export function CarritoDrawer() {
     }
 
     // 2. Verificación Humana Requerida
-    if (!turnstileVerified) {
-      toast.error('Por favor completa la verificación de seguridad antes de continuar');
-      return;
-    }
+    // Verificación no bloqueante para WhatsApp checkout directo
 
     // 3. Limitador de Frecuencia (Rate Limit: 15s)
     const now = Date.now();
@@ -250,7 +247,9 @@ export function CarritoDrawer() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad + 1)}
-                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white transition-colors cursor-pointer"
+                        disabled={item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible}
+                        title={item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible ? 'Máximo stock disponible alcanzado' : 'Añadir otra unidad'}
+                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
                       >
                         +
                       </button>
@@ -351,7 +350,7 @@ export function CarritoDrawer() {
             <button
               type="button"
               onClick={handleCheckoutWhatsApp}
-              disabled={isSubmitting || !turnstileVerified}
+              disabled={isSubmitting}
               className="w-full py-4 px-6 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_24px_rgba(220,20,60,0.45)] hover:shadow-[0_6px_30px_rgba(222,5,65,0.6)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed border border-[#dc143c]"
             >
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

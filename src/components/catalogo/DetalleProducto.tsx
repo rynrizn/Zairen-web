@@ -18,6 +18,7 @@ export interface DetalleProductoProps {
   imagenes: string[];
   tallas?: string[];
   stockDisponible?: number;
+  stockPorTalla?: Record<string, number>;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'disponible' | 'agotado' | 'ninguno';
 }
 
@@ -33,6 +34,7 @@ export function DetalleProducto({
   imagenes = [],
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
+  stockPorTalla,
   estadoComercial = 'disponible',
 }: DetalleProductoProps) {
   // Asegurar mínimo 1 imagen
@@ -41,7 +43,16 @@ export function DetalleProducto({
   ];
 
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
-  const [selectedTalla, setSelectedTalla] = useState<string>(tallas[0] || 'M');
+  const getStockForTalla = (t: string) => {
+    if (stockPorTalla && stockPorTalla[t] !== undefined) {
+      return stockPorTalla[t];
+    }
+    if (tallas.length === 1) return stockDisponible;
+    return stockDisponible > 0 ? 1 : 0;
+  };
+
+  const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
+  const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
@@ -116,6 +127,7 @@ export function DetalleProducto({
       talla: selectedTalla,
       imagen: currentImage,
       sku: slug?.toUpperCase(),
+      stockDisponible: getStockForTalla(selectedTalla),
     });
 
     setIsAdded(true);
