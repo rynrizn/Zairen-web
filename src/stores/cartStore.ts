@@ -42,10 +42,14 @@ if (typeof window !== 'undefined') {
  * Añade una prenda al carrito considerando la combinación ID + TALLA
  */
 export function addItem(item: Omit<CartItem, 'cantidad'>) {
+  const maxStock = item.stockDisponible !== undefined ? item.stockDisponible : Infinity;
+  if (maxStock <= 0) {
+    return; // Rechazar firmemente cualquier intento de añadir items con stock agotado
+  }
+
   const current = $cart.get();
   const existing = current.find((i) => i.id === item.id && i.talla === item.talla);
 
-  const maxStock = item.stockDisponible ?? Infinity;
   if (existing) {
     if (existing.cantidad >= maxStock) {
       return; // No permitir sobrepasar el stock real
@@ -58,7 +62,7 @@ export function addItem(item: Omit<CartItem, 'cantidad'>) {
       )
     );
   } else {
-    $cart.set([...current, { ...item, cantidad: Math.min(1, maxStock) }]);
+    $cart.set([...current, { ...item, cantidad: 1 }]);
   }
 }
 
