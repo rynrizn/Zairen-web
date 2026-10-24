@@ -11,6 +11,8 @@ export interface TarjetaPoleraProps {
   nombre: string;
   precio: number;
   coleccion: string;
+  coleccionSlug?: string;
+  idColeccion?: string;
   subtitulo?: string;
   imagen: string;
   imagenDorsal?: string;
@@ -27,6 +29,8 @@ export function TarjetaPolera({
   nombre,
   precio,
   coleccion,
+  coleccionSlug,
+  idColeccion,
   subtitulo = 'Algodón Peinado 280 GSM • Caída Geométrica',
   imagen,
   imagenDorsal,
