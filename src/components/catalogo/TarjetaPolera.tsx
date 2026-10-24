@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
