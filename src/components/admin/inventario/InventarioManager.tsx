@@ -189,9 +189,9 @@ export function InventarioManager() {
             </span>
             <span className="text-[#ac8888] font-mono text-xs">// ZAIREN ARCHIVE</span>
           </div>
-          <h1 className="font-headline text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight leading-none">
+          <h1 className="font-headline text-2xl sm:text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight leading-none break-words">
             CONTROL DE INVENTARIO{' '}
-            <span className="text-[#dc143c] font-light text-xl tracking-normal block md:inline font-mono">
+            <span className="text-[#dc143c] font-light text-base sm:text-xl tracking-normal block md:inline font-mono">
               // DROPS & SKUS
             </span>
           </h1>
@@ -199,63 +199,65 @@ export function InventarioManager() {
         </div>
 
         {/* Micro-Cards de Estadísticas Rápidas (Ortogonales) */}
-        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-          {/* Total Prendas */}
-          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04]">
-              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-[#ac8888] uppercase">Total Prendas</div>
-              <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
-                {totalPrendas} <span className="font-mono text-[11px] text-[#ac8888] font-normal">uds</span>
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full xl:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full sm:w-auto">
+            {/* Total Prendas */}
+            <div className="bg-[#1c1b1b]/90 px-3.5 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3">
+              <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04] shrink-0">
+                <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+              </div>
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-[#ac8888] uppercase truncate">Total Prendas</div>
+                <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
+                  {totalPrendas} <span className="font-mono text-[11px] text-[#ac8888] font-normal">uds</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* SKUs Activos */}
-          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04]">
-              <span className="material-symbols-outlined text-[18px]">tag</span>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-[#ac8888] uppercase">SKUs Activos</div>
-              <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
-                {skusActivos} <span className="font-mono text-[11px] text-[#ac8888] font-normal">refs</span>
+            {/* SKUs Activos */}
+            <div className="bg-[#1c1b1b]/90 px-3.5 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3">
+              <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04] shrink-0">
+                <span className="material-symbols-outlined text-[18px]">tag</span>
+              </div>
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-[#ac8888] uppercase truncate">SKUs Activos</div>
+                <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
+                  {skusActivos} <span className="font-mono text-[11px] text-[#ac8888] font-normal">refs</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Bajo Stock Crítico */}
-          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#dc143c]/30 shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
-              <span className="material-symbols-outlined text-[18px]">warning</span>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-[#f87171] uppercase font-bold">Bajo Stock</div>
-              <div className="font-headline text-base font-bold text-[#f87171] leading-tight">
-                {bajoStockCritico} <span className="font-mono text-[11px] text-[#f87171] font-normal">variantes</span>
+            {/* Bajo Stock Crítico */}
+            <div className="bg-[#1c1b1b]/90 px-3.5 py-2.5 rounded-none border border-[#dc143c]/30 shadow-md flex items-center gap-3">
+              <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c] shrink-0">
+                <span className="material-symbols-outlined text-[18px]">warning</span>
+              </div>
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-[#f87171] uppercase font-bold truncate">Bajo Stock</div>
+                <div className="font-headline text-base font-bold text-[#f87171] leading-tight">
+                  {bajoStockCritico} <span className="font-mono text-[11px] text-[#f87171] font-normal">variantes</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Triggers de Acción */}
-          <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
             <button
               type="button"
               onClick={handleRefreshCdn}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border border-[#2A2A2A] cursor-pointer"
+              className="px-3 sm:px-4 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] font-mono text-[11px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all border border-[#2A2A2A] cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] text-[#dc143c]">sync</span>
-              <span>Sincronizar CDN</span>
+              <span className="truncate">Sincronizar</span>
             </button>
             <button
               type="button"
               onClick={handleCreateNew}
-              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(220,20,60,0.35)] cursor-pointer border border-[#dc143c]"
+              className="px-3.5 sm:px-5 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_20px_rgba(220,20,60,0.35)] cursor-pointer border border-[#dc143c]"
             >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              <span>+ AGREGAR PRENDA</span>
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">add</span>
+              <span className="truncate">+ AGREGAR</span>
             </button>
           </div>
         </div>
