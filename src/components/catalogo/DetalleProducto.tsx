@@ -186,9 +186,10 @@ export function DetalleProducto({
           <div className="bento-image-viewport">
             {/* Imagen Principal con transición y zoom suave */}
             <img
+              key={activeImageIndex}
               src={getOptimizedImageUrl(currentImage, 1000, 1250)}
               alt={`${nombre} - Vista ${activeImageIndex + 1}`}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
+              className="w-full h-full object-contain sm:object-cover bento-image-active transition-transform duration-500 ease-out hover:scale-[1.03]"
             />
 
             {/* Badge de Estado con Color Dinámico */}
@@ -214,24 +215,28 @@ export function DetalleProducto({
               </svg>
             </button>
 
-            {/* Flechas de Navegación del Carrusel (si hay > 1 imagen) */}
+            {/* Flechas Ortogonales Zen Minimalistas (si hay > 1 imagen) */}
             {safeImages.length > 1 && (
               <>
                 <button
                   type="button"
                   onClick={handlePrevImage}
                   aria-label="Imagen anterior"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-[#dc143c] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer z-20"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-[#0e0e10]/85 hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white flex items-center justify-center border border-white/10 hover:border-[#dc143c] transition-all cursor-pointer z-20 backdrop-blur-md shadow-lg"
                 >
-                  ‹
+                  <svg className="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
                 </button>
                 <button
                   type="button"
                   onClick={handleNextImage}
                   aria-label="Imagen siguiente"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-[#dc143c] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer z-20"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-[#0e0e10]/85 hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white flex items-center justify-center border border-white/10 hover:border-[#dc143c] transition-all cursor-pointer z-20 backdrop-blur-md shadow-lg"
                 >
-                  ›
+                  <svg className="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
                 </button>
               </>
             )}
