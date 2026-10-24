@@ -18,10 +18,18 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const filteredProducts = useMemo(() => {
     return initialProducts
       .filter((p) => {
-        // Filtro por colección
+        // Filtro por colección (normalizado sin conflicto de guiones o espacios)
         if (selectedCollection !== 'todas') {
-          const matchCol = p.coleccion.toLowerCase().includes(selectedCollection.toLowerCase());
-          if (!matchCol) return false;
+          const selNorm = selectedCollection.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const prodColNorm = (p.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const prodSlugNorm = ((p as any).coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const match =
+            (p as any).coleccionSlug === selectedCollection ||
+            prodSlugNorm === selNorm ||
+            prodColNorm === selNorm ||
+            prodColNorm.includes(selNorm) ||
+            selNorm.includes(prodColNorm);
+          if (!match) return false;
         }
 
         // Filtro por estado comercial
@@ -96,27 +104,18 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       }
     });
 
-    // Productos que no coincidieron con colecciones registradas
+    // Productos que no coincidieron con colecciones registradas: agrupar por su propia coleccion
     const remaining = filteredProducts.filter((p) => !usedProductIds.has(p.id));
     if (remaining.length > 0) {
-      grouped.push({
-        id: 'archive-general',
-        name: 'ARCHIVE // GENERAL',
-        products: remaining,
-      });
-    }
-
-    // Si las colecciones estaban vacías o no cruzaron, agrupar por colección del producto
-    if (grouped.length === 0 && filteredProducts.length > 0) {
       const byColName = new Map<string, TarjetaPoleraProps[]>();
-      filteredProducts.forEach((p) => {
-        const colKey = p.coleccion || 'DROP 01';
+      remaining.forEach((p) => {
+        const colKey = p.coleccion || 'COLECCIÓN PRINCIPAL';
         if (!byColName.has(colKey)) byColName.set(colKey, []);
         byColName.get(colKey)!.push(p);
       });
       byColName.forEach((prods, colName) => {
         grouped.push({
-          id: colName.toLowerCase().replace(/\s+/g, '-'),
+          id: colName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           name: colName.toUpperCase(),
           products: prods,
         });
@@ -131,6 +130,20 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const areAllCollapsed = sections.length > 0 && sections.every((s) => collapsedSections[s.id]);
+
+  const toggleAllSections = () => {
+    if (areAllCollapsed) {
+      setCollapsedSections({});
+    } else {
+      const next: Record<string, boolean> = {};
+      sections.forEach((s) => {
+        next[s.id] = true;
+      });
+      setCollapsedSections(next);
+    }
   };
 
   return (
@@ -233,6 +246,19 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             <option value="nombre-asc">Nombre: A - Z</option>
             <option value="nombre-desc">Nombre: Z - A</option>
           </select>
+
+          {/* Botón Global para Contraer / Expandir Todas las Secciones */}
+          {sections.length > 1 && (
+            <button
+              type="button"
+              onClick={toggleAllSections}
+              title={areAllCollapsed ? 'Expandir todas las secciones' : 'Contraer todas las secciones'}
+              className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            >
+              <span className="text-[#dc143c] font-bold">{areAllCollapsed ? '⊞' : '⊟'}</span>
+              <span>{areAllCollapsed ? 'Expandir Todo' : 'Contraer Todo'}</span>
+            </button>
+          )}
         </div>
       </div>
 

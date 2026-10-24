@@ -11,6 +11,8 @@ export interface TarjetaPoleraProps {
   nombre: string;
   precio: number;
   coleccion: string;
+  coleccionSlug?: string;
+  idColeccion?: string;
   subtitulo?: string;
   imagen: string;
   imagenDorsal?: string;
@@ -27,6 +29,8 @@ export function TarjetaPolera({
   nombre,
   precio,
   coleccion,
+  coleccionSlug,
+  idColeccion,
   subtitulo = 'Algodón Peinado 280 GSM • Caída Geométrica',
   imagen,
   imagenDorsal,
@@ -84,8 +88,10 @@ export function TarjetaPolera({
 
   return (
     <article
-      className="group relative flex flex-col bg-[#141416] border border-[#201f1f] hover:border-[#4A4A4A] transition-all duration-300 p-3 shadow-lg hover:shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
+      className="group relative flex flex-col bg-[#141416] border border-[#201f1f] hover:border-[#dc143c]/60 transition-all duration-300 ease-out p-3 shadow-lg hover:shadow-[0_16px_36px_rgba(220,20,60,0.20)] hover:-translate-y-1.5 overflow-hidden"
     >
+      {/* Micro-línea de acento carmesí Zen en la base al hacer hover */}
+      <div className="absolute bottom-0 left-0 h-[2.5px] w-0 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] group-hover:w-full transition-all duration-500 ease-out pointer-events-none z-20" />
       {/* Contenedor Fotográfico Orthogonal 4:5 */}
       <a href={productUrl} className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
         {/* Imagen Frontal */}
@@ -175,7 +181,7 @@ export function TarjetaPolera({
                   type="button"
                   onClick={() => setSelectedTalla(talla)}
                   disabled={isSoldOut}
-                  className={`w-7 h-7 text-xs font-mono font-bold flex items-center justify-center transition-all cursor-pointer border ${
+                  className={`w-7 h-7 text-xs font-mono font-bold flex items-center justify-center transition-all cursor-pointer border active:scale-90 ${
                     isSelected
                       ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)]'
                       : 'bg-[#1c1b1b] text-[#e6bdbc] hover:bg-[#2a2a2a] hover:text-white border-white/[0.08]'
@@ -204,7 +210,7 @@ export function TarjetaPolera({
               disabled={isSoldOut}
               aria-label={`Añadir ${nombre} al carrito`}
               title="Añadir a la bolsa"
-              className={`w-9 h-9 shrink-0 flex items-center justify-center font-bold transition-all cursor-pointer border ${
+              className={`w-9 h-9 shrink-0 flex items-center justify-center font-bold transition-all cursor-pointer border active:scale-95 ${
                 isSoldOut
                   ? 'bg-[#1c1b1b] text-[#5c3f3f] border-[#201f1f] cursor-not-allowed'
                   : isAdded

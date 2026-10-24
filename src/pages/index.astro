@@ -26,7 +26,9 @@ if (isSupabaseConfigured) {
         slug: p.slug,
         nombre: p.nombre,
         precio: Number(p.precio_venta),
-        coleccion: p.coleccion || 'DROP 01',
+        coleccion: p.coleccion || 'General',
+        coleccionSlug: p.coleccion_slug || (p.coleccion ? p.coleccion.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : 'general'),
+        idColeccion: p.id_coleccion,
         subtitulo: p.descripcion || 'Algodón pesado 280 GSM',
         imagen: p.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
         imagenDorsal: p.imagen_dorsal,
@@ -44,7 +46,22 @@ if (isSupabaseConfigured) {
       .order('orden', { ascending: true });
 
     if (!cError && dbCols && dbCols.length > 0) {
-      collections = dbCols;
+      // Filtrar para mostrar unicamente colecciones que tengan productos activos
+      collections = dbCols.filter((col) => {
+        const colSlugNorm = (col.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const colNameNorm = (col.nombre || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return products.some((prod) => {
+          const prodColNorm = (prod.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const prodSlugNorm = ((prod as any).coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          return (
+            (prod as any).idColeccion === col.id ||
+            prodColNorm === colNameNorm ||
+            prodSlugNorm === colSlugNorm ||
+            prodColNorm.includes(colNameNorm) ||
+            colNameNorm.includes(prodColNorm)
+          );
+        });
+      });
     }
   } catch (e) {
     console.warn('Error al cargar catálogo desde Supabase:', e);
