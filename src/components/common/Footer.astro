@@ -167,14 +167,14 @@ import { siteConfig } from '../../config/site';
       <div class="flex flex-wrap items-center gap-3">
         <span>© 2026 {siteConfig.name}. Todos los derechos reservados. Tienda Oficial Online.</span>
         
-        {/* Botón de Acceso a Administración */}
+        {/* Acceso a Administración Mimetizado como Texto Discreto */}
         <a
-          href="/login"
-          class="px-2.5 py-1 rounded-none border border-[#2A2A2A] hover:border-[#dc143c] bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white transition-all text-[10px] tracking-wider font-bold inline-flex items-center gap-1.5"
-          title="Acceso al Panel Administrativo"
+          href="/admin"
+          id="footer-admin-link"
+          class="text-[10px] font-mono text-[#8F8F8C]/40 hover:text-[#8F8F8C] transition-colors cursor-pointer select-none tracking-widest uppercase ml-1"
+          title="Consola de Control"
         >
-          <span>// SYS</span>
-          <span class="text-[9px] opacity-70">ADMIN</span>
+          sys.v2
         </a>
       </div>
 
