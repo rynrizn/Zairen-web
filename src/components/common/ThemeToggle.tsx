@@ -4,10 +4,19 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const updateTheme = () => {
       const isLight = document.documentElement.classList.contains('light');
       setTheme(isLight ? 'light' : 'dark');
-    }
+    };
+    updateTheme();
+    window.addEventListener('pageshow', updateTheme);
+    window.addEventListener('storage', updateTheme);
+    window.addEventListener('zairen-theme-change', updateTheme);
+    return () => {
+      window.removeEventListener('pageshow', updateTheme);
+      window.removeEventListener('storage', updateTheme);
+      window.removeEventListener('zairen-theme-change', updateTheme);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -17,11 +26,11 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       if (next === 'light') {
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
-        localStorage.setItem('zairen_theme', 'light');
+        localStorage.setItem('zairen_theme', 'light'); window.dispatchEvent(new Event('zairen-theme-change'));
       } else {
         document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
-        localStorage.setItem('zairen_theme', 'dark');
+        localStorage.setItem('zairen_theme', 'dark'); window.dispatchEvent(new Event('zairen-theme-change'));
       }
     }
   };

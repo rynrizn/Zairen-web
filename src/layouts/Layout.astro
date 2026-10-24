@@ -52,21 +52,28 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
     <meta name="theme-color" content="#0A0A0A" />
     <meta name="author" content="ZAIREN LAB" />
 
-    <!-- Script Inline de Tema (Evita destello en carga) -->
+    <!-- Script Inline de Tema (Sincronización instantánea en carga y bfcache de navegación) -->
     <script is:inline>
-      const theme = (() => {
-        if (typeof localStorage !== 'undefined' && localStorage.getItem('zairen_theme')) {
-          return localStorage.getItem('zairen_theme');
+      function syncZairenTheme() {
+        const theme = (() => {
+          if (typeof localStorage !== 'undefined' && localStorage.getItem('zairen_theme')) {
+            return localStorage.getItem('zairen_theme');
+          }
+          return 'dark';
+        })();
+        if (theme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
         }
-        return 'dark';
-      })();
-      if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-      } else {
-        document.documentElement.classList.remove('light');
-        document.documentElement.classList.add('dark');
       }
+      syncZairenTheme();
+      window.addEventListener('pageshow', syncZairenTheme);
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'zairen_theme') syncZairenTheme();
+      });
     </script>
 
     <!-- Open Graph / Facebook / WhatsApp Preview -->

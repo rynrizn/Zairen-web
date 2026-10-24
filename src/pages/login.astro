@@ -141,6 +141,17 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 <script>
   import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+  // Si el usuario ya está autenticado en su navegador, redirigir directamente al panel
+  (async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const redirect = (document.getElementById('redirect-url') as HTMLInputElement)?.value || '/admin';
+        window.location.replace(redirect);
+      }
+    } catch (e) {}
+  })();
+
   const form = document.getElementById('login-form') as HTMLFormElement;
   const errorBox = document.getElementById('login-error') as HTMLDivElement;
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
