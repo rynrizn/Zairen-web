@@ -189,9 +189,9 @@ export function InventarioManager() {
             </span>
             <span className="text-[#ac8888] font-mono text-xs">// ZAIREN ARCHIVE</span>
           </div>
-          <h1 className="font-headline text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight leading-none">
+          <h1 className="font-headline text-2xl sm:text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight leading-none break-words">
             CONTROL DE INVENTARIO{' '}
-            <span className="text-[#dc143c] font-light text-xl tracking-normal block md:inline font-mono">
+            <span className="text-[#dc143c] font-light text-base sm:text-xl tracking-normal block md:inline font-mono">
               // DROPS & SKUS
             </span>
           </h1>
@@ -199,72 +199,74 @@ export function InventarioManager() {
         </div>
 
         {/* Micro-Cards de Estadísticas Rápidas (Ortogonales) */}
-        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-          {/* Total Prendas */}
-          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04]">
-              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-[#ac8888] uppercase">Total Prendas</div>
-              <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
-                {totalPrendas} <span className="font-mono text-[11px] text-[#ac8888] font-normal">uds</span>
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full xl:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full sm:w-auto">
+            {/* Total Prendas */}
+            <div className="bg-[#1c1b1b]/90 px-3.5 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3">
+              <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04] shrink-0">
+                <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+              </div>
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-[#ac8888] uppercase truncate">Total Prendas</div>
+                <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
+                  {totalPrendas} <span className="font-mono text-[11px] text-[#ac8888] font-normal">uds</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* SKUs Activos */}
-          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04]">
-              <span className="material-symbols-outlined text-[18px]">tag</span>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-[#ac8888] uppercase">SKUs Activos</div>
-              <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
-                {skusActivos} <span className="font-mono text-[11px] text-[#ac8888] font-normal">refs</span>
+            {/* SKUs Activos */}
+            <div className="bg-[#1c1b1b]/90 px-3.5 py-2.5 rounded-none border border-[#2A2A2A] shadow-md flex items-center gap-3">
+              <div className="w-8 h-8 rounded-none bg-[#141416] flex items-center justify-center text-[#dc143c] border border-white/[0.04] shrink-0">
+                <span className="material-symbols-outlined text-[18px]">tag</span>
+              </div>
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-[#ac8888] uppercase truncate">SKUs Activos</div>
+                <div className="font-headline text-base font-bold text-[#e5e2e1] leading-tight">
+                  {skusActivos} <span className="font-mono text-[11px] text-[#ac8888] font-normal">refs</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Bajo Stock Crítico */}
-          <div className="bg-[#1c1b1b]/90 px-4 py-2.5 rounded-none border border-[#dc143c]/30 shadow-md flex items-center gap-3 flex-1 sm:flex-initial">
-            <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
-              <span className="material-symbols-outlined text-[18px]">warning</span>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-[#f87171] uppercase font-bold">Bajo Stock</div>
-              <div className="font-headline text-base font-bold text-[#f87171] leading-tight">
-                {bajoStockCritico} <span className="font-mono text-[11px] text-[#f87171] font-normal">variantes</span>
+            {/* Bajo Stock Crítico */}
+            <div className="bg-[#1c1b1b]/90 px-3.5 py-2.5 rounded-none border border-[#dc143c]/30 shadow-md flex items-center gap-3">
+              <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c] shrink-0">
+                <span className="material-symbols-outlined text-[18px]">warning</span>
+              </div>
+              <div className="min-w-0">
+                <div className="font-mono text-[10px] text-[#f87171] uppercase font-bold truncate">Bajo Stock</div>
+                <div className="font-headline text-base font-bold text-[#f87171] leading-tight">
+                  {bajoStockCritico} <span className="font-mono text-[11px] text-[#f87171] font-normal">variantes</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Triggers de Acción */}
-          <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
             <button
               type="button"
               onClick={handleRefreshCdn}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all border border-[#2A2A2A] cursor-pointer"
+              className="px-3 sm:px-4 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#e5e2e1] font-mono text-[11px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all border border-[#2A2A2A] cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] text-[#dc143c]">sync</span>
-              <span>Sincronizar CDN</span>
+              <span className="truncate">Sincronizar</span>
             </button>
             <button
               type="button"
               onClick={handleCreateNew}
-              className="flex-1 sm:flex-initial px-5 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(220,20,60,0.35)] cursor-pointer border border-[#dc143c]"
+              className="px-3.5 sm:px-5 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_20px_rgba(220,20,60,0.35)] cursor-pointer border border-[#dc143c]"
             >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              <span>+ AGREGAR PRENDA</span>
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">add</span>
+              <span className="truncate">+ AGREGAR</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* 2. Barra de Filtros y Búsqueda (Ortogonal) */}
-      <section className="bg-[#1c1b1b]/80 p-3 rounded-none border border-[#2A2A2A] shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-        {/* Input de Búsqueda */}
-        <div className="relative flex-1 min-w-[260px] max-w-xl">
+      {/* 2. Barra de Filtros y Búsqueda (Ortogonal y Contenida) */}
+      <section className="bg-[#1c1b1b]/80 p-3 rounded-none border border-[#2A2A2A] shadow-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full max-w-full overflow-hidden">
+        {/* Input de Búsqueda Flexible */}
+        <div className="relative flex-1 w-full min-w-0 max-w-xl">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ac8888] text-[18px]">
             search
           </span>
@@ -286,48 +288,52 @@ export function InventarioManager() {
           )}
         </div>
 
-        {/* Grupo de Filtros */}
-        <div className="flex flex-wrap items-center gap-2 overflow-x-auto py-1">
+        {/* Grupo de Filtros con Scroll Horizontal Contenido */}
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 max-w-full py-1">
           {/* Colección */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A]">
-            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A] overflow-x-auto max-w-full scrollbar-none">
+            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase shrink-0">
               Colección:
             </span>
-            {coleccionesList.map((col) => (
-              <button
-                key={col}
-                type="button"
-                onClick={() => setSelectedColeccion(col)}
-                className={`px-3 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border ${
-                  selectedColeccion === col
-                    ? 'bg-[#dc143c] text-white font-bold border-[#dc143c]'
-                    : 'text-[#ac8888] hover:text-white border-transparent'
-                }`}
-              >
-                {col}
-              </button>
-            ))}
+            <div className="flex items-center gap-1 shrink-0">
+              {coleccionesList.map((col) => (
+                <button
+                  key={col}
+                  type="button"
+                  onClick={() => setSelectedColeccion(col)}
+                  className={`px-2.5 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border whitespace-nowrap ${
+                    selectedColeccion === col
+                      ? 'bg-[#dc143c] text-white font-bold border-[#dc143c]'
+                      : 'text-[#ac8888] hover:text-white border-transparent'
+                  }`}
+                >
+                  {col}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Estado de Stock */}
-          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A]">
-            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase hidden sm:inline">
+          <div className="flex items-center bg-[#141416] p-1 rounded-none border border-[#2A2A2A] overflow-x-auto max-w-full scrollbar-none">
+            <span className="px-2 font-mono text-[10px] text-[#ac8888] uppercase shrink-0">
               Estado:
             </span>
-            {(['Todos', 'Disponible', 'Pocas Uds', 'Agotado'] as const).map((est) => (
-              <button
-                key={est}
-                type="button"
-                onClick={() => setSelectedEstado(est)}
-                className={`px-2.5 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border ${
-                  selectedEstado === est
-                    ? 'bg-[#2a2a2a] text-[#FAF9F6] font-bold border-white/20'
-                    : 'text-[#ac8888] hover:text-white border-transparent'
-                }`}
-              >
-                {est}
-              </button>
-            ))}
+            <div className="flex items-center gap-1 shrink-0">
+              {(['Todos', 'Disponible', 'Pocas Uds', 'Agotado'] as const).map((est) => (
+                <button
+                  key={est}
+                  type="button"
+                  onClick={() => setSelectedEstado(est)}
+                  className={`px-2 py-1 rounded-none font-mono text-xs uppercase transition-all cursor-pointer border whitespace-nowrap ${
+                    selectedEstado === est
+                      ? 'bg-[#2a2a2a] text-[#FAF9F6] font-bold border-white/20'
+                      : 'text-[#ac8888] hover:text-white border-transparent'
+                  }`}
+                >
+                  {est}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Selector de Vista */}
@@ -361,7 +367,7 @@ export function InventarioManager() {
       </section>
 
       {/* 3. Matriz Global de Stock - Ancho Completo a 12 Columnas */}
-      <div className="w-full bg-[#1c1b1b]/80 rounded-none p-6 border border-[#2A2A2A] shadow-xl flex flex-col space-y-4">
+      <div className="w-full bg-[#1c1b1b]/80 rounded-none p-3.5 sm:p-6 border border-[#2A2A2A] shadow-xl flex flex-col space-y-4">
         {/* Header de la Tabla */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
@@ -435,15 +441,15 @@ export function InventarioManager() {
                     </div>
                   </div>
 
-                  {/* Fila de Tallas y Stock Total */}
-                  <div className="flex items-center justify-between pt-2.5 border-t border-white/[0.06]">
-                    <div className="flex items-center gap-1.5 font-mono text-xs">
+                  {/* Fila de Tallas y Stock Total Adaptable */}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-2.5 border-t border-white/[0.06]">
+                    <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
                       {['S', 'M', 'L', 'XL'].map((talla) => {
                         const stockTalla = item.stock[talla] || 0;
                         return (
                           <span
                             key={talla}
-                            className={`px-2 py-0.5 rounded-none border text-[11px] font-bold ${
+                            className={`px-1.5 sm:px-2 py-0.5 rounded-none border text-[10px] sm:text-[11px] font-bold ${
                               stockTalla === 0
                                 ? 'bg-red-950/60 text-red-400 border-red-900/50'
                                 : stockTalla <= 3
@@ -457,7 +463,7 @@ export function InventarioManager() {
                       })}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 ml-auto sm:ml-0">
                       <span className="font-mono text-xs sm:text-sm font-bold text-[#FAF9F6]">
                         {totalItem} UDS
                       </span>

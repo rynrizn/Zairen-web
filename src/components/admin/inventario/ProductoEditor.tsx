@@ -457,7 +457,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   };
 
   return (
-    <div className="bg-[#141416] rounded-none p-6 border border-[#2A2A2A] relative flex flex-col space-y-5 shadow-2xl">
+    <div className="bg-[#141416] rounded-none p-3.5 sm:p-6 border border-[#2A2A2A] relative flex flex-col space-y-5 shadow-2xl w-full max-w-full overflow-hidden">
       {/* Indicador carmesí superior */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c]"></div>
 
@@ -512,7 +512,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
             </div>
 
             {/* SKU y Código */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
                   SKU / Identificador
@@ -582,7 +582,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
             </div>
 
             {/* Precios y Costes */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
                   Precio Venta (Bs) *
@@ -842,8 +842,8 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
 
       {/* Modal Selector de Mediateca Cloudinary */}
       {showMediaLibrary && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#141416] border border-white/[0.12] w-full max-w-2xl max-h-[85vh] flex flex-col p-6 rounded-none shadow-2xl">
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-[#141416] border border-white/[0.12] w-full max-w-2xl max-h-[85vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-[#dc143c]"></span>
@@ -870,7 +870,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                   Cargando catálogo de imágenes...
                 </div>
               ) : mediaImages.length > 0 ? (
-                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
                   {mediaImages.map((url, i) => {
                     const isAlreadyAdded = imagenes.includes(url);
                     return (
