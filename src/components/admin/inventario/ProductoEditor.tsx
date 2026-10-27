@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { MatrizStock, type StockBySize } from './MatrizStock';
 import { uploadImageToCloudinary } from '../../../lib/imageUploader';
 import { supabase } from '../../../lib/supabase';
+import { MediaLibraryModal } from './MediaLibraryModal';
 
 export interface InventarioItem {
   id: string;
@@ -167,66 +168,10 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     }
   };
 
-  const openMediaLibrary = async () => {
+  const openMediaLibrary = () => {
     setShowMediaLibrary(true);
-    setIsLoadingMedia(true);
-    try {
-      const urlsSet = new Set<string>();
-
-      // Obtener imagenes de la tabla imagen
-      const { data: dbImgs } = await supabase
-        .from('imagen')
-        .select('url_imagen')
-        .not('url_imagen', 'is', null)
-        .order('id', { ascending: false })
-        .limit(60);
-
-      if (dbImgs) {
-        dbImgs.forEach((img: any) => {
-          if (img.url_imagen && img.url_imagen.trim()) {
-            urlsSet.add(img.url_imagen.trim());
-          }
-        });
-      }
-
-      // Obtener imagenes de vista catalogo
-      const { data: catImgs } = await supabase
-        .from('vw_catalogo_publico')
-        .select('imagen_portada, imagen_dorsal')
-        .limit(40);
-
-      if (catImgs) {
-        catImgs.forEach((p: any) => {
-          if (p.imagen_portada) urlsSet.add(p.imagen_portada);
-          if (p.imagen_dorsal) urlsSet.add(p.imagen_dorsal);
-        });
-      }
-
-      // Si no hay imagenes en BD todavia, sugerir las oficiales
-      if (urlsSet.size === 0) {
-        urlsSet.add('https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp');
-      }
-
-      setMediaImages(Array.from(urlsSet));
-    } catch (e) {
-      console.warn('Error cargando mediateca:', e);
-    } finally {
-      setIsLoadingMedia(false);
-    }
   };
 
-  const handleSelectFromMedia = (url: string) => {
-    if (imagenes.length >= 5) {
-      toast.error('Límite de 5 imágenes alcanzado');
-      return;
-    }
-    if (imagenes.includes(url)) {
-      toast.info('Esta imagen ya fue agregada a la prenda');
-      return;
-    }
-    setImagenes((prev) => [...prev, url]);
-    toast.success('Imagen agregada desde la mediateca');
-  };
 
   const handleAddUrl = () => {
     if (!inputUrl.trim()) return;
@@ -854,83 +799,18 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       </form>
 
       {/* Modal Selector de Mediateca Cloudinary */}
-      {showMediaLibrary && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-[#141416] border border-white/[0.12] w-full max-w-2xl max-h-[85vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-[#dc143c]"></span>
-                <h3 className="font-display text-sm font-bold uppercase text-white tracking-wider">
-                  Mediateca Cloudinary // Reutilizar Fotos
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowMediaLibrary(false)}
-                className="text-[#ac8888] hover:text-white text-sm font-mono cursor-pointer"
-              >
-                ✕ Cerrar
-              </button>
-            </div>
-
-            <p className="font-mono text-xs text-[#ac8888] my-3">
-              Haz clic en cualquier imagen para agregarla directamente a la prenda:
-            </p>
-
-            <div className="flex-1 overflow-y-auto pr-1 my-2">
-              {isLoadingMedia ? (
-                <div className="py-12 text-center text-xs font-mono text-[#ac8888]">
-                  Cargando catálogo de imágenes...
-                </div>
-              ) : mediaImages.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-                  {mediaImages.map((url) => {
-                    const isAlreadyAdded = imagenes.includes(url);
-                    return (
-                      <div
-                        key={url}
-                        onClick={() => !isAlreadyAdded && handleSelectFromMedia(url)}
-                        className={`relative aspect-[3/4] bg-[#0E0F11] border transition-all cursor-pointer overflow-hidden group ${
-                          isAlreadyAdded
-                            ? 'border-[#047857] opacity-40 cursor-not-allowed'
-                            : 'border-white/[0.08] hover:border-[#dc143c] hover:scale-105'
-                        }`}
-                      >
-                        <img src={url} alt="" className="w-full h-full object-cover" />
-                        {isAlreadyAdded ? (
-                          <span className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] font-mono text-emerald-400 font-bold">
-                            ✓ Añadida
-                          </span>
-                        ) : (
-                          <div className="absolute inset-0 bg-[#dc143c]/0 group-hover:bg-[#dc143c]/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <span className="text-white text-xs font-mono font-bold bg-[#dc143c] px-2 py-0.5">
-                              + Elegir
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="py-12 text-center text-xs font-mono text-[#ac8888]">
-                  No se encontraron imágenes previas en la base de datos.
-                </div>
-              )}
-            </div>
-
-            <div className="pt-4 border-t border-white/[0.08] flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowMediaLibrary(false)}
-                className="px-5 py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold transition-colors cursor-pointer"
-              >
-                Listo
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MediaLibraryModal
+        isOpen={showMediaLibrary}
+        onClose={() => setShowMediaLibrary(false)}
+        alreadySelectedUrls={imagenes}
+        onSelectImages={(selectedUrls) => {
+          setImagenes((prev) => {
+            const combined = [...prev, ...selectedUrls];
+            return combined.slice(0, 5);
+          });
+        }}
+        maxSelection={5}
+      />
     </div>
   );
 }
