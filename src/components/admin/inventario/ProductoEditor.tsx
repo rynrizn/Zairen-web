@@ -592,9 +592,11 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Columna Izquierda: Datos Principales & Galería (7 cols) */}
-          <div className="md:col-span-7 space-y-4">
-            {/* Nombre del Producto */}
+          {/* ======================================================== */}
+          {/* COLUMNA IZQUIERDA: Nombre, Fotos y Descripción (7 cols) */}
+          {/* ======================================================== */}
+          <div className="md:col-span-7 space-y-5">
+            {/* 1. Nombre del Producto */}
             <div>
               <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
                 Nombre del Producto *
@@ -609,145 +611,8 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
               />
             </div>
 
-            {/* SKU y Código */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  SKU / Identificador
-                </label>
-                <input
-                  type="text"
-                  value={sku}
-                  onChange={(e) => setSku(e.target.value)}
-                  className="w-full bg-[#1c1b1b] text-[#dc143c] font-mono font-bold text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none uppercase"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Tipo / Categoría
-                </label>
-                <select
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value)}
-                  className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-                >
-                  <option value="Polera">Polera</option>
-                  <option value="Hoodie">Hoodie</option>
-                  <option value="Pantalón">Pantalón</option>
-                  <option value="Accesorio">Accesorio</option>
-                  <option value="Gorra">Gorra</option>
-                  <option value="__nuevo__">+ Crear nuevo tipo...</option>
-                </select>
-                {tipo === '__nuevo__' && (
-                  <input
-                    type="text"
-                    value={tipoNuevo}
-                    onChange={(e) => setTipoNuevo(e.target.value)}
-                    placeholder="Escribe el nuevo tipo..."
-                    className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2 rounded-none border border-[#dc143c] mt-1.5 focus:outline-none"
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Colección Dinámica */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block">
-                  Colección / Línea de Diseño
-                </label>
-                <a
-                  href="/admin/colecciones"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-mono text-[10px] text-[#dc143c] hover:underline uppercase font-bold"
-                >
-                  Gestionar colecciones ↗
-                </a>
-              </div>
-              <select
-                value={coleccion}
-                onChange={(e) => setColeccion(e.target.value)}
-                className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-              >
-                <option value="">-- Seleccionar Colección --</option>
-                {coleccionesDisponibles.map((col) => (
-                  <option key={col.id} value={col.nombre}>
-                    {col.nombre}
-                  </option>
-                ))}
-                <option value="__nueva__">+ Crear nueva colección...</option>
-              </select>
-              {coleccion === '__nueva__' && (
-                <div className="flex items-center gap-2 mt-1.5">
-                  <input
-                    type="text"
-                    value={seccionNueva}
-                    onChange={(e) => setSeccionNueva(e.target.value)}
-                    placeholder="Nombre de la nueva colección..."
-                    className="flex-1 bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2 rounded-none border border-[#dc143c] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCrearColeccion}
-                    className="px-3.5 py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold cursor-pointer transition-colors"
-                  >
-                    Guardar
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Precios y Costes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Precio Venta (Bs) *
-                </label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={precio === '' || Number.isNaN(precio) ? '' : precio}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === '') {
-                      setPrecio('');
-                    } else {
-                      const num = parseFloat(val);
-                      setPrecio(Number.isNaN(num) ? '' : num);
-                    }
-                  }}
-                  className="w-full bg-[#1c1b1b] text-white font-price font-bold text-sm px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                  Costo Fabricación (Bs)
-                </label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={costo === '' || Number.isNaN(costo) ? '' : costo}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === '') {
-                      setCosto('');
-                    } else {
-                      const num = parseFloat(val);
-                      setCosto(Number.isNaN(num) ? '' : num);
-                    }
-                  }}
-                  className="w-full bg-[#1c1b1b] text-[#ac8888] font-price text-sm px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Galería de Fotos */}
-            <div className="space-y-2 pt-2">
+            {/* 2. Galería de Fotos */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider">
                   Fotos de la Prenda ({imagenes.length}/5)
@@ -853,93 +718,223 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Columna Derecha: Estado, Tallas, Descripción y Stock (5 cols) */}
-          <div className="md:col-span-5 space-y-4">
-            {/* Estado Comercial */}
+            {/* 3. Descripción Conceptual de la Prenda */}
             <div>
               <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                Estado Comercial
-              </label>
-              <select
-                value={estadoComercial}
-                onChange={(e) => setEstadoComercial(e.target.value as any)}
-                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-              >
-                <option value="nuevo">NUEVO (Verde)</option>
-                <option value="disponible">DISPONIBLE (Azul)</option>
-                <option value="preventa">PREVENTA (Morado)</option>
-                <option value="oferta">OFERTA (Ámbar)</option>
-                <option value="agotado">AGOTADO (Rojo)</option>
-              </select>
-            </div>
-
-            {/* Tallas Disponibles */}
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                Tallas Disponibles (Separadas por coma)
-              </label>
-              <input
-                type="text"
-                value={tallasTexto}
-                onChange={(e) => setTallasTexto(e.target.value)}
-                placeholder="S, M, L, XL"
-                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Matriz de Stock */}
-            <div>
-              <MatrizStock stock={stock} onChange={setStock} />
-            </div>
-
-            {/* Descripción Corta */}
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                Descripción de la Prenda
+                Descripción Conceptual
               </label>
               <textarea
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 rows={3}
-                placeholder="Detalla los aspectos clave de la prenda..."
-                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-sans text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none resize-none"
+                placeholder="Describe el corte, estética y detalles de la prenda..."
+                className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-sans text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none resize-none leading-relaxed"
               />
             </div>
+          </div>
 
-            {/* Interruptor de Visibilidad */}
-            <div className="flex items-center justify-between p-3 rounded-none bg-[#1c1b1b] border border-white/[0.08]">
+          {/* ======================================================== */}
+          {/* COLUMNA DERECHA: Colección, Precios, Stock y Estado (5 cols) */}
+          {/* ======================================================== */}
+          <div className="md:col-span-5 space-y-4">
+            {/* 4. Colección / Drop y Tipo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <span className="text-xs font-mono font-bold text-white block">Producto Visible</span>
-                <span className="text-[10px] font-mono text-[#ac8888]">¿Mostrar este producto en el catálogo?</span>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block">
+                    Colección // Drop
+                  </label>
+                  <a
+                    href="/admin/colecciones"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-[9px] text-[#dc143c] hover:underline uppercase font-bold"
+                  >
+                    Drops ↗
+                  </a>
+                </div>
+                <select
+                  value={coleccion}
+                  onChange={(e) => setColeccion(e.target.value)}
+                  className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                >
+                  <option value="">-- Seleccionar --</option>
+                  {coleccionesDisponibles.map((col) => (
+                    <option key={col.id} value={col.nombre}>
+                      {col.nombre}
+                    </option>
+                  ))}
+                  <option value="__nueva__">+ Crear nuevo drop...</option>
+                </select>
+                {coleccion === '__nueva__' && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <input
+                      type="text"
+                      value={seccionNueva}
+                      onChange={(e) => setSeccionNueva(e.target.value)}
+                      placeholder="Nombre..."
+                      className="flex-1 bg-[#1c1b1b] text-white font-mono text-xs px-2.5 py-1.5 rounded-none border border-[#dc143c] focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCrearColeccion}
+                      className="px-2.5 py-1.5 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold cursor-pointer"
+                    >
+                      OK
+                    </button>
+                  </div>
+                )}
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  Categoría
+                </label>
+                <select
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                >
+                  <option value="Polera">Polera</option>
+                  <option value="Hoodie">Hoodie</option>
+                  <option value="Pantalón">Pantalón</option>
+                  <option value="Accesorio">Accesorio</option>
+                  <option value="Gorra">Gorra</option>
+                  <option value="__nuevo__">+ Otro tipo...</option>
+                </select>
+                {tipo === '__nuevo__' && (
+                  <input
+                    type="text"
+                    value={tipoNuevo}
+                    onChange={(e) => setTipoNuevo(e.target.value)}
+                    placeholder="Escribe el tipo..."
+                    className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-2.5 py-1.5 rounded-none border border-[#dc143c] mt-1.5 focus:outline-none"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* 5. Precios, Costo & SKU */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  Precio (Bs) *
+                </label>
                 <input
-                  type="checkbox"
-                  checked={publicado}
-                  onChange={(e) => setPublicado(e.target.checked)}
-                  className="sr-only peer"
+                  type="number"
+                  step="0.5"
+                  value={precio === '' || Number.isNaN(precio) ? '' : precio}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setPrecio('');
+                    } else {
+                      const num = parseFloat(val);
+                      setPrecio(Number.isNaN(num) ? '' : num);
+                    }
+                  }}
+                  placeholder="Ej: 180"
+                  className="w-full bg-[#1c1b1b] text-white font-price font-bold text-sm px-3 py-2 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                  required
                 />
-                <div className="w-10 h-5 bg-[#262626] border border-white/10 peer-focus:outline-none transition-colors peer peer-checked:bg-[#dc143c] peer-checked:border-[#dc143c] relative after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:h-4 after:w-4 after:transition-transform peer-checked:after:translate-x-5"></div>
-              </label>
+              </div>
+
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  Costo (Bs)
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={costo === '' || Number.isNaN(costo) ? '' : costo}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setCosto('');
+                    } else {
+                      const num = parseFloat(val);
+                      setCosto(Number.isNaN(num) ? '' : num);
+                    }
+                  }}
+                  className="w-full bg-[#1c1b1b] text-[#ac8888] font-price text-sm px-3 py-2 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  SKU (Auto)
+                </label>
+                <input
+                  type="text"
+                  value={sku}
+                  readOnly
+                  className="w-full bg-[#141416] text-[#dc143c] font-mono font-bold text-xs px-3 py-2.5 rounded-none border border-white/[0.08] cursor-not-allowed uppercase select-all"
+                  title="Identificador generado automáticamente por el sistema"
+                />
+              </div>
+            </div>
+
+            {/* 6. Matriz de Stock x Talla */}
+            <div>
+              <MatrizStock stock={stock} onChange={setStock} />
+            </div>
+
+            {/* 7. Estado Comercial & Visibilidad */}
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
+                  Estado Comercial
+                </label>
+                <select
+                  value={estadoComercial}
+                  onChange={(e) => setEstadoComercial(e.target.value as any)}
+                  className="w-full bg-[#1c1b1b] text-[#e5e2e1] font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
+                >
+                  <option value="nuevo">NUEVO (Verde)</option>
+                  <option value="disponible">DISPONIBLE (Azul)</option>
+                  <option value="preventa">PREVENTA (Morado)</option>
+                  <option value="oferta">OFERTA (Ámbar)</option>
+                  <option value="agotado">AGOTADO (Rojo)</option>
+                </select>
+              </div>
+
+              {/* Visibilidad y Destacado */}
+              <div className="flex items-center gap-6 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={publicado}
+                    onChange={(e) => setPublicado(e.target.checked)}
+                    className="w-4 h-4 rounded-none bg-[#1c1b1b] border-white/20 text-[#dc143c] focus:ring-[#dc143c] focus:ring-offset-0 cursor-pointer accent-[#dc143c]"
+                  />
+                  <span className="font-mono text-xs text-[#e5e2e1] uppercase">
+                    Publicado en Tienda
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={destacado}
+                    onChange={(e) => setDestacado(e.target.checked)}
+                    className="w-4 h-4 rounded-none bg-[#1c1b1b] border-white/20 text-[#dc143c] focus:ring-[#dc143c] focus:ring-offset-0 cursor-pointer accent-[#dc143c]"
+                  />
+                  <span className="font-mono text-xs text-[#e5e2e1] uppercase">
+                    Destacado (Home)
+                  </span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Acciones de Guardar */}
-        <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/[0.06]">
-          {product ? (
-            <button
-              type="button"
-              onClick={handleDeleteProduct}
-              className="px-4 py-2.5 rounded-none bg-red-950/60 hover:bg-red-700 text-red-200 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-red-800/60 flex items-center gap-1.5"
-            >
-              <span className="material-symbols-outlined text-[16px]">delete</span>
-              <span>Eliminar Prenda</span>
-            </button>
-          ) : <div></div>}
+        {/* Footer con Acciones */}
+        <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#ac8888]">
+            <span className="w-2 h-2 rounded-none bg-emerald-400"></span>
+            <span>SKU: {sku}</span>
+          </div>
 
           <div className="flex items-center gap-3">
             <button
@@ -951,9 +946,9 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_16px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
+              className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold transition-all shadow-lg hover:shadow-[#dc143c]/20 cursor-pointer border border-[#dc143c]"
             >
-              Guardar Producto
+              {product ? 'Guardar Cambios' : 'Registrar Prenda'}
             </button>
           </div>
         </div>
