@@ -382,12 +382,15 @@ export function CarritoDrawer() {
 
             {/* Honeypot Anti-Bot (Oculto) */}
             <input
+              id="cart-honeypot"
               type="text"
               name="company_tax_id_ref"
               value={honeypotValue}
               onChange={(e) => setHoneypotValue(e.target.value)}
               tabIndex={-1}
               autoComplete="off"
+              aria-hidden="true"
+              aria-label="No completar"
               className="absolute opacity-0 pointer-events-none -left-[9999px]"
             />
 

@@ -184,8 +184,13 @@ export function ColeccionCombobox({
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
             </svg>
+            <label htmlFor="combobox-search-input" className="sr-only">
+              Filtrar colecciones por nombre
+            </label>
             <input
               ref={searchInputRef}
+              id="combobox-search-input"
+              name="filterColeccion"
               type="text"
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
