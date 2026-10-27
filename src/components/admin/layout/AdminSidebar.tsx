@@ -55,9 +55,12 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
   const handleLogout = async () => {
     if (confirm('¿Deseas cerrar la sesión administrativa de Zairen Lab?')) {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      localStorage.removeItem('zairen_user_id');
+      localStorage.removeItem('zairen_user_email');
+      localStorage.removeItem('zairen_user_role');
       window.location.href = '/login';
     }
   };
