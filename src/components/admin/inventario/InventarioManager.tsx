@@ -546,14 +546,14 @@ export function InventarioManager() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
           onClick={() => {
             setIsEditorOpen(false);
             setSelectedItem(null);
           }}
         >
           <div
-            className="w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto"
+            className="w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-[#141416] sm:border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <ProductoEditor
