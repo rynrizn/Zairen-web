@@ -14,7 +14,7 @@ export interface TitleOptions {
 
 export function formatPageTitle(title?: string, isCatalog = false): string {
   if (isCatalog) {
-    return 'Zairen';
+    return 'Catálogo Zairen Lab';
   }
 
   if (!title) {

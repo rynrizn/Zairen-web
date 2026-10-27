@@ -30,24 +30,20 @@ export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#dc143c]"></span>
             <h3 className="font-headline text-base font-bold uppercase text-white tracking-wider">
-              Guía de Tallas // Streetwear Oversize
+              Guía de Medidas (cm)
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-white flex items-center justify-center text-xs font-mono transition-colors cursor-pointer"
+            title="Cerrar modal"
           >
             ✕
           </button>
         </div>
 
-        <p className="font-mono text-xs text-[#ac8888] leading-relaxed">
-          Nuestras prendas cuentan con un corte **Oversize estructurado** en algodón pesado (280–320 GSM).
-          Las medidas corresponden a la prenda extendida sobre una superficie plana.
-        </p>
-
-        {/* Tabla Ortogonal Zen */}
+        {/* Tabla Ortogonal Zen con Scroll Horizontal en Móvil */}
         <div className="overflow-x-auto border border-white/[0.08]">
           <table className="w-full text-left font-mono text-xs">
             <thead className="bg-[#1c1b1b] text-[#dc143c] uppercase text-[11px] border-b border-white/[0.08]">
@@ -75,23 +71,13 @@ export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
           </table>
         </div>
 
-        <div className="bg-[#1c1b1b] p-3.5 border border-white/[0.06] space-y-1">
-          <span className="font-mono text-[11px] text-[#dc143c] font-bold uppercase block">
-            💡 Consejo de Calce (Fit Advice)
-          </span>
-          <p className="font-mono text-[11px] text-[#ac8888] leading-relaxed">
-            Si deseas el calce holgado y caído característico de la marca, elige tu talla habitual.
-            Si prefieres un ajuste regular tradicional, te recomendamos optar por una talla menor.
-          </p>
-        </div>
-
         <div className="flex justify-end pt-2">
           <button
             type="button"
             onClick={onClose}
             className="px-6 py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold transition-colors cursor-pointer"
           >
-            Entendido
+            Cerrar
           </button>
         </div>
       </div>
