@@ -466,7 +466,7 @@ export function InventarioManager() {
                   {/* Fila de Tallas y Stock Total Adaptable */}
                   <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-2.5 border-t border-white/[0.06]">
                     <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
-                      {['S', 'M', 'L', 'XL'].map((talla) => {
+                      {(Object.keys(item.stock).length > 0 ? Object.keys(item.stock) : ['S', 'M', 'L', 'XL']).map((talla) => {
                         const stockTalla = item.stock[talla] || 0;
                         return (
                           <span
