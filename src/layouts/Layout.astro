@@ -83,6 +83,21 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
       window.addEventListener('storage', (e) => {
         if (e.key === 'zairen_theme') syncZairenTheme();
       });
+
+      // Recuperación automática ante chunks obsoletos de Vite tras nuevos despliegues
+      window.addEventListener('vite:preloadError', () => {
+        const reloadKey = 'zairen_chunk_reload_attempt';
+        const hasReloaded = sessionStorage.getItem(reloadKey);
+        if (!hasReloaded) {
+          sessionStorage.setItem(reloadKey, 'true');
+          window.location.reload();
+        }
+      });
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          sessionStorage.removeItem('zairen_chunk_reload_attempt');
+        }, 3000);
+      });
     </script>
 
     <!-- Open Graph / Facebook / WhatsApp Preview -->
