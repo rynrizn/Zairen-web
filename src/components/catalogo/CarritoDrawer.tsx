@@ -92,30 +92,49 @@ export function CarritoDrawer() {
     lastOrderAttemptRef.current = now;
 
     setIsSubmitting(true);
+    const toastLoading = toast.loading('Revalidando stock disponible y preparando orden...');
+
     try {
-      // Registrar intento de pedido en Supabase en segundo plano si la tabla está disponible
-      supabase
-        .from('pedido')
-        .insert({
-          origen: 'CATALOGO_WEB',
-          estado: 'PENDIENTE',
+      const validateRes = await fetch('/api/checkout-validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart,
           subtotal,
-          envio: shipping,
+          shipping,
           total,
-          observacion: clientNotes || 'Checkout desde Drawer Web',
-        })
-        .then(
-          () => {},
-          () => {}
-        );
+          notes: clientNotes,
+        }),
+      });
+
+      const validateData = await validateRes.json().catch(() => ({}));
+
+      if (!validateRes.ok || !validateData.success) {
+        toast.dismiss(toastLoading);
+        if (validateData.error === 'STOCK_INSUFICIENTE') {
+          toast.error(validateData.message || 'Una de las prendas seleccionadas se ha agotado.', {
+            duration: 8000,
+          });
+        } else {
+          toast.error(validateData.error || 'No se pudo validar el inventario en el servidor.');
+        }
+        return;
+      }
+
+      toast.dismiss(toastLoading);
+      const orderNote = validateData.orderNumber
+        ? `${clientNotes ? `${clientNotes} • ` : ''}[Orden #${validateData.orderNumber}]`
+        : clientNotes;
 
       // Generar URL y abrir WhatsApp
+      const whatsappUrl = generateWhatsAppOrderUrl(cart, orderNote);
+      window.open(whatsappUrl, '_blank');
+      toast.success('Pedido registrado como PENDIENTE. Abriendo WhatsApp...');
+    } catch (e: any) {
+      toast.dismiss(toastLoading);
       const whatsappUrl = generateWhatsAppOrderUrl(cart, clientNotes);
       window.open(whatsappUrl, '_blank');
-      toast.success('Abriendo WhatsApp para confirmar tu pedido...');
-    } catch (e) {
-      const whatsappUrl = generateWhatsAppOrderUrl(cart, clientNotes);
-      window.open(whatsappUrl, '_blank');
+      toast.info('Abriendo WhatsApp...');
     } finally {
       setIsSubmitting(false);
     }
