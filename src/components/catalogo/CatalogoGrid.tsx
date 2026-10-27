@@ -361,7 +361,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar prenda o SKU..."
-              className="w-full bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2 text-xs font-mono text-[#e5e2e1] placeholder:text-[#ac8888]/60 focus:outline-none transition-colors"
+              className="w-full bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2 text-xs font-mono text-[#e5e2e1] placeholder:text-[#ac8888] focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
@@ -525,7 +525,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         </div>
 
         {/* Checkbox de Disponibilidad Ortogonal */}
-        <label htmlFor="catalogo-solo-stock" className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors">
+        <label htmlFor="catalogo-solo-stock" className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#e5e2e1] hover:text-white transition-colors">
           <input
             id="catalogo-solo-stock"
             name="soloStock"
