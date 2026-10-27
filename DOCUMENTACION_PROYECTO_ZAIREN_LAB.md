@@ -233,3 +233,10 @@ Lee la documentación detenidamente y propónme un plan estratégico de mejoras 
 - **Buscador interactivo integrado:** Campo de búsqueda interno que filtra colecciones al vuelo mientras se escribe.
 - **Sincronización bidireccional con URL (`?coleccion=<slug>`):** Inicializa la vista desde el parámetro de consulta en la URL, actualiza la URL mediante `history.pushState` sin recargar la página, y soporta navegación nativa con el botón Atrás/Adelante (`popstate`).
 - **Compatibilidad móvil extrema (360px–390px):** Diseñado con altura mínima táctil de 44px (WCAG 2.2 AA) y ancho 100% responsivo sin generar desbordamiento horizontal (`overflow-x`).
+
+### Fase 7: Modal Grande / Ficha de Producto Deslizable en Catálogo
+- **Componente `ModalDetalleProducto.tsx`:** Ficha de producto integrada en modal deslizable sobre el catálogo público con diseño responsive adaptativo: bottom-sheet a pantalla completa con tirador táctil y gesto hacia abajo en móvil ($le 768\text{px}$), y ventana bento centrada en escritorio.
+- **Transición suave y acelerada por hardware:** Desplazamiento vertical fluido utilizando exclusivamente propiedades `transform: translateY` y `opacity` para garantizar 60 FPS sin provocar repintados de página (*layout shifts*, CLS = 0).
+- **Control de accesibilidad y foco (WCAG):** Atrapa el foco dentro del modal (`role="dialog"`, `aria-modal="true"`), bloquea el desplazamiento del fondo (`document.body.style.overflow = 'hidden'`) y restaura el foco a la tarjeta de origen al cerrarse.
+- **Sincronización de historial con `pushState` y `popstate`:** Al abrir una prenda, la URL cambia a `/producto/[slug]` permitiendo compartir el enlace directamente; al pulsar el botón Atrás del navegador, el modal se cierra suavemente preservando la posición de lectura del catálogo.
+- **Persistencia de ruta SSR de contingencia:** La ruta servida por el servidor `/producto/[id].astro` se mantiene operativa para accesos directos, rastreadores SEO y navegación sin JavaScript.
