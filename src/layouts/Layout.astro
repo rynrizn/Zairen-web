@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { siteConfig } from '../config/site';
 import { Toaster } from '../components/ui/Toaster';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title?: string;
@@ -52,6 +53,8 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
     <meta name="theme-color" content="#0A0A0A" />
     <meta name="author" content="ZAIREN LAB" />
 
+    <ClientRouter />
+
     <!-- Script Inline de Tema (Sincronización instantánea en carga y bfcache de navegación) -->
     <script is:inline>
       function syncZairenTheme() {
@@ -71,6 +74,7 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
       }
       syncZairenTheme();
       window.addEventListener('pageshow', syncZairenTheme);
+      document.addEventListener('astro:after-swap', syncZairenTheme);
       window.addEventListener('storage', (e) => {
         if (e.key === 'zairen_theme') syncZairenTheme();
       });
