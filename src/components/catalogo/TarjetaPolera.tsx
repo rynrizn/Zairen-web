@@ -29,6 +29,7 @@ export interface TarjetaPoleraProps {
   esPrioritario?: boolean;
   priority?: boolean;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno' | 'disponible' | 'agotado';
+  onSelectProduct?: (product: TarjetaPoleraProps, targetElement?: HTMLElement) => void;
 }
 
 export function TarjetaPolera({
@@ -42,12 +43,14 @@ export function TarjetaPolera({
   subtitulo = 'Algodón Peinado 280 GSM • Caída Geométrica',
   imagen,
   imagenDorsal,
+  imagenes,
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
   stockPorTalla,
   esPrioritario = false,
   priority = false,
   estadoComercial = 'ninguno',
+  onSelectProduct,
 }: TarjetaPoleraProps) {
   // Determinar stock de cada talla
   const getStockForTalla = (t: string) => {
@@ -135,6 +138,37 @@ export function TarjetaPolera({
     </svg>
   );
 
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) {
+      return;
+    }
+    if (onSelectProduct) {
+      e.preventDefault();
+      onSelectProduct(
+        {
+          id,
+          slug,
+          nombre,
+          precio,
+          coleccion,
+          coleccionSlug,
+          idColeccion,
+          subtitulo,
+          imagen,
+          imagenDorsal,
+          imagenes,
+          tallas,
+          stockDisponible,
+          stockPorTalla,
+          esPrioritario,
+          priority,
+          estadoComercial,
+        },
+        e.currentTarget
+      );
+    }
+  };
+
   const productUrl = `/producto/${slug || id}`;
   const selectedTallaStock = getStockForTalla(selectedTalla);
 
@@ -149,7 +183,7 @@ export function TarjetaPolera({
       {/* Micro-línea de acento carmesí Zen en la base al hacer hover */}
       <div className="absolute bottom-0 left-0 h-[2.5px] w-0 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] group-hover:w-full transition-all duration-500 ease-out pointer-events-none z-20" />
       {/* Contenedor Fotográfico Orthogonal 4:5 */}
-      <a href={productUrl} data-astro-prefetch="hover" className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
+      <a href={productUrl} onClick={handleCardClick} data-astro-prefetch="hover" className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
         {/* Imagen Frontal Optimizada */}
         <img
           src={getOptimizedImageUrl(imagen, 600, 750)}
@@ -228,7 +262,7 @@ export function TarjetaPolera({
           <span className="text-[10px] font-mono text-[#dc143c] uppercase tracking-widest block font-bold">
             {coleccion}
           </span>
-          <a href={productUrl} className="block mt-0.5">
+          <a href={productUrl} onClick={handleCardClick} className="block mt-0.5">
             <h3 className="font-display text-sm md:text-base font-bold text-[#FAF9F6] uppercase tracking-tight line-clamp-1 group-hover:text-[#dc143c] transition-colors">
               {nombre}
             </h3>
