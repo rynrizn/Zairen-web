@@ -108,8 +108,8 @@ if (isSupabaseConfigured) {
     />
   </main>
 
-  <!-- Carrito Drawer Global -->
-  <CarritoDrawer client:load />
+  <!-- Carrito Drawer Global Diferido a client:idle -->
+  <CarritoDrawer client:idle />
 
   <!-- Footer Oficial -->
   <Footer />
