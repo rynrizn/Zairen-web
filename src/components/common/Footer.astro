@@ -35,7 +35,7 @@ import { siteConfig } from '../../config/site';
         </p>
         
         {/* Redes Sociales Ortogonales con Icono y Nombre */}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+        <div class="flex flex-wrap gap-2.5 pt-1">
           {/* TikTok */}
           <a
             id="footer-social-tiktok"
@@ -43,7 +43,7 @@ import { siteConfig } from '../../config/site';
             href="https://tiktok.com/@zairenlab"
             target="_blank"
             rel="noopener noreferrer"
-            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+            class="social-btn flex-1 min-w-[120px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
           >
             <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
@@ -58,7 +58,7 @@ import { siteConfig } from '../../config/site';
             href="https://instagram.com/zairenlab"
             target="_blank"
             rel="noopener noreferrer"
-            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+            class="social-btn flex-1 min-w-[120px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
           >
             <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect width="20" height="20" x="2" y="2" rx="0" ry="0"/>
@@ -75,7 +75,7 @@ import { siteConfig } from '../../config/site';
             href={`https://wa.me/${siteConfig.whatsapp.number}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#25D366] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#25D366] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+            class="social-btn flex-1 min-w-[120px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#25D366] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#25D366] text-xs font-mono uppercase tracking-wider font-bold transition-all"
           >
             <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.37C9.37 7.37 9.1 7.43 8.88 7.68C8.65 7.92 8.02 8.51 8.02 9.73C8.02 10.95 8.91 12.12 9.03 12.28C9.16 12.45 10.77 14.93 13.23 16C13.82 16.25 14.28 16.41 14.63 16.52C15.22 16.71 15.77 16.68 16.2 16.62C16.67 16.55 17.65 16.03 17.86 15.45C18.06 14.86 18.06 14.36 18 14.26C17.94 14.15 17.79 14.09 17.56 13.98C17.34 13.87 16.25 13.33 16.05 13.26C15.84 13.18 15.69 13.15 15.54 13.38C15.38 13.61 14.94 14.15 14.81 14.3C14.68 14.45 14.54 14.47 14.32 14.36C14.09 14.24 13.37 14.01 12.52 13.25C11.86 12.66 11.41 11.93 11.29 11.71C11.16 11.49 11.27 11.37 11.39 11.25C11.49 11.14 11.62 10.98 11.73 10.84C11.85 10.71 11.89 10.61 11.96 10.46C12.04 10.31 12 10.18 11.94 10.07C11.89 9.96 11.43 8.84 11.25 8.38C11.06 7.93 10.88 7.99 10.74 7.99C10.61 7.98 10.46 7.98 10.31 7.98C10.16 7.98 9.91 8.04 9.71 8.25C9.53 8.46 9.53 7.37 9.53 7.37Z"/>
@@ -83,19 +83,20 @@ import { siteConfig } from '../../config/site';
             <span>WhatsApp</span>
           </a>
 
-          {/* X / Twitter */}
+          {/* Facebook (Oculto por defecto, visible si se activa en admin) */}
           <a
-            id="footer-social-twitter"
-            data-social-id="twitter"
-            href="https://x.com/zairenlab"
+            id="footer-social-facebook"
+            data-social-id="facebook"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
-            class="social-btn flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#dc143c] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#dc143c] text-xs font-mono uppercase tracking-wider font-bold transition-all"
+            style="display: none;"
+            class="social-btn flex-1 min-w-[120px] flex items-center justify-center gap-2 px-3 py-2.5 bg-[#141416] hover:bg-[#1877F2] text-[#FAF9F6] hover:text-white border border-[#2A2A2A] hover:border-[#1877F2] text-xs font-mono uppercase tracking-wider font-bold transition-all"
           >
             <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
-            <span>X / Red</span>
+            <span>Facebook</span>
           </a>
         </div>
       </div>
@@ -181,7 +182,7 @@ import { siteConfig } from '../../config/site';
       <div class="flex items-center gap-6">
         <span>ESTRUCTURA SIN SATURACIÓN</span>
         <span class="w-1.5 h-1.5 bg-emerald-400"></span>
-        <span>DROP 01 DISPONIBLE</span>
+        <span id="footer-drop-status">DROP 01 DISPONIBLE</span>
       </div>
     </div>
 
@@ -214,19 +215,56 @@ import { siteConfig } from '../../config/site';
     try {
       const { data } = await supabase
         .from('configuracion')
-        .select('redes_sociales')
+        .select('canales_ordenados, redes_sociales, apariencia')
         .eq('id', 1)
         .maybeSingle();
 
-      if (data && Array.isArray(data.redes_sociales)) {
-        data.redes_sociales.forEach((social: any) => {
-          const btn = document.querySelector(`[data-social-id="${social.id}"]`) as HTMLAnchorElement;
+      if (data) {
+        // 1. Sincronizar estado del Drop en footer
+        if (data.apariencia && (data.apariencia as any).drop_status) {
+          const dropEl = document.getElementById('footer-drop-status');
+          if (dropEl) dropEl.textContent = (data.apariencia as any).drop_status;
+        }
+
+        // 2. Lista de canales normalizada
+        const channelsList: Array<{ id: string; url?: string; activo?: boolean; value?: string; enabled?: boolean; type?: string }> = 
+          Array.isArray(data.canales_ordenados) && data.canales_ordenados.length > 0 
+            ? data.canales_ordenados 
+            : (Array.isArray(data.redes_sociales) ? data.redes_sociales : []);
+
+        const knownPlatforms = ['tiktok', 'instagram', 'whatsapp', 'facebook'];
+        
+        knownPlatforms.forEach((platform) => {
+          const btn = document.querySelector(`[data-social-id="${platform}"]`) as HTMLAnchorElement;
+          const colLink = document.querySelector(`[data-col-id="${platform}"]`) as HTMLAnchorElement;
+
+          const match = channelsList.find((c) => c.id === platform || c.type === platform);
+          const isEnabled = match ? (match.enabled !== undefined ? match.enabled : match.activo) : false;
+          const rawVal = match ? (match.value || match.url || '') : '';
+
+          let targetUrl = rawVal;
+          if (platform === 'whatsapp' && rawVal) {
+            const cleanPhone = rawVal.replace(/\D/g, '');
+            targetUrl = `https://wa.me/${cleanPhone}`;
+          }
+
+          const hasValidUrl = Boolean(targetUrl && targetUrl.trim());
+
           if (btn) {
-            if (social.activo && social.url && social.url.trim() !== '') {
+            if (isEnabled && hasValidUrl) {
               btn.style.display = 'flex';
-              btn.href = social.url;
+              btn.href = targetUrl;
             } else {
               btn.style.display = 'none';
+            }
+          }
+
+          if (colLink) {
+            if (isEnabled && hasValidUrl) {
+              colLink.style.display = 'flex';
+              colLink.href = targetUrl;
+            } else {
+              colLink.style.display = 'none';
             }
           }
         });
@@ -236,7 +274,7 @@ import { siteConfig } from '../../config/site';
     }
   }
 
-  // Ejecutar al cargar la página
+  // Ejecutar al cargar la página y ante actualizaciones
   if (typeof window !== 'undefined') {
     syncFooterSocials();
     window.addEventListener('zairen-config-updated', syncFooterSocials);
