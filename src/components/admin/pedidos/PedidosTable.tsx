@@ -6,6 +6,7 @@ export type OrderStatus = 'Pendiente' | 'Confirmado' | 'En Despacho' | 'Entregad
 
 export interface OrderItem {
   id: string;
+  productId?: string;
   name: string;
   size: string;
   color: string;
@@ -97,9 +98,11 @@ export function PedidosTable() {
             created_at,
             detalle_pedido (
               id,
+              producto_id,
               cantidad,
               precio_unitario,
               subtotal,
+              atributos_snapshot,
               producto:producto_id (
                 id,
                 nombre,
@@ -139,10 +142,19 @@ export function PedidosTable() {
               const coverImg = d.producto?.imagen?.find((img: any) => img.es_portada)?.url_imagen ||
                 d.producto?.imagen?.[0]?.url_imagen ||
                 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=400&auto=format&fit=crop';
+
+              // Extraer talla real desde atributos_snapshot
+              let size = 'Única';
+              if (d.atributos_snapshot) {
+                const match = String(d.atributos_snapshot).match(/Talla:\s*([A-Za-z0-9]+)/i);
+                if (match) size = match[1].toUpperCase();
+              }
+
               return {
                 id: d.id,
+                productId: d.producto_id || d.producto?.id,
                 name: d.producto?.nombre || 'Prenda Zairen',
-                size: 'Única',
+                size,
                 color: 'Edición Drop',
                 quantity: Number(d.cantidad) || 1,
                 price: Number(d.precio_unitario) || 0,
@@ -227,6 +239,61 @@ export function PedidosTable() {
           .from('pedido')
           .update({ estado: mapUiStatusToDb(newStatus) })
           .eq('id', orderId);
+
+        // Si se cancela la orden, revertir automáticamente el stock de cada prenda
+        if (newStatus === 'Cancelado') {
+          const targetOrder = orders.find((o) => o.id === orderId);
+          if (targetOrder && targetOrder.items) {
+            for (const item of targetOrder.items) {
+              const prodId = item.productId;
+              const sizeKey = `stock_${item.size}`;
+              const qty = item.quantity;
+
+              if (prodId) {
+                // Restaurar atributo de talla específica
+                if (['S', 'M', 'L', 'XL'].includes(item.size)) {
+                  try {
+                    const { data: attr } = await supabase
+                      .from('atributo_producto')
+                      .select('valor')
+                      .eq('producto_id', prodId)
+                      .eq('clave', sizeKey)
+                      .maybeSingle();
+
+                    if (attr) {
+                      const currentVal = parseInt(String(attr.valor), 10) || 0;
+                      await supabase
+                        .from('atributo_producto')
+                        .update({ valor: String(currentVal + qty) })
+                        .eq('producto_id', prodId)
+                        .eq('clave', sizeKey);
+                    }
+                  } catch (e) {
+                    console.warn('Error restaurando atributo de talla:', e);
+                  }
+                }
+
+                // Restaurar inventario físico total
+                try {
+                  const { data: inv } = await supabase
+                    .from('inventario')
+                    .select('id, cantidad')
+                    .eq('producto_id', prodId)
+                    .maybeSingle();
+
+                  if (inv) {
+                    await supabase
+                      .from('inventario')
+                      .update({ cantidad: (inv.cantidad || 0) + qty })
+                      .eq('id', inv.id);
+                  }
+                } catch (e) {
+                  console.warn('Error restaurando inventario total:', e);
+                }
+              }
+            }
+          }
+        }
       }
 
       setOrders((prev) =>
@@ -249,8 +316,8 @@ export function PedidosTable() {
           description: 'Venta cerrada y registrada en Kardex contable.',
         });
       } else if (newStatus === 'Cancelado') {
-        toast.error(`Pedido cancelado`, {
-          description: 'Se liberó la reserva de stock a disponibilidad pública.',
+        toast.error(`Pedido cancelado y stock liberado`, {
+          description: 'Se restableció el inventario por talla a disponibilidad pública.',
         });
       }
     } catch (err) {
@@ -286,7 +353,7 @@ export function PedidosTable() {
   const cleanPhone = selectedOrder ? selectedOrder.clientPhone.replace(/\D/g, '') : '';
   const whatsappUrl = selectedOrder
     ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-        `Hola ${selectedOrder.clientName}, te escribimos de ZAIREN LAB sobre tu orden ${selectedOrder.orderNumber}.`
+        `Hola ${selectedOrder.clientName}, sobre tu pedido ${selectedOrder.orderNumber} en Zairen Lab: te contactamos para coordinar los detalles de despacho.`
       )}`
     : '#';
 
