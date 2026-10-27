@@ -395,10 +395,15 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       {/* ========================================================== */}
       {filteredProducts.length > 0 ? (
         <div className="space-y-12">
-          {sections.map((section) => {
+          {sections.map((section, secIdx) => {
             const isCollapsed = Boolean(collapsedSections[section.id]);
             return (
-              <div key={section.id} className="section-collapsible">
+              <div
+                key={section.id}
+                className={`section-collapsible ${
+                  secIdx > 0 ? '[content-visibility:auto] [contain-intrinsic-size:1px_500px]' : ''
+                }`}
+              >
                 {/* Encabezado de Sección Colapsable */}
                 <div
                   onClick={() => toggleSection(section.id)}
@@ -439,8 +444,12 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
                       mobileDensity === 'compact' ? 'grid-cols-2' : 'grid-cols-1'
                     } sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 animate-in fade-in duration-200`}
                   >
-                    {section.products.map((producto) => (
-                      <TarjetaPolera key={producto.id} {...producto} />
+                    {section.products.map((producto, prodIdx) => (
+                      <TarjetaPolera
+                        key={producto.id}
+                        {...producto}
+                        priority={secIdx === 0 && prodIdx === 0}
+                      />
                     ))}
                   </div>
                 )}
