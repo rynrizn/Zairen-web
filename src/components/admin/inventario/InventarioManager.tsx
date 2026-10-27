@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ProductoEditor, type InventarioItem } from './ProductoEditor';
+import type { StockBySize } from './MatrizStock';
 import { supabase } from '../../../lib/supabase';
 
 export function InventarioManager() {
@@ -64,7 +65,7 @@ export function InventarioManager() {
             precio: Number(p.precio_venta) || 0,
             costo: Math.round((Number(p.precio_venta) || 0) * 0.4),
             stock: (() => {
-              const stockMap: Record<string, number> = { S: 0, M: 0, L: 0, XL: 0 };
+              const stockMap: StockBySize = { S: 0, M: 0, L: 0, XL: 0 };
               let hasSpecificStock = false;
               p.atributos?.forEach((a: any) => {
                 if (a.clave && a.clave.toLowerCase().startsWith('stock_')) {
