@@ -72,7 +72,8 @@ export function POSTerminal() {
             activo,
             coleccion:coleccion_id (id, nombre, slug),
             imagenes:imagen (url_imagen, es_portada, orden),
-            inventario:inventario (cantidad, cantidad_reservada)
+            inventario:inventario (cantidad, cantidad_reservada),
+            atributos:atributo_producto (clave, valor)
           `)
           .eq('activo', true)
           .order('created_at', { ascending: false });
@@ -88,6 +89,20 @@ export function POSTerminal() {
 
             const totalStock = p.inventario?.reduce((acc: number, inv: any) => acc + (inv.cantidad || 0), 0) || 0;
 
+            const stockMap: Record<string, number> = { S: 0, M: 0, L: 0, XL: 0 };
+            if (Array.isArray(p.atributos)) {
+              p.atributos.forEach((attr: any) => {
+                const match = String(attr.clave).toLowerCase().match(/^stock_([a-z0-9]+)$/);
+                if (match) {
+                  const sizeKey = match[1].toUpperCase();
+                  stockMap[sizeKey] = parseInt(String(attr.valor), 10) || 0;
+                }
+              });
+            }
+            if (Object.values(stockMap).every((v) => v === 0) && totalStock > 0) {
+              stockMap.M = totalStock;
+            }
+
             return {
               id: p.id,
               sku: `ZRN-${p.slug?.substring(0, 8).toUpperCase() || 'PRENDA'}`,
@@ -95,12 +110,7 @@ export function POSTerminal() {
               category: catName,
               price: Number(p.precio_venta) || 0,
               image: coverImg?.url_imagen || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
-              stock: {
-                S: Math.floor(totalStock / 4) || 0,
-                M: Math.floor(totalStock / 4) || 0,
-                L: Math.floor(totalStock / 4) || 0,
-                XL: Math.max(0, totalStock - Math.floor(totalStock / 4) * 3) || 0,
-              },
+              stock: stockMap,
             };
           });
 
@@ -214,33 +224,136 @@ export function POSTerminal() {
     }
   };
 
-  const handleProcessSale = () => {
+  const handleProcessSale = async () => {
     if (cart.length === 0) {
       toast.error('El carrito está vacío');
       return;
     }
 
-    const ticketNumber = `#V-2026-0${Math.floor(100 + Math.random() * 900)}`;
-    const itemsSummary = cart.map((i) => `${i.quantity}x ${i.name} (${i.size})`).join(', ');
+    const toastId = toast.loading('Registrando venta presencial y deduciendo inventario...');
 
-    const newSale: SaleRecord = {
-      id: `sal-${Date.now()}`,
-      ticketNumber,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      clientName: customerMode === 'registered' ? clientName : 'Cliente Mostrador (S/N)',
-      clientPhone: customerMode === 'registered' ? clientPhone : '',
-      itemsSummary,
-      paymentMethod,
-      total,
-      discount,
-    };
+    try {
+      const ticketNumber = `#V-2026-0${Math.floor(100 + Math.random() * 900)}`;
+      const itemsSummary = cart.map((i) => `${i.quantity}x ${i.name} (${i.size})`).join(', ');
 
-    setRecentSales([newSale, ...recentSales]);
-    setActiveReceipt(newSale);
-    setCart([]);
-    toast.success(`Venta ${ticketNumber} registrada exitosamente`, {
-      description: `Total cobrado: Bs ${total.toFixed(2)} (${paymentMethod})`,
-    });
+      // 1. Insertar orden en tabla pedido
+      const { data: orderData, error: orderError } = await supabase
+        .from('pedido')
+        .insert({
+          origen: 'POS_PRESENCIAL',
+          estado: 'ENTREGADO',
+          cliente_nombre: customerMode === 'registered' ? clientName || 'Cliente Mostrador' : 'Cliente Mostrador (S/N)',
+          cliente_telefono: customerMode === 'registered' ? clientPhone : '',
+          subtotal: subtotal,
+          descuento: discount,
+          total: total,
+          observacion: `Venta POS Presencial - Pago: ${paymentMethod} // ${itemsSummary}`,
+        })
+        .select('id, numero_orden')
+        .single();
+
+      const savedOrderId = orderData?.id;
+
+      // 2. Insertar detalle_pedido y descontar stock por talla atómicamente
+      for (const item of cart) {
+        if (savedOrderId) {
+          await supabase.from('detalle_pedido').insert({
+            pedido_id: savedOrderId,
+            producto_id: item.productId,
+            producto_nombre: item.name,
+            atributos_snapshot: `Talla: ${item.size} // SKU: ${item.sku}`,
+            cantidad: item.quantity,
+            precio_unitario: item.price,
+            subtotal: item.price * item.quantity,
+          });
+        }
+
+        // Deducción atómica del stock por talla en atributo_producto
+        const sizeKey = `stock_${item.size}`;
+        const { data: attr } = await supabase
+          .from('atributo_producto')
+          .select('valor')
+          .eq('producto_id', item.productId)
+          .eq('clave', sizeKey)
+          .maybeSingle();
+
+        if (attr) {
+          const currentStock = parseInt(String(attr.valor), 10) || 0;
+          const nextStock = Math.max(0, currentStock - item.quantity);
+          await supabase
+            .from('atributo_producto')
+            .update({ valor: String(nextStock) })
+            .eq('producto_id', item.productId)
+            .eq('clave', sizeKey);
+        }
+
+        // Deducción en inventario físico
+        const { data: inv } = await supabase
+          .from('inventario')
+          .select('id, cantidad')
+          .eq('producto_id', item.productId)
+          .maybeSingle();
+
+        if (inv) {
+          const nextInv = Math.max(0, (inv.cantidad || 0) - item.quantity);
+          await supabase
+            .from('inventario')
+            .update({ cantidad: nextInv })
+            .eq('id', inv.id);
+
+          try {
+            await supabase.from('movimiento_inventario').insert({
+              inventario_id: inv.id,
+              producto_id: item.productId,
+              tipo_movimiento: 'VENTA_POS',
+              cantidad: -item.quantity,
+              cantidad_anterior: inv.cantidad,
+              cantidad_nueva: nextInv,
+              motivo: `Venta POS Presencial ${ticketNumber} - Talla ${item.size}`,
+              origen: 'POS_SISTEMA',
+            });
+          } catch (e) {
+            // Ignorar si tabla movimiento_inventario no está lista
+          }
+        }
+      }
+
+      // Actualizar catálogo en memoria local
+      setCatalog((prev) =>
+        prev.map((prod) => {
+          const cartItem = cart.find((c) => c.productId === prod.id);
+          if (!cartItem) return prod;
+          const updatedStock = { ...prod.stock };
+          if (updatedStock[cartItem.size] !== undefined) {
+            updatedStock[cartItem.size] = Math.max(0, updatedStock[cartItem.size] - cartItem.quantity);
+          }
+          return { ...prod, stock: updatedStock };
+        })
+      );
+
+      const newSale: SaleRecord = {
+        id: savedOrderId || `sal-${Date.now()}`,
+        ticketNumber: orderData?.numero_orden ? `#V-${String(orderData.numero_orden).padStart(4, '0')}` : ticketNumber,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        clientName: customerMode === 'registered' ? clientName : 'Cliente Mostrador (S/N)',
+        clientPhone: customerMode === 'registered' ? clientPhone : '',
+        itemsSummary,
+        paymentMethod,
+        total,
+        discount,
+      };
+
+      setRecentSales([newSale, ...recentSales]);
+      setActiveReceipt(newSale);
+      setCart([]);
+      toast.dismiss(toastId);
+      toast.success(`Venta ${newSale.ticketNumber} registrada exitosamente`, {
+        description: `Total cobrado: Bs ${total.toFixed(2)} (${paymentMethod})`,
+      });
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      toast.error('Error al procesar la venta: ' + (err?.message || 'Error desconocido'));
+    }
   };
 
   return (
@@ -250,7 +363,7 @@ export function POSTerminal() {
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2 font-mono text-xs text-[#dc143c] uppercase tracking-widest font-bold">
             <span className="inline-flex w-2 h-2 rounded-none bg-[#dc143c] shadow-[0_0_10px_#dc143c] animate-ping"></span>
-            <span>ONLINE NODE // TOKYO-03</span>
+            <span>ONLINE NODE // CORE SYSTEM</span>
             <span className="text-[#5c3f3f]">/</span>
             <span>ADMIN-POS-INTERFACE</span>
           </div>
