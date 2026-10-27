@@ -111,20 +111,26 @@ export function TarjetaPolera({
   );
 
   const productUrl = `/producto/${slug || id}`;
+  const selectedTallaStock = getStockForTalla(selectedTalla);
 
   return (
     <article
-      className="group relative flex flex-col bg-[#141416] border border-[#201f1f] hover:border-[#dc143c]/60 transition-all duration-300 ease-out p-3 shadow-lg hover:shadow-[0_16px_36px_rgba(220,20,60,0.20)] hover:-translate-y-1.5 overflow-hidden"
+      className={`group relative flex flex-col bg-[#141416] border transition-all duration-300 ease-out p-3 shadow-lg hover:-translate-y-1.5 overflow-hidden ${
+        isSoldOut
+          ? 'border-red-950/40 opacity-70 grayscale-[25%]'
+          : 'border-[#201f1f] hover:border-[#dc143c]/60 hover:shadow-[0_16px_36px_rgba(220,20,60,0.20)]'
+      }`}
     >
       {/* Micro-línea de acento carmesí Zen en la base al hacer hover */}
       <div className="absolute bottom-0 left-0 h-[2.5px] w-0 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] group-hover:w-full transition-all duration-500 ease-out pointer-events-none z-20" />
       {/* Contenedor Fotográfico Orthogonal 4:5 */}
-      <a href={productUrl} className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
+      <a href={productUrl} data-astro-prefetch="hover" className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
         {/* Imagen Frontal */}
         <img
           src={getOptimizedImageUrl(imagen, 600, 750)}
           alt={nombre}
           loading="lazy"
+          style={{ viewTransitionName: `prod-img-${id}` }}
           className="w-full h-full object-cover filter contrast-[1.03] group-hover:scale-105 transition-transform duration-700 ease-out"
         />
 
@@ -223,6 +229,13 @@ export function TarjetaPolera({
               );
             })}
           </div>
+
+          {/* Micro-aviso de últimas unidades por talla seleccionada */}
+          {!isSoldOut && selectedTallaStock > 0 && selectedTallaStock <= 2 && (
+            <span className="text-[9px] font-mono text-amber-400 font-bold block">
+              ⚡ Últimas {selectedTallaStock} uds ({selectedTalla})
+            </span>
+          )}
 
           {/* Precio y Botón Agregar Carrito Cuadrado / Ortogonal */}
           <div className="flex items-center justify-between pt-1">

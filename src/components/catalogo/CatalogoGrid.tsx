@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { TarjetaPolera, type TarjetaPoleraProps } from './TarjetaPolera';
+import { GuiaTallasModal } from './GuiaTallasModal';
 
 interface CatalogoGridProps {
   initialProducts: TarjetaPoleraProps[];
@@ -10,9 +11,11 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const [selectedCollection, setSelectedCollection] = useState<string>('todas');
   const [commercialFilter, setCommercialFilter] = useState<string>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'recientes' | 'precio-asc' | 'precio-desc' | 'nombre-asc' | 'nombre-desc'>('recientes');
+  const [sortBy, setSortBy] = useState<'recientes' | 'precio-asc' | 'precio-desc' | 'nombre-asc' | 'nombre-desc' | 'disponibles'>('recientes');
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const [mobileDensity, setMobileDensity] = useState<'compact' | 'large'>('compact');
+  const [isGuiaOpen, setIsGuiaOpen] = useState<boolean>(false);
 
   // Filtrado y ordenamiento reactivo
   const filteredProducts = useMemo(() => {
@@ -59,6 +62,11 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         return true;
       })
       .sort((a, b) => {
+        if (sortBy === 'disponibles') {
+          const aHasStock = (a.stockDisponible ?? 0) > 0 ? 1 : 0;
+          const bHasStock = (b.stockDisponible ?? 0) > 0 ? 1 : 0;
+          if (aHasStock !== bHasStock) return bHasStock - aHasStock;
+        }
         if (sortBy === 'precio-asc') return a.precio - b.precio;
         if (sortBy === 'precio-desc') return b.precio - a.precio;
         if (sortBy === 'nombre-asc') return a.nombre.localeCompare(b.nombre);
@@ -67,8 +75,17 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       });
   }, [initialProducts, selectedCollection, commercialFilter, searchQuery, sortBy, onlyAvailable]);
 
-  // Agrupación por colecciones para secciones colapsables (estilo CatalogoV0)
+  // Agrupación por colecciones con prendas agotadas al final de cada sección
   const sections = useMemo(() => {
+    const sortByStockAndConfig = (prods: TarjetaPoleraProps[]) => {
+      return [...prods].sort((a, b) => {
+        const aSoldOut = (a.stockDisponible ?? 0) <= 0 || a.estadoComercial === 'agotado';
+        const bSoldOut = (b.stockDisponible ?? 0) <= 0 || b.estadoComercial === 'agotado';
+        if (aSoldOut !== bSoldOut) return aSoldOut ? 1 : -1;
+        return 0;
+      });
+    };
+
     // Si se seleccionó una colección específica, mostrar solo esa sección
     if (selectedCollection !== 'todas') {
       const activeCol = collections.find((c) => c.slug === selectedCollection);
@@ -77,7 +94,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         {
           id: selectedCollection,
           name: name.toUpperCase(),
-          products: filteredProducts,
+          products: sortByStockAndConfig(filteredProducts),
         },
       ];
     }
@@ -99,7 +116,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         grouped.push({
           id: col.slug,
           name: (col.nombre.split('//')[0]?.trim() || col.nombre).toUpperCase(),
-          products: colProducts,
+          products: sortByStockAndConfig(colProducts),
         });
       }
     });
@@ -117,7 +134,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         grouped.push({
           id: colName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           name: colName.toUpperCase(),
-          products: prods,
+          products: sortByStockAndConfig(prods),
         });
       });
     }
@@ -234,18 +251,55 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             )}
           </div>
 
-          {/* Selector de Orden Ampliado (Precios, Recientes, Alfabético) */}
+          {/* Selector de Orden Ampliado (Precios, Recientes, Alfabético, Disponibles) */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
             className="bg-[#141416] border border-[#201f1f] text-[#e5e2e1] text-xs font-mono rounded-none px-3 py-2 focus:outline-none focus:border-[#dc143c] cursor-pointer"
           >
             <option value="recientes">Más Recientes</option>
+            <option value="disponibles">Disponibles Primero</option>
             <option value="precio-asc">Precio: Menor a Mayor</option>
             <option value="precio-desc">Precio: Mayor a Menor</option>
             <option value="nombre-asc">Nombre: A - Z</option>
             <option value="nombre-desc">Nombre: Z - A</option>
           </select>
+
+          {/* Botón Guía de Tallas */}
+          <button
+            type="button"
+            onClick={() => setIsGuiaOpen(true)}
+            title="Ver medidas en centímetros de prendas"
+            className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+          >
+            <span>📏</span>
+            <span className="hidden sm:inline">Guía de Tallas</span>
+            <span className="sm:hidden">Tallas</span>
+          </button>
+
+          {/* Toggle de Densidad Móvil (1 o 2 columnas) */}
+          <div className="flex sm:hidden items-center bg-[#141416] border border-[#201f1f] p-0.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setMobileDensity('compact')}
+              title="2 Columnas compactas"
+              className={`px-2 py-1 text-[10px] font-mono uppercase cursor-pointer ${
+                mobileDensity === 'compact' ? 'bg-[#dc143c] text-white font-bold' : 'text-[#ac8888]'
+              }`}
+            >
+              2 Col
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileDensity('large')}
+              title="1 Columna grande"
+              className={`px-2 py-1 text-[10px] font-mono uppercase cursor-pointer ${
+                mobileDensity === 'large' ? 'bg-[#dc143c] text-white font-bold' : 'text-[#ac8888]'
+              }`}
+            >
+              1 Col
+            </button>
+          </div>
 
           {/* Botón Global para Contraer / Expandir Todas las Secciones */}
           {sections.length > 1 && (
@@ -256,7 +310,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
               className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
             >
               <span className="text-[#dc143c] font-bold">{areAllCollapsed ? '⊞' : '⊟'}</span>
-              <span>{areAllCollapsed ? 'Expandir Todo' : 'Contraer Todo'}</span>
+              <span className="hidden sm:inline">{areAllCollapsed ? 'Expandir Todo' : 'Contraer Todo'}</span>
             </button>
           )}
         </div>
@@ -380,7 +434,11 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
 
                 {/* Cuadrícula de Prendas de la Sección */}
                 {!isCollapsed && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-200">
+                  <div
+                    className={`grid ${
+                      mobileDensity === 'compact' ? 'grid-cols-2' : 'grid-cols-1'
+                    } sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 animate-in fade-in duration-200`}
+                  >
                     {section.products.map((producto) => (
                       <TarjetaPolera key={producto.id} {...producto} />
                     ))}
@@ -416,6 +474,9 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           </button>
         </div>
       )}
+
+      {/* Modal de Guía de Tallas */}
+      <GuiaTallasModal isOpen={isGuiaOpen} onClose={() => setIsGuiaOpen(false)} />
     </section>
   );
 }
