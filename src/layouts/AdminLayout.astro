@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { siteConfig } from '../config/site';
+import { formatPageTitle } from '../lib/formatTitle';
 import { Toaster } from '../components/ui/Toaster';
 import { AdminSidebar } from '../components/admin/layout/AdminSidebar';
 
@@ -9,7 +10,8 @@ interface Props {
   activePath?: string;
 }
 
-const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
+const { title = 'Panel', activePath = 'panel' } = Astro.props;
+const finalTitle = formatPageTitle(title);
 ---
 
 <!doctype html>
@@ -28,7 +30,7 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
-    <title>{title}</title>
+    <title>{finalTitle}</title>
 
     {/* Script Inline de Tema para Admin (Sincronizado con localStorage) */}
     <script is:inline>
