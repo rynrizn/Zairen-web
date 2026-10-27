@@ -75,6 +75,11 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Estados del selector modal de Mediateca Cloudinary
+  const [showMediaLibrary, setShowMediaLibrary] = useState<boolean>(false);
+  const [isLoadingMedia, setIsLoadingMedia] = useState<boolean>(false);
+  const [mediaImages, setMediaImages] = useState<string[]>([]);
+
   useEffect(() => {
     if (product) {
       setSku(product.sku);
