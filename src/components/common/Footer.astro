@@ -113,19 +113,20 @@ import { siteConfig } from '../../config/site';
         </span>
         <ul class="space-y-2 text-[#8F8F8C]">
           <li>
-            <a href="https://tiktok.com/@zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
+            <a data-col-id="tiktok" href="https://tiktok.com/@zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
               <span>TikTok Oficial</span>
               <span class="text-[10px] text-[#4A4A4A]">↗</span>
             </a>
           </li>
           <li>
-            <a href="https://instagram.com/zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
+            <a data-col-id="instagram" href="https://instagram.com/zairenlab" target="_blank" rel="noopener noreferrer" class="hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5">
               <span>Instagram Oficial</span>
               <span class="text-[10px] text-[#4A4A4A]">↗</span>
             </a>
           </li>
           <li>
             <a 
+              data-col-id="whatsapp"
               href={`https://wa.me/${siteConfig.whatsapp.number}`} 
               target="_blank" 
               rel="noopener noreferrer" 
@@ -211,8 +212,59 @@ import { siteConfig } from '../../config/site';
 <script>
   import { supabase } from '../../lib/supabase';
 
+  function applySocials(socialsList: Array<{ id: string; url?: string; activo?: boolean; value?: string; enabled?: boolean }>) {
+    const knownPlatforms = ['tiktok', 'instagram', 'whatsapp', 'facebook'];
+
+    knownPlatforms.forEach((platform) => {
+      const btn = document.querySelector(`[data-social-id="${platform}"]`) as HTMLAnchorElement;
+      const colLink = document.querySelector(`[data-col-id="${platform}"]`) as HTMLAnchorElement;
+
+      const match = socialsList.find((s) => s.id === platform);
+      const isEnabled = match
+        ? (match.activo !== undefined ? match.activo : (match.enabled !== undefined ? match.enabled : true))
+        : (platform !== 'facebook');
+      const rawVal = match ? (match.url || match.value || '') : '';
+
+      let targetUrl = rawVal;
+      if (platform === 'whatsapp' && rawVal) {
+        const cleanPhone = rawVal.replace(/\D/g, '');
+        targetUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : '';
+      }
+
+      const hasValidUrl = Boolean(targetUrl && targetUrl.trim());
+
+      if (btn) {
+        if (isEnabled && hasValidUrl) {
+          btn.style.display = 'flex';
+          btn.href = targetUrl;
+        } else if (!isEnabled) {
+          btn.style.display = 'none';
+        }
+      }
+
+      if (colLink) {
+        if (isEnabled && hasValidUrl) {
+          colLink.style.display = 'flex';
+          colLink.href = targetUrl;
+        } else if (!isEnabled) {
+          colLink.style.display = 'none';
+        }
+      }
+    });
+  }
+
   async function syncFooterSocials() {
     try {
+      // 1. Cargar cache local para render inmediato sin parpadeo
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('zairen_footer_socials');
+        if (cached) {
+          try {
+            applySocials(JSON.parse(cached));
+          } catch (e) {}
+        }
+      }
+
       const { data } = await supabase
         .from('configuracion')
         .select('redes_sociales, canales_contacto, apariencia')
@@ -220,54 +272,21 @@ import { siteConfig } from '../../config/site';
         .maybeSingle();
 
       if (data) {
-        // 1. Sincronizar estado del Drop en footer
+        // Sincronizar estado del Drop en footer
         if (data.apariencia && (data.apariencia as any).drop_status) {
           const dropEl = document.getElementById('footer-drop-status');
           if (dropEl) dropEl.textContent = (data.apariencia as any).drop_status;
         }
 
-        // 2. Lista de canales normalizada
-        const channelsList: Array<{ id: string; url?: string; activo?: boolean; value?: string; enabled?: boolean; type?: string }> = 
-          Array.isArray(data.canales_ordenados) && data.canales_ordenados.length > 0 
-            ? data.canales_ordenados 
-            : (Array.isArray(data.redes_sociales) ? data.redes_sociales : []);
+        // Redes sociales exclusivas del footer (independientes de las tarjetas de producto)
+        const socialsList: Array<{ id: string; url?: string; activo?: boolean; value?: string; enabled?: boolean }> =
+          Array.isArray(data.redes_sociales) ? data.redes_sociales : [];
 
-        const knownPlatforms = ['tiktok', 'instagram', 'whatsapp', 'facebook'];
-        
-        knownPlatforms.forEach((platform) => {
-          const btn = document.querySelector(`[data-social-id="${platform}"]`) as HTMLAnchorElement;
-          const colLink = document.querySelector(`[data-col-id="${platform}"]`) as HTMLAnchorElement;
+        if (socialsList.length > 0 && typeof window !== 'undefined') {
+          localStorage.setItem('zairen_footer_socials', JSON.stringify(socialsList));
+        }
 
-          const match = channelsList.find((c) => c.id === platform || c.type === platform);
-          const isEnabled = match ? (match.enabled !== undefined ? match.enabled : match.activo) : false;
-          const rawVal = match ? (match.value || match.url || '') : '';
-
-          let targetUrl = rawVal;
-          if (platform === 'whatsapp' && rawVal) {
-            const cleanPhone = rawVal.replace(/\D/g, '');
-            targetUrl = `https://wa.me/${cleanPhone}`;
-          }
-
-          const hasValidUrl = Boolean(targetUrl && targetUrl.trim());
-
-          if (btn) {
-            if (isEnabled && hasValidUrl) {
-              btn.style.display = 'flex';
-              btn.href = targetUrl;
-            } else {
-              btn.style.display = 'none';
-            }
-          }
-
-          if (colLink) {
-            if (isEnabled && hasValidUrl) {
-              colLink.style.display = 'flex';
-              colLink.href = targetUrl;
-            } else {
-              colLink.style.display = 'none';
-            }
-          }
-        });
+        applySocials(socialsList);
       }
     } catch (e) {
       // Fallback a visualización estándar

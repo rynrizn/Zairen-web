@@ -13,6 +13,17 @@ const { activePath = '/' } = Astro.props;
 
 <!-- Header Superior Fijo Minimalista -->
 <header class="navbar-header fixed top-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1C1B1B] transition-colors">
+  <!-- Barra Promocional Superior Fija (Si está activa en Supabase / LocalStorage) -->
+  <div
+    id="top-promo-banner"
+    style="display: none;"
+    class="w-full bg-[#141416] text-[#FAF9F6] border-b border-[#dc143c]/40 text-center py-1.5 px-4 font-mono text-[11px] uppercase tracking-wider relative z-50 flex items-center justify-center gap-3 transition-colors"
+  >
+    <span class="w-1.5 h-1.5 rounded-full bg-[#dc143c] animate-pulse shrink-0"></span>
+    <a id="top-promo-banner-link" href="#catalogo" class="hover:text-[#dc143c] transition-colors truncate">
+      <span id="top-promo-banner-text">NUEVO DROP 2026 // ENVÍOS A TODA BOLIVIA</span>
+    </a>
+  </div>
   <div class="h-16 w-full max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-between">
     
     <!-- Logotipo Oficial Suelto & Limpio (Sin cajas ni marcos que lo encierren) -->
@@ -115,6 +126,14 @@ const { activePath = '/' } = Astro.props;
 </header>
 
 <style>
+  :global(html.light) #top-promo-banner {
+    background-color: #FAF9F6 !important;
+    border-color: rgba(220, 20, 60, 0.3) !important;
+    color: #141416 !important;
+  }
+  :global(body.has-promo-banner) main {
+    padding-top: 6.5rem !important;
+  }
   :global(html.light) .navbar-header {
     background-color: rgba(248, 247, 244, 0.95) !important;
     border-color: #DCD9D2 !important;
@@ -143,6 +162,53 @@ const { activePath = '/' } = Astro.props;
 </style>
 
 <script>
+  import { supabase } from '../../lib/supabase';
+
+  async function syncTopPromoBanner() {
+    try {
+      const banner = document.getElementById('top-promo-banner');
+      const bannerText = document.getElementById('top-promo-banner-text');
+      const bannerLink = document.getElementById('top-promo-banner-link') as HTMLAnchorElement;
+      if (!banner || !bannerText) return;
+
+      // 1. Render inmediato desde localStorage si existe
+      const localEnabled = localStorage.getItem('zairen_banner_enabled') === 'true';
+      const localText = localStorage.getItem('zairen_banner_text');
+      const localLink = localStorage.getItem('zairen_banner_link');
+
+      if (localEnabled && localText && localText.trim()) {
+        banner.style.display = 'flex';
+        bannerText.textContent = localText;
+        if (bannerLink && localLink) bannerLink.href = localLink;
+        document.body.classList.add('has-promo-banner');
+      }
+
+      // 2. Consulta y sincronización con Supabase
+      const { data } = await supabase
+        .from('configuracion')
+        .select('apariencia')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (data?.apariencia?.banner_promocional) {
+        const bp = data.apariencia.banner_promocional;
+        if (bp.activo && bp.texto && bp.texto.trim()) {
+          banner.style.display = 'flex';
+          bannerText.textContent = bp.texto;
+          if (bannerLink && bp.link) bannerLink.href = bp.link;
+          document.body.classList.add('has-promo-banner');
+        } else {
+          banner.style.display = 'none';
+          document.body.classList.remove('has-promo-banner');
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (typeof window !== 'undefined') {
+    syncTopPromoBanner();
+    window.addEventListener('zairen-config-updated', syncTopPromoBanner);
+  }
   const toggleBtn = document.getElementById('mobile-menu-toggle-btn');
   const mobileMenu = document.getElementById('mobile-top-menu');
 

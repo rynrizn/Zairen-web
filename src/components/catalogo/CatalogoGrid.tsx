@@ -333,7 +333,12 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
           {/* Campo de Búsqueda Ortogonal */}
           <div className="relative flex-1 sm:w-64">
+            <label htmlFor="catalogo-search-input" className="sr-only">
+              Buscar prenda o SKU
+            </label>
             <input
+              id="catalogo-search-input"
+              name="search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -352,7 +357,13 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           </div>
 
           {/* Selector de Orden Ampliado (Precios, Recientes, Alfabético, Disponibles) */}
+          <label htmlFor="catalogo-sort-select" className="sr-only">
+            Ordenar catálogo por
+          </label>
           <select
+            id="catalogo-sort-select"
+            name="sortBy"
+            aria-label="Ordenar catálogo por"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
             className="bg-[#141416] border border-[#201f1f] text-[#e5e2e1] text-xs font-mono rounded-none px-3 py-2 focus:outline-none focus:border-[#dc143c] cursor-pointer"
@@ -479,8 +490,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         </div>
 
         {/* Checkbox de Disponibilidad Ortogonal */}
-        <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors">
+        <label htmlFor="catalogo-solo-stock" className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#ac8888] hover:text-[#e5e2e1] transition-colors">
           <input
+            id="catalogo-solo-stock"
+            name="soloStock"
             type="checkbox"
             checked={onlyAvailable}
             onChange={(e) => setOnlyAvailable(e.target.checked)}

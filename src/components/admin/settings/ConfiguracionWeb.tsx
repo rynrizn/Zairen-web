@@ -26,6 +26,20 @@ export interface Sucursal {
   activa: boolean;
 }
 
+export interface FooterSocialItem {
+  id: string;
+  nombre: string;
+  url: string;
+  activo: boolean;
+}
+
+export const DEFAULT_FOOTER_SOCIALS: FooterSocialItem[] = [
+  { id: 'tiktok', nombre: 'TikTok', url: 'https://tiktok.com/@zairenlab', activo: true },
+  { id: 'instagram', nombre: 'Instagram', url: 'https://instagram.com/zairenlab', activo: true },
+  { id: 'whatsapp', nombre: 'WhatsApp', url: `https://wa.me/${siteConfig.whatsapp.number}`, activo: true },
+  { id: 'facebook', nombre: 'Facebook', url: '', activo: false },
+];
+
 const defaultSucursales: Sucursal[] = [
   {
     id: 'suc-1',
@@ -64,6 +78,9 @@ export function ConfiguracionWeb() {
   const [newChannelName, setNewChannelName] = useState<string>('');
   const [newChannelValue, setNewChannelValue] = useState<string>('');
   const [showAddChannel, setShowAddChannel] = useState<boolean>(false);
+
+  // 4B. Redes Sociales del Footer Desacopladas
+  const [footerSocials, setFooterSocials] = useState<FooterSocialItem[]>(DEFAULT_FOOTER_SOCIALS);
 
   // 5. Sucursales / Nodos
   const [sucursales, setSucursales] = useState<Sucursal[]>(defaultSucursales);
@@ -114,6 +131,7 @@ export function ConfiguracionWeb() {
       brandName,
       brandSlogan,
       channels,
+      footerSocials,
       sucursales,
       accentColor,
       blurIntensity,
@@ -141,6 +159,7 @@ export function ConfiguracionWeb() {
     brandName,
     brandSlogan,
     channels,
+    footerSocials,
     sucursales,
     accentColor,
     blurIntensity,
@@ -225,6 +244,22 @@ export function ConfiguracionWeb() {
             }
           }
 
+          // Redes Sociales exclusivas del Footer
+          if (Array.isArray(data.redes_sociales) && data.redes_sociales.length > 0) {
+            const mappedSocials = DEFAULT_FOOTER_SOCIALS.map(def => {
+              const match = data.redes_sociales.find((r: any) => r.id === def.id || r.type === def.id);
+              if (match) {
+                return {
+                  ...def,
+                  url: match.url || match.value || def.url,
+                  activo: typeof match.activo === 'boolean' ? match.activo : (typeof match.enabled === 'boolean' ? match.enabled : def.activo),
+                };
+              }
+              return def;
+            });
+            setFooterSocials(mappedSocials);
+          }
+
           // Moneda & Apariencia
           if (data.apariencia) {
             if (data.apariencia.color_acento) setAccentColor(data.apariencia.color_acento);
@@ -284,6 +319,16 @@ export function ConfiguracionWeb() {
             const parsed = JSON.parse(savedSuc);
             if (Array.isArray(parsed) && parsed.length > 0) {
               setSucursales(parsed);
+            }
+          } catch (e) {}
+        }
+
+        const savedFooterSocials = localStorage.getItem('zairen_footer_socials');
+        if (savedFooterSocials && (!dbData || !dbData.redes_sociales)) {
+          try {
+            const parsed = JSON.parse(savedFooterSocials);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setFooterSocials(parsed);
             }
           } catch (e) {}
         }
@@ -382,6 +427,18 @@ export function ConfiguracionWeb() {
     toast.info('Canal eliminado');
   };
 
+  const toggleFooterSocial = (id: string) => {
+    setFooterSocials((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, activo: !s.activo } : s))
+    );
+  };
+
+  const updateFooterSocialUrl = (id: string, url: string) => {
+    setFooterSocials((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, url } : s))
+    );
+  };
+
   // Descartar cambios
   const handleDiscardChanges = () => {
     if (!initialSnapshotRef.current) return;
@@ -396,6 +453,7 @@ export function ConfiguracionWeb() {
       setBrandName(parsed.brandName);
       setBrandSlogan(parsed.brandSlogan);
       setChannels(parsed.channels);
+      if (parsed.footerSocials) setFooterSocials(parsed.footerSocials);
       setSucursales(parsed.sucursales);
       setAccentColor(parsed.accentColor);
       setBlurIntensity(parsed.blurIntensity);
@@ -435,14 +493,12 @@ export function ConfiguracionWeb() {
           whatsapp: { activo: Boolean(waChannel?.enabled), telefono: waNumber },
           canales: channels,
         },
-        redes_sociales: channels
-          .filter((c) => c.type !== 'whatsapp')
-          .map((c) => ({
-            id: c.id,
-            nombre: c.name,
-            url: c.value,
-            activo: c.enabled,
-          })),
+        redes_sociales: footerSocials.map((s) => ({
+          id: s.id,
+          nombre: s.nombre,
+          url: s.url,
+          activo: s.activo,
+        })),
         politicas_envio: {
           envio_gratis_minimo: freeShippingThreshold,
           costo_envio_express: shippingCost,
@@ -492,6 +548,7 @@ export function ConfiguracionWeb() {
         localStorage.setItem('zairen_shipping_threshold', String(freeShippingThreshold));
         localStorage.setItem('zairen_sucursales', JSON.stringify(sucursales));
         localStorage.setItem('zairen_contact_channels', JSON.stringify(channels));
+        localStorage.setItem('zairen_footer_socials', JSON.stringify(footerSocials));
         localStorage.setItem('zairen_accent_color', accentColor);
         localStorage.setItem('zairen_blur_intensity', blurIntensity);
         localStorage.setItem('zairen_custom_greeting', customGreeting);
@@ -619,12 +676,14 @@ export function ConfiguracionWeb() {
             </div>
 
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+              <label htmlFor="config-exchange-rate" className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
                 Tasa de Cambio Manual (1 USD = X BOB)
               </label>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs text-white font-bold">$ 1.00 USD =</span>
                 <input
+                  id="config-exchange-rate"
+                  name="exchangeRate"
                   type="number"
                   step="0.01"
                   min="1"
@@ -662,10 +721,12 @@ export function ConfiguracionWeb() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+              <label htmlFor="config-shipping-cost" className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
                 Costo Envío Express ({currency === 'BOB' ? 'Bs' : '$'})
               </label>
               <input
+                id="config-shipping-cost"
+                name="shippingCost"
                 type="number"
                 min="0"
                 value={shippingCost}
@@ -676,17 +737,22 @@ export function ConfiguracionWeb() {
 
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
               <div className="flex items-center justify-between mb-1">
-                <label className="font-mono text-xs text-[#ac8888] uppercase">
+                <label htmlFor="config-free-shipping-toggle" className="font-mono text-xs text-[#ac8888] uppercase cursor-pointer">
                   Monto Mínimo Envío Gratis
                 </label>
                 <input
+                  id="config-free-shipping-toggle"
+                  name="freeShippingEnabled"
                   type="checkbox"
                   checked={freeShippingEnabled}
                   onChange={(e) => setFreeShippingEnabled(e.target.checked)}
                   className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
                 />
               </div>
+              <label htmlFor="config-free-shipping-threshold" className="sr-only">Monto mínimo para envío gratis</label>
               <input
+                id="config-free-shipping-threshold"
+                name="freeShippingThreshold"
                 type="number"
                 min="0"
                 value={freeShippingThreshold}
@@ -710,10 +776,12 @@ export function ConfiguracionWeb() {
             </div>
 
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+              <label htmlFor="config-delivery-time" className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
                 Tiempo de Entrega Estimado
               </label>
               <input
+                id="config-delivery-time"
+                name="deliveryTime"
                 type="text"
                 value={deliveryTime}
                 onChange={(e) => setDeliveryTime(e.target.value)}
@@ -782,10 +850,12 @@ export function ConfiguracionWeb() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                  <label htmlFor="config-new-channel-type" className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
                     Tipo de Canal
                   </label>
                   <select
+                    id="config-new-channel-type"
+                    name="newChannelType"
                     value={newChannelType}
                     onChange={(e) => setNewChannelType(e.target.value as ChannelType)}
                     className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
@@ -798,10 +868,12 @@ export function ConfiguracionWeb() {
                   </select>
                 </div>
                 <div>
-                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                  <label htmlFor="config-new-channel-name" className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
                     Etiqueta Visible
                   </label>
                   <input
+                    id="config-new-channel-name"
+                    name="newChannelName"
                     type="text"
                     value={newChannelName}
                     onChange={(e) => setNewChannelName(e.target.value)}
@@ -810,10 +882,12 @@ export function ConfiguracionWeb() {
                   />
                 </div>
                 <div>
-                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                  <label htmlFor="config-new-channel-value" className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
                     Número, Usuario o Enlace
                   </label>
                   <input
+                    id="config-new-channel-value"
+                    name="newChannelValue"
                     type="text"
                     value={newChannelValue}
                     onChange={(e) => setNewChannelValue(e.target.value)}
@@ -894,11 +968,13 @@ export function ConfiguracionWeb() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <label htmlFor={`channel-toggle-${channel.id}`} className="flex items-center gap-2 cursor-pointer select-none">
                         <span className="font-mono text-[10px] text-[#ac8888] uppercase">
                           {channel.enabled ? 'ACTIVO' : 'INACTIVO'}
                         </span>
                         <input
+                          id={`channel-toggle-${channel.id}`}
+                          name={`channel-toggle-${channel.id}`}
                           type="checkbox"
                           checked={channel.enabled}
                           onChange={() => toggleChannel(channel.id)}
@@ -921,10 +997,12 @@ export function ConfiguracionWeb() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3">
                     <div>
-                      <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                      <label htmlFor={`channel-val-${channel.id}`} className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
                         {isWa ? 'Número de WhatsApp (con código de país sin +)' : 'Usuario o Enlace Completo'}
                       </label>
                       <input
+                        id={`channel-val-${channel.id}`}
+                        name={`channel-val-${channel.id}`}
                         type="text"
                         value={channel.value}
                         onChange={(e) => updateChannelValue(channel.id, e.target.value)}
@@ -942,10 +1020,12 @@ export function ConfiguracionWeb() {
 
                     {isWa && (
                       <div>
-                        <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                        <label htmlFor={`channel-template-${channel.id}`} className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
                           Plantilla Mensaje para Ficha de Producto
                         </label>
                         <textarea
+                          id={`channel-template-${channel.id}`}
+                          name={`channel-template-${channel.id}`}
                           rows={2}
                           value={channel.messageTemplate || ''}
                           onChange={(e) => updateChannelMessage(channel.id, e.target.value)}
@@ -1085,6 +1165,69 @@ export function ConfiguracionWeb() {
         </div>
 
         {/* ======================================================== */}
+        {/* SECCIÓN 3B: REDES SOCIALES Y COMUNIDAD DEL FOOTER        */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">share</span>
+              <div>
+                <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                  Redes Sociales & Señales de Drop del Footer
+                </h3>
+                <p className="text-[11px] text-[#ac8888] font-sans">
+                  Configuración independiente para los botones y enlaces del pie de página (TikTok, Instagram, WhatsApp, Facebook). Activar o desactivar aquí no afecta los canales de consulta de las prendas en el catálogo.
+                </p>
+              </div>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-emerald-400 font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
+              {footerSocials.filter((s) => s.activo).length} VISIBLES
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {footerSocials.map((social) => (
+              <div key={social.id} className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: social.activo ? '#10b981' : '#6b7280' }}></span>
+                    <span className="font-headline text-xs font-bold text-white uppercase">{social.nombre}</span>
+                  </div>
+                  <label htmlFor={`footer-social-toggle-${social.id}`} className="flex items-center gap-2 cursor-pointer select-none">
+                    <span className="font-mono text-[10px] text-[#ac8888] uppercase">
+                      {social.activo ? 'VISIBLE' : 'OCULTO'}
+                    </span>
+                    <input
+                      id={`footer-social-toggle-${social.id}`}
+                      name={`footer-social-toggle-${social.id}`}
+                      type="checkbox"
+                      checked={social.activo}
+                      onChange={() => toggleFooterSocial(social.id)}
+                      className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
+                    />
+                  </label>
+                </div>
+
+                <div>
+                  <label htmlFor={`footer-social-url-${social.id}`} className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                    {social.id === 'whatsapp' ? 'Enlace o Número de WhatsApp' : `URL Oficial de ${social.nombre}`}
+                  </label>
+                  <input
+                    id={`footer-social-url-${social.id}`}
+                    name={`footer-social-url-${social.id}`}
+                    type="text"
+                    value={social.url}
+                    onChange={(e) => updateFooterSocialUrl(social.id, e.target.value)}
+                    placeholder={social.id === 'whatsapp' ? 'https://wa.me/591... o 591...' : `https://${social.id}.com/...`}
+                    className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ======================================================== */}
         {/* SECCIÓN 4: GESTIÓN DE SUCURSALES / NODOS                  */}
         {/* ======================================================== */}
         <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
@@ -1166,7 +1309,7 @@ export function ConfiguracionWeb() {
 
             {/* Control 1-Click: Color de Acento Carmesí */}
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-3">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
+              <label htmlFor="config-accent-color" className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
                 Color de Acento Zairen Lab
               </label>
               <p className="text-[11px] text-[#8F8F8C] font-mono">
@@ -1196,6 +1339,8 @@ export function ConfiguracionWeb() {
                 ))}
               </div>
               <input
+                id="config-accent-color"
+                name="accentColor"
                 type="text"
                 value={accentColor}
                 onChange={(e) => setAccentColor(e.target.value)}
@@ -1229,7 +1374,7 @@ export function ConfiguracionWeb() {
 
               {bannerEnabled && (
                 <div className="space-y-2 pt-2 border-t border-white/[0.04]">
-                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
+                  <label htmlFor="config-banner-text" className="font-mono text-[10px] text-[#ac8888] uppercase block">
                     Mensajes Rápidos (1-Clic)
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -1254,6 +1399,8 @@ export function ConfiguracionWeb() {
                     ))}
                   </div>
                   <input
+                    id="config-banner-text"
+                    name="bannerText"
                     type="text"
                     value={bannerText}
                     onChange={(e) => setBannerText(e.target.value)}
@@ -1265,10 +1412,12 @@ export function ConfiguracionWeb() {
 
             {/* Horario de Atención Oficial */}
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-2 md:col-span-2">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
+              <label htmlFor="config-opening-hours" className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
                 Horario de Atención Oficial
               </label>
               <input
+                id="config-opening-hours"
+                name="openingHours"
                 type="text"
                 value={openingHours}
                 onChange={(e) => setOpeningHours(e.target.value)}
