@@ -1,5 +1,5 @@
 -- ============================================================
--- ⛩️ ZAIREN LAB // SCRIPT MAESTRO INTEGRAL (ALL-IN-ONE SETUP)
+-- ZAIREN LAB // SCRIPT MAESTRO INTEGRAL (ALL-IN-ONE SETUP)
 -- ============================================================
 -- Copia y pega TODO este archivo en el "SQL Editor" de Supabase
 -- y presiona "RUN" para desplegar la base de datos completa.

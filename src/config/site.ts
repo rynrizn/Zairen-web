@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * ⛩️ CONFIGURACIÓN CENTRAL DE LA MARCA // ZAIREN LAB
+ * CONFIGURACIÓN CENTRAL DE LA MARCA // ZAIREN LAB
  * =====================================================================
  * Este es el archivo donde configuras los datos de tu marca,
  * número de WhatsApp, políticas de envío y redes sociales dinámicas.
