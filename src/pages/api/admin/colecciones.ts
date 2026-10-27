@@ -1,3 +1,14 @@
+
+function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+}
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
@@ -215,6 +226,190 @@ export const DELETE: APIRoute = async ({ request }) => {
   } catch (err: any) {
     return new Response(
       JSON.stringify({ success: false, error: err?.message || 'Error del servidor' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+};
+
+export const POST: APIRoute = async ({ request }) => {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    const token = authHeader?.replace(/^Bearer\s+/i, '').trim();
+    const dbClient = token ? getServerSupabase(token) : getServiceSupabase();
+
+    const body = await request.json().catch(() => ({}));
+    const { nombre, slug, descripcion, orden = 0, activa = true, imagen_url = null } = body;
+
+    if (!nombre || typeof nombre !== 'string' || nombre.trim().length < 2) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'El nombre de la colección debe tener al menos 2 caracteres.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const cleanNombre = nombre.trim();
+    const cleanSlug = slug && typeof slug === 'string' && slug.trim().length > 0
+      ? slugify(slug)
+      : slugify(cleanNombre);
+
+    // Verificar unicidad de nombre o slug
+    const { data: existing } = await dbClient
+      .from('coleccion')
+      .select('id, nombre, slug')
+      .or(`nombre.eq.${cleanNombre},slug.eq.${cleanSlug}`)
+      .maybeSingle();
+
+    if (existing) {
+      const field = existing.nombre.toLowerCase() === cleanNombre.toLowerCase() ? 'nombre' : 'slug';
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Ya existe una colección con ese ${field} ("${field === 'nombre' ? cleanNombre : cleanSlug}").`,
+        }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: newCol, error: insertErr } = await dbClient
+      .from('coleccion')
+      .insert({
+        nombre: cleanNombre,
+        slug: cleanSlug,
+        descripcion: descripcion?.trim() || null,
+        orden: Number(orden) || 0,
+        activa: Boolean(activa),
+        imagen_url: imagen_url || null,
+      })
+      .select()
+      .single();
+
+    if (insertErr || !newCol) {
+      return new Response(
+        JSON.stringify({ success: false, error: insertErr?.message || 'Error al crear la colección' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, coleccion: newCol }),
+      { status: 201, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ success: false, error: err?.message || 'Error interno del servidor' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+};
+
+export const PUT: APIRoute = async ({ request }) => {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    const token = authHeader?.replace(/^Bearer\s+/i, '').trim();
+    const dbClient = token ? getServerSupabase(token) : getServiceSupabase();
+
+    const body = await request.json().catch(() => ({}));
+    const { id, nombre, slug, descripcion, orden, activa, imagen_url } = body;
+
+    if (!id || typeof id !== 'string') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'ID de colección no especificado' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verificar si existe la colección
+    const { data: current, error: curErr } = await dbClient
+      .from('coleccion')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (curErr || !current) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Colección no encontrada' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const updates: Record<string, any> = {};
+
+    if (nombre !== undefined) {
+      if (typeof nombre !== 'string' || nombre.trim().length < 2) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'El nombre debe tener al menos 2 caracteres' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      updates.nombre = nombre.trim();
+    }
+
+    if (slug !== undefined && typeof slug === 'string' && slug.trim().length > 0) {
+      updates.slug = slugify(slug);
+    } else if (updates.nombre && updates.nombre !== current.nombre) {
+      updates.slug = slugify(updates.nombre);
+    }
+
+    if (descripcion !== undefined) {
+      updates.descripcion = descripcion?.trim() || null;
+    }
+
+    if (orden !== undefined) {
+      updates.orden = Number(orden) || 0;
+    }
+
+    if (activa !== undefined) {
+      updates.activa = Boolean(activa);
+    }
+
+    if (imagen_url !== undefined) {
+      updates.imagen_url = imagen_url || null;
+    }
+
+    // Si se actualizó slug o nombre, chequear colisiones con otras colecciones
+    if (updates.nombre || updates.slug) {
+      const checkSlug = updates.slug || current.slug;
+      const checkNombre = updates.nombre || current.nombre;
+
+      const { data: collision } = await dbClient
+        .from('coleccion')
+        .select('id, nombre, slug')
+        .neq('id', id)
+        .or(`nombre.eq.${checkNombre},slug.eq.${checkSlug}`)
+        .maybeSingle();
+
+      if (collision) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Ya existe otra colección con ese nombre o slug',
+          }),
+          { status: 409, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    const { data: updatedCol, error: updateErr } = await dbClient
+      .from('coleccion')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateErr || !updatedCol) {
+      return new Response(
+        JSON.stringify({ success: false, error: updateErr?.message || 'Error al actualizar colección' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, coleccion: updatedCol }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ success: false, error: err?.message || 'Error interno del servidor' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
