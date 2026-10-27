@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
 import { clearStoreConfigCache } from '../../../lib/configuracion';
@@ -6,9 +6,17 @@ import {
   siteConfig,
   getCurrencyConfig,
   setCurrencyConfig,
-  type CurrencyConfig,
-  type SocialNetwork,
 } from '../../../config/site';
+import {
+  DEFAULT_CONTACT_CHANNELS,
+  type ContactChannel,
+  type ChannelType,
+  getActiveChannels,
+  getFirstActiveChannel,
+  buildChannelActionUrl,
+  validatePhone,
+  validateSocialHandleOrUrl,
+} from '../../../lib/contactChannels';
 
 export interface Sucursal {
   id: string;
@@ -29,6 +37,10 @@ const defaultSucursales: Sucursal[] = [
 ];
 
 export function ConfiguracionWeb() {
+  // Estado sucio para la barra flotante y beforeunload
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+  const initialSnapshotRef = useRef<string>('');
+
   // 1. Moneda & Tasa de Cambio
   const [currency, setCurrency] = useState<'BOB' | 'USD'>('BOB');
   const [exchangeRate, setExchangeRate] = useState<number>(6.96);
@@ -41,60 +53,26 @@ export function ConfiguracionWeb() {
   );
   const [deliveryTime, setDeliveryTime] = useState<string>(siteConfig.shipping.deliveryTimeExpress);
 
-  // 3. Marca & WhatsApp
+  // 3. Marca
   const [brandName, setBrandName] = useState(siteConfig.name);
   const [brandSlogan, setBrandSlogan] = useState(siteConfig.slogan);
-  const [whatsappNumber, setWhatsappNumber] = useState(siteConfig.whatsapp.number);
-  const [whatsappDisplay, setWhatsappDisplay] = useState(siteConfig.whatsapp.displayNumber);
-  const [whatsappTemplate, setWhatsappTemplate] = useState(siteConfig.whatsapp.messageTemplate);
 
-  // 4. Sucursales / Nodos
+  // 4. Canales de Contacto Unificados & Dinámicos
+  const [channels, setChannels] = useState<ContactChannel[]>(DEFAULT_CONTACT_CHANNELS);
+  const [previewTab, setPreviewTab] = useState<'card' | 'detail'>('card');
+  const [newChannelType, setNewChannelType] = useState<ChannelType>('instagram');
+  const [newChannelName, setNewChannelName] = useState<string>('');
+  const [newChannelValue, setNewChannelValue] = useState<string>('');
+  const [showAddChannel, setShowAddChannel] = useState<boolean>(false);
+
+  // 5. Sucursales / Nodos
   const [sucursales, setSucursales] = useState<Sucursal[]>(defaultSucursales);
   const [showAddSucursal, setShowAddSucursal] = useState<boolean>(false);
   const [newSucNombre, setNewSucNombre] = useState<string>('');
   const [newSucCiudad, setNewSucCiudad] = useState<string>('');
   const [newSucDireccion, setNewSucDireccion] = useState<string>('');
 
-  // 5. Redes Sociales Dinámicas
-  const [socials, setSocials] = useState<SocialNetwork[]>([
-    {
-      id: 'tiktok',
-      name: 'TikTok',
-      url: 'https://tiktok.com/@zairenlab',
-      enabled: true,
-      icon: 'Video',
-    },
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      url: 'https://instagram.com/zairenlab',
-      enabled: true,
-      icon: 'Instagram',
-    },
-    {
-      id: 'whatsapp',
-      name: 'WhatsApp',
-      url: `https://wa.me/${siteConfig.whatsapp.number}`,
-      enabled: true,
-      icon: 'MessageSquare',
-    },
-    {
-      id: 'twitter',
-      name: 'X (Twitter)',
-      url: 'https://x.com/zairenlab',
-      enabled: true,
-      icon: 'Twitter',
-    },
-    {
-      id: 'facebook',
-      name: 'Facebook',
-      url: '',
-      enabled: false,
-      icon: 'Facebook',
-    },
-  ]);
-
-  // 6. Apariencia Zen & Personalización (Estilo CatalogoV0)
+  // 6. Apariencia Zen & Personalización
   const [accentColor, setAccentColor] = useState<string>('#dc143c');
   const [blurIntensity, setBlurIntensity] = useState<string>('16px');
   const [customGreeting, setCustomGreeting] = useState<string>(
@@ -109,41 +87,111 @@ export function ConfiguracionWeb() {
   const [maintenanceMessage, setMaintenanceMessage] = useState<string>('Tienda en actualización de catálogo. Volvemos en breve.');
   const [openingHours, setOpeningHours] = useState<string>('Lun a Sáb: 09:00 - 20:00 (BOT)');
 
+  // Helper para crear snapshot de estado y comparar suciedad
+  const getSnapshot = () =>
+    JSON.stringify({
+      currency,
+      exchangeRate,
+      shippingCost,
+      freeShippingEnabled,
+      freeShippingThreshold,
+      deliveryTime,
+      brandName,
+      brandSlogan,
+      channels,
+      sucursales,
+      accentColor,
+      blurIntensity,
+      customGreeting,
+      bannerEnabled,
+      bannerText,
+      bannerLink,
+      maintenanceMode,
+      maintenanceMessage,
+      openingHours,
+    });
+
+  // Marcar sucio cuando cambie cualquier valor tras la carga inicial
+  useEffect(() => {
+    if (!initialSnapshotRef.current) return;
+    const current = getSnapshot();
+    setIsDirty(current !== initialSnapshotRef.current);
+  }, [
+    currency,
+    exchangeRate,
+    shippingCost,
+    freeShippingEnabled,
+    freeShippingThreshold,
+    deliveryTime,
+    brandName,
+    brandSlogan,
+    channels,
+    sucursales,
+    accentColor,
+    blurIntensity,
+    customGreeting,
+    bannerEnabled,
+    bannerText,
+    bannerLink,
+    maintenanceMode,
+    maintenanceMessage,
+    openingHours,
+  ]);
+
+  // Alerta de beforeunload al intentar salir con cambios sin guardar
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
   // Cargar configuraciones guardadas al iniciar desde Supabase (y localStorage de fallback)
   useEffect(() => {
     let isMounted = true;
 
     async function loadConfig() {
+      let dbData: any = null;
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('configuracion')
           .select('*')
           .eq('id', 1)
           .maybeSingle();
 
+        dbData = data;
         if (data && isMounted) {
-          // Marca & WhatsApp
+          // Marca
           if (data.marca) setBrandName(data.marca);
           if (data.slogan) setBrandSlogan(data.slogan);
-          if (data.whatsapp_numero) setWhatsappNumber(data.whatsapp_numero);
-          if (data.whatsapp_mensaje_template) setWhatsappTemplate(data.whatsapp_mensaje_template);
 
-          // Canales de contacto / display
-          if (data.canales_contacto?.whatsapp?.telefono) {
-            setWhatsappDisplay(data.canales_contacto.whatsapp.telefono);
-          }
-
-          // Redes sociales
-          if (Array.isArray(data.redes_sociales) && data.redes_sociales.length > 0) {
-            setSocials(
-              data.redes_sociales.map((r: any) => ({
-                id: r.id,
-                name: r.nombre || r.id,
-                url: r.url || '',
-                enabled: Boolean(r.activo),
-                icon: r.id === 'tiktok' ? 'Video' : r.id === 'instagram' ? 'Instagram' : r.id === 'twitter' ? 'Twitter' : r.id === 'facebook' ? 'Facebook' : 'MessageSquare',
-              }))
-            );
+          // Canales ordenados prioritarios
+          if (Array.isArray(data.canales_ordenados) && data.canales_ordenados.length > 0) {
+            setChannels(data.canales_ordenados);
+          } else {
+            // Reconstruir canales desde campos legados si existen
+            const legacyChannels: ContactChannel[] = [...DEFAULT_CONTACT_CHANNELS];
+            if (data.whatsapp_numero) {
+              const wa = legacyChannels.find((c) => c.id === 'whatsapp');
+              if (wa) {
+                wa.value = data.whatsapp_numero;
+                if (data.whatsapp_mensaje_template) wa.messageTemplate = data.whatsapp_mensaje_template;
+              }
+            }
+            if (Array.isArray(data.redes_sociales)) {
+              data.redes_sociales.forEach((r: any) => {
+                const match = legacyChannels.find((c) => c.id === r.id);
+                if (match) {
+                  match.value = r.url || match.value;
+                  match.enabled = Boolean(r.activo);
+                }
+              });
+            }
+            setChannels(legacyChannels);
           }
 
           // Políticas de envío
@@ -204,7 +252,23 @@ export function ConfiguracionWeb() {
             }
           } catch (e) {}
         }
+
+        const savedChannels = localStorage.getItem('zairen_contact_channels');
+        if (savedChannels && (!dbData || !dbData.canales_ordenados)) {
+          try {
+            const parsed = JSON.parse(savedChannels);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setChannels(parsed);
+            }
+          } catch (e) {}
+        }
       }
+
+      // Registrar instantánea inicial
+      setTimeout(() => {
+        initialSnapshotRef.current = getSnapshot();
+        setIsDirty(false);
+      }, 100);
     }
 
     loadConfig();
@@ -214,89 +278,137 @@ export function ConfiguracionWeb() {
     };
   }, []);
 
-  const handleToggleSocial = (id: string) => {
-    setSocials((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s))
+  // Handlers para reordenar y modificar canales de contacto
+  const moveChannel = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= channels.length) return;
+
+    const newChannels = [...channels];
+    const temp = newChannels[index];
+    newChannels[index] = newChannels[targetIndex];
+    newChannels[targetIndex] = temp;
+
+    // Actualizar propiedad order
+    const updated = newChannels.map((c, i) => ({ ...c, order: i }));
+    setChannels(updated);
+  };
+
+  const toggleChannel = (id: string) => {
+    setChannels((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c))
     );
   };
 
-  const handleUpdateSocialUrl = (id: string, url: string) => {
-    setSocials((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, url } : s))
+  const updateChannelValue = (id: string, value: string) => {
+    setChannels((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, value } : c))
     );
   };
 
-  const handleAddSucursal = (e: React.FormEvent) => {
+  const updateChannelMessage = (id: string, messageTemplate: string) => {
+    setChannels((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, messageTemplate } : c))
+    );
+  };
+
+  const handleAddCustomChannel = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSucNombre.trim() || !newSucCiudad.trim()) {
-      toast.error('Nombre y ciudad de la sucursal son requeridos');
+    if (!newChannelName.trim() || !newChannelValue.trim()) {
+      toast.error('Completa el nombre y valor del canal');
       return;
     }
-    const nueva: Sucursal = {
-      id: `suc-${Date.now()}`,
-      nombre: newSucNombre.trim(),
-      ciudad: newSucCiudad.trim(),
-      direccion: newSucDireccion.trim() || 'Dirección por coordinar',
-      activa: true,
+
+    const newChan: ContactChannel = {
+      id: `custom-${Date.now()}`,
+      name: newChannelName.trim(),
+      type: newChannelType,
+      value: newChannelValue.trim(),
+      enabled: true,
+      order: channels.length,
+      messageTemplate:
+        newChannelType === 'whatsapp'
+          ? 'Hola Zairen Lab, me interesa consultar sobre *{prenda}* ({moneda} {precio}):\n{url}'
+          : undefined,
     };
-    const updated = [...sucursales, nueva];
-    setSucursales(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('zairen_sucursales', JSON.stringify(updated));
-    }
-    setNewSucNombre('');
-    setNewSucCiudad('');
-    setNewSucDireccion('');
-    setShowAddSucursal(false);
-    toast.success(`Sucursal ${nueva.nombre} añadida con éxito`);
+
+    setChannels((prev) => [...prev, newChan]);
+    setNewChannelName('');
+    setNewChannelValue('');
+    setShowAddChannel(false);
+    toast.success('Canal de contacto añadido');
   };
 
-  const handleToggleSucursal = (id: string) => {
-    const updated = sucursales.map((s) =>
-      s.id === id ? { ...s, activa: !s.activa } : s
+  const handleRemoveChannel = (id: string) => {
+    setChannels((prev) =>
+      prev
+        .filter((c) => c.id !== id)
+        .map((c, idx) => ({ ...c, order: idx }))
     );
-    setSucursales(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('zairen_sucursales', JSON.stringify(updated));
+    toast.info('Canal eliminado');
+  };
+
+  // Descartar cambios
+  const handleDiscardChanges = () => {
+    if (!initialSnapshotRef.current) return;
+    try {
+      const parsed = JSON.parse(initialSnapshotRef.current);
+      setCurrency(parsed.currency);
+      setExchangeRate(parsed.exchangeRate);
+      setShippingCost(parsed.shippingCost);
+      setFreeShippingEnabled(parsed.freeShippingEnabled);
+      setFreeShippingThreshold(parsed.freeShippingThreshold);
+      setDeliveryTime(parsed.deliveryTime);
+      setBrandName(parsed.brandName);
+      setBrandSlogan(parsed.brandSlogan);
+      setChannels(parsed.channels);
+      setSucursales(parsed.sucursales);
+      setAccentColor(parsed.accentColor);
+      setBlurIntensity(parsed.blurIntensity);
+      setCustomGreeting(parsed.customGreeting);
+      setBannerEnabled(parsed.bannerEnabled);
+      setBannerText(parsed.bannerText);
+      setBannerLink(parsed.bannerLink);
+      setMaintenanceMode(parsed.maintenanceMode);
+      setMaintenanceMessage(parsed.maintenanceMessage);
+      setOpeningHours(parsed.openingHours);
+      setIsDirty(false);
+      toast.info('Cambios descartados');
+    } catch {
+      toast.error('No se pudo restaurar la configuración');
     }
   };
 
-  const handleDeleteSucursal = (id: string) => {
-    if (sucursales.length <= 1) {
-      toast.error('Debe mantenerse al menos una sucursal registrada');
-      return;
-    }
-    const updated = sucursales.filter((s) => s.id !== id);
-    setSucursales(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('zairen_sucursales', JSON.stringify(updated));
-    }
-    toast.info('Sucursal eliminada');
-  };
-
+  // Guardar configuración completa y revalidar caché
   const handleSaveAll = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const loadingToast = toast.loading('Guardando configuración en la base de datos...');
+    const loadingToast = toast.loading('Guardando configuración y revalidando catálogo...');
 
     try {
-      // Formatear payload para la tabla public.configuracion en Supabase
+      // 1. Extraer datos del canal prioritario WhatsApp para retrocompatibilidad
+      const waChannel = channels.find((c) => c.type === 'whatsapp' && c.enabled) || channels.find((c) => c.type === 'whatsapp');
+      const waNumber = waChannel ? waChannel.value.replace(/\D/g, '') : siteConfig.whatsapp.number;
+      const waTemplate = waChannel?.messageTemplate || siteConfig.whatsapp.messageTemplate;
+
       const payload = {
         marca: brandName,
         slogan: brandSlogan,
-        whatsapp_numero: whatsappNumber,
-        whatsapp_mensaje_template: whatsappTemplate,
+        whatsapp_numero: waNumber,
+        whatsapp_mensaje_template: waTemplate,
         moneda_codigo: currency,
         moneda_simbolo: currency === 'BOB' ? 'Bs' : '$',
+        canales_ordenados: channels,
         canales_contacto: {
-          whatsapp: { activo: true, telefono: whatsappDisplay },
-          instagram_dm: { activo: true, usuario: '@zairenlab' },
+          whatsapp: { activo: Boolean(waChannel?.enabled), telefono: waNumber },
+          canales: channels,
         },
-        redes_sociales: socials.map((s) => ({
-          id: s.id,
-          nombre: s.name,
-          url: s.url,
-          activo: s.enabled,
-        })),
+        redes_sociales: channels
+          .filter((c) => c.type !== 'whatsapp')
+          .map((c) => ({
+            id: c.id,
+            nombre: c.name,
+            url: c.value,
+            activo: c.enabled,
+          })),
         politicas_envio: {
           envio_gratis_minimo: freeShippingThreshold,
           costo_envio_express: shippingCost,
@@ -333,20 +445,20 @@ export function ConfiguracionWeb() {
         throw error;
       }
 
-      // Limpiar cache de memoria
+      // 2. Limpiar cache de memoria
       clearStoreConfigCache();
 
-      // Guardar también en localStorage para reactividad client-side inmediata
+      // 3. Guardar en localStorage para reactividad client-side inmediata
       if (typeof window !== 'undefined') {
         setCurrencyConfig({ currency, rate: exchangeRate > 0 ? exchangeRate : 6.96 });
         localStorage.setItem('zairen_cart_promo_enabled', String(freeShippingEnabled));
         localStorage.setItem('zairen_shipping_cost', String(shippingCost));
         localStorage.setItem('zairen_shipping_threshold', String(freeShippingThreshold));
         localStorage.setItem('zairen_sucursales', JSON.stringify(sucursales));
+        localStorage.setItem('zairen_contact_channels', JSON.stringify(channels));
         localStorage.setItem('zairen_accent_color', accentColor);
         localStorage.setItem('zairen_blur_intensity', blurIntensity);
         localStorage.setItem('zairen_custom_greeting', customGreeting);
-        localStorage.setItem('zairen_socials', JSON.stringify(socials));
         localStorage.setItem('zairen_banner_enabled', String(bannerEnabled));
         localStorage.setItem('zairen_banner_text', bannerText);
         localStorage.setItem('zairen_banner_link', bannerLink);
@@ -358,9 +470,19 @@ export function ConfiguracionWeb() {
         window.dispatchEvent(new Event('zairen-config-updated'));
       }
 
+      // 4. Disparar revalidación segura del catálogo Edge (Fase 3)
+      try {
+        await fetch('/api/admin/revalidar-catalogo', { method: 'POST' });
+      } catch (err) {
+        console.warn('Revalidación edge no disponible:', err);
+      }
+
+      initialSnapshotRef.current = getSnapshot();
+      setIsDirty(false);
+
       toast.dismiss(loadingToast);
-      toast.success('Configuración guardada en la base de datos', {
-        description: `Moneda: ${currency} // Redes activas: ${socials.filter(s => s.enabled).length} // Envíos guardados`,
+      toast.success('Configuración guardada y catálogo actualizado', {
+        description: `Canales activos: ${getActiveChannels(channels).length} • Revalidación Edge completada`,
       });
     } catch (err: any) {
       toast.dismiss(loadingToast);
@@ -368,17 +490,26 @@ export function ConfiguracionWeb() {
     }
   };
 
-  const activeSocialsCount = socials.filter((s) => s.enabled && s.url.trim() !== '').length;
+  const activeChannels = getActiveChannels(channels);
+  const priorityChannel = getFirstActiveChannel(channels);
+
+  // Mock product info para previsualización
+  const mockProduct = {
+    nombre: 'POLERA OVERSIZED BOX-01 SUMI',
+    precio: currency === 'USD' ? 26 : 180,
+    moneda: currency === 'USD' ? '$' : 'Bs',
+    url: 'https://zairenlab.pages.dev/producto/box-01-sumi',
+  };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 relative pb-28">
       {/* 1. Header */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 bg-[#dc143c] animate-pulse"></span>
             <span className="font-mono text-xs text-[#dc143c] uppercase tracking-wider font-bold">
-              CMS // AJUSTES DE MARCA, MONEDA Y ENVÍOS
+              CMS // AJUSTES DE MARCA, CANALES Y ENVÍOS
             </span>
           </div>
           <h1 className="font-headline text-3xl md:text-5xl font-bold text-[#e5e2e1] uppercase tracking-tight">
@@ -416,11 +547,10 @@ export function ConfiguracionWeb() {
           </div>
 
           <p className="text-xs text-[#ac8888] font-sans">
-            Elige en qué moneda deseas mostrar todos los productos del catálogo y checkout. Puedes alternar entre Bolivianos (Bs) y Dólares (USD) definiendo manualmente el tipo de cambio oficial.
+            Elige en qué moneda deseas mostrar todos los productos del catálogo y checkout.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            {/* Selector de Moneda */}
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
               <label className="font-mono text-xs text-[#ac8888] uppercase block mb-2">
                 Moneda Activa en Pantalla
@@ -451,7 +581,6 @@ export function ConfiguracionWeb() {
               </div>
             </div>
 
-            {/* Tasa de Cambio Manual */}
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
               <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
                 Tasa de Cambio Manual (1 USD = X BOB)
@@ -468,11 +597,6 @@ export function ConfiguracionWeb() {
                 />
                 <span className="font-mono text-xs text-[#ac8888]">BOB</span>
               </div>
-              <span className="text-[10px] font-mono text-[#ac8888] block mt-1.5">
-                {currency === 'USD'
-                  ? `Prenda de Bs 180 se mostrará como $ ${(180 / (exchangeRate || 6.96)).toFixed(2)} USD`
-                  : 'Prenda de Bs 180 se mostrará como Bs 180'}
-              </span>
             </div>
           </div>
         </div>
@@ -499,41 +623,43 @@ export function ConfiguracionWeb() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
               <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Precio de Envío Estándar (Bs)
+                Costo Envío Express ({currency === 'BOB' ? 'Bs' : '$'})
               </label>
               <input
                 type="number"
+                min="0"
                 value={shippingCost}
-                onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
-                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-sm rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                onChange={(e) => setShippingCost(Number(e.target.value) || 0)}
+                className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
               />
-              <span className="text-[10px] font-mono text-[#ac8888] block mt-1">
-                Tarifa cobrada en la bolsa de compras.
-              </span>
             </div>
 
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Monto Mínimo para Envío Gratis (Bs)
-              </label>
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-mono text-xs text-[#ac8888] uppercase">
+                  Monto Mínimo Envío Gratis
+                </label>
+                <input
+                  type="checkbox"
+                  checked={freeShippingEnabled}
+                  onChange={(e) => setFreeShippingEnabled(e.target.checked)}
+                  className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
+                />
+              </div>
               <input
                 type="number"
+                min="0"
                 value={freeShippingThreshold}
-                onChange={(e) => setFreeShippingThreshold(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setFreeShippingThreshold(Number(e.target.value) || 0)}
                 disabled={!freeShippingEnabled}
-                className={`w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-sm rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none ${
-                  !freeShippingEnabled ? 'opacity-40 cursor-not-allowed' : ''
-                }`}
+                className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none disabled:opacity-40"
               />
-              <span className="text-[10px] font-mono text-[#ac8888] block mt-1">
-                Sólo aplicable si activas la opción abajo.
-              </span>
             </div>
 
-            <div>
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
               <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
                 Tiempo de Entrega Estimado
               </label>
@@ -541,521 +667,463 @@ export function ConfiguracionWeb() {
                 type="text"
                 value={deliveryTime}
                 onChange={(e) => setDeliveryTime(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                placeholder="24 a 48 hrs"
+                className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
               />
-              <span className="text-[10px] font-mono text-[#ac8888] block mt-1">
-                Ej: Coordinación directa por WhatsApp.
-              </span>
             </div>
-          </div>
-
-          {/* Toggle de Envío Gratis */}
-          <div className="pt-3 border-t border-white/[0.06]">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={freeShippingEnabled}
-                onChange={(e) => setFreeShippingEnabled(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded-none accent-[#dc143c] cursor-pointer"
-              />
-              <div>
-                <span className="font-mono text-xs uppercase font-bold text-white block">
-                  Activar Promoción de Envío Gratis en Carrito
-                </span>
-                <span className="text-[11px] font-body text-[#ac8888] block mt-0.5">
-                  (Si está desactivada, el carrito NUNCA mostrará la barra de envío gratis ni prometerá envíos gratis).
-                </span>
-              </div>
-            </label>
           </div>
         </div>
 
         {/* ======================================================== */}
-        {/* SECCIÓN 3: GESTIÓN DE SUCURSALES / NODOS                  */}
+        {/* SECCIÓN 3: CANALES DE CONTACTO DINÁMICOS & PRIORIDAD       */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#dc143c] text-[20px]">contacts</span>
+                <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                  Canales de Contacto Oficial & Prioridad de Atención
+                </h3>
+              </div>
+              <p className="text-xs text-[#ac8888] font-sans mt-0.5">
+                Configura los canales oficiales. El primer canal activo se muestra en la tarjeta del catálogo; todos los activos aparecen en la ficha de producto.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-[#1c1b1b] text-emerald-400 font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
+                {activeChannels.length} ACTIVOS
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAddChannel(!showAddChannel)}
+                className="px-3 py-1 bg-[#201f1f] hover:bg-[#2a2a2a] text-white font-mono text-[11px] uppercase tracking-wider flex items-center gap-1 border border-white/[0.08] cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[14px]">add</span>
+                <span>Nuevo Canal</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Formulario para añadir canal nuevo */}
+          {showAddChannel && (
+            <div className="p-4 bg-[#1c1b1b] border border-[#dc143c]/30 space-y-3">
+              <div className="font-headline text-xs font-bold text-white uppercase tracking-wider flex items-center justify-between">
+                <span>Registrar Nuevo Canal de Contacto</span>
+                <button
+                  type="button"
+                  onClick={() => setShowAddChannel(false)}
+                  className="text-[#ac8888] hover:text-white font-mono text-xs"
+                >
+                  ✕ Cerrar
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                    Tipo de Canal
+                  </label>
+                  <select
+                    value={newChannelType}
+                    onChange={(e) => setNewChannelType(e.target.value as ChannelType)}
+                    className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
+                  >
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="custom">Canal Web / Personalizado</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                    Etiqueta Visible
+                  </label>
+                  <input
+                    type="text"
+                    value={newChannelName}
+                    onChange={(e) => setNewChannelName(e.target.value)}
+                    placeholder="Ej: Telegram, Soporte WhatsApp"
+                    className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
+                  />
+                </div>
+                <div>
+                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                    Número, Usuario o Enlace
+                  </label>
+                  <input
+                    type="text"
+                    value={newChannelValue}
+                    onChange={(e) => setNewChannelValue(e.target.value)}
+                    placeholder="591... o @usuario o https://"
+                    className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={handleAddCustomChannel}
+                  className="px-4 py-1.5 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold"
+                >
+                  Guardar Canal
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de canales ordenables */}
+          <div className="space-y-3">
+            {channels.map((channel, idx) => {
+              // Validaciones en vivo
+              const isWa = channel.type === 'whatsapp';
+              const phoneVal = isWa ? validatePhone(channel.value) : { valid: true, error: undefined };
+              const socialVal = !isWa ? validateSocialHandleOrUrl(channel.type, channel.value) : { valid: true, error: undefined };
+              const hasError = !phoneVal.valid || !socialVal.valid;
+
+              return (
+                <div
+                  key={channel.id}
+                  className={`p-4 border transition-all rounded-none ${
+                    channel.enabled
+                      ? idx === 0
+                        ? 'bg-[#1c1b1b] border-[#dc143c] shadow-[0_0_15px_rgba(220,20,60,0.15)]'
+                        : 'bg-[#1c1b1b] border-white/[0.08]'
+                      : 'bg-[#18181a] border-white/[0.03] opacity-50'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-white/[0.04]">
+                    <div className="flex items-center gap-2">
+                      {/* Controles de Orden / Prioridad */}
+                      <div className="flex items-center gap-1 bg-[#141416] p-0.5 border border-white/[0.06]">
+                        <button
+                          type="button"
+                          onClick={() => moveChannel(idx, 'up')}
+                          disabled={idx === 0}
+                          title="Subir prioridad"
+                          className="w-6 h-6 flex items-center justify-center text-[#ac8888] hover:text-white disabled:opacity-20 cursor-pointer"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveChannel(idx, 'down')}
+                          disabled={idx === channels.length - 1}
+                          title="Bajar prioridad"
+                          className="w-6 h-6 flex items-center justify-center text-[#ac8888] hover:text-white disabled:opacity-20 cursor-pointer"
+                        >
+                          ▼
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-white px-2 py-0.5 bg-[#201f1f]">
+                          #{idx + 1}
+                        </span>
+                        <span className="font-headline text-xs font-bold text-[#FAF9F6] uppercase">
+                          {channel.name}
+                        </span>
+                        {idx === 0 && channel.enabled && (
+                          <span className="px-2 py-0.5 bg-[#dc143c]/15 text-[#dc143c] border border-[#dc143c]/40 font-mono text-[9px] uppercase font-bold tracking-wider">
+                            PRIORITARIO EN TARJETA
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <span className="font-mono text-[10px] text-[#ac8888] uppercase">
+                          {channel.enabled ? 'ACTIVO' : 'INACTIVO'}
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={channel.enabled}
+                          onChange={() => toggleChannel(channel.id)}
+                          className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
+                        />
+                      </label>
+
+                      {channel.id.startsWith('custom-') && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveChannel(channel.id)}
+                          className="text-[#ac8888] hover:text-red-400 font-mono text-xs"
+                          title="Eliminar canal"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3">
+                    <div>
+                      <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                        {isWa ? 'Número de WhatsApp (con código de país sin +)' : 'Usuario o Enlace Completo'}
+                      </label>
+                      <input
+                        type="text"
+                        value={channel.value}
+                        onChange={(e) => updateChannelValue(channel.id, e.target.value)}
+                        placeholder={isWa ? '59170000000' : 'https://... o @usuario'}
+                        className={`w-full px-3 py-1.5 bg-[#141416] font-mono text-xs text-white rounded-none border focus:outline-none ${
+                          hasError ? 'border-red-500' : 'border-[#201f1f] focus:border-[#dc143c]'
+                        }`}
+                      />
+                      {hasError && (
+                        <span className="font-mono text-[10px] text-red-400 block mt-1">
+                          ⚠️ {phoneVal.error || socialVal.error}
+                        </span>
+                      )}
+                    </div>
+
+                    {isWa && (
+                      <div>
+                        <label className="font-mono text-[10px] text-[#ac8888] uppercase block mb-1">
+                          Plantilla Mensaje para Ficha de Producto
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={channel.messageTemplate || ''}
+                          onChange={(e) => updateChannelMessage(channel.id, e.target.value)}
+                          placeholder="Hola Zairen Lab, me interesa {prenda}..."
+                          className="w-full px-3 py-1 bg-[#141416] font-mono text-[11px] text-[#FAF9F6] rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                        />
+                        <span className="font-mono text-[9px] text-[#ac8888] block mt-0.5">
+                          Variables: <code>{'{prenda}'}</code>, <code>{'{precio}'}</code>, <code>{'{moneda}'}</code>, <code>{'{url}'}</code>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ======================================================== */}
+          {/* VISTA PREVIA EN VIVO (CARD VS DETALLE)                    */}
+          {/* ======================================================== */}
+          <div className="mt-6 p-5 bg-[#0e0e10] border border-[#201f1f] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#dc143c] text-[18px]">visibility</span>
+                <span className="font-headline text-xs font-bold text-white uppercase tracking-wider">
+                  Previsualización en Vivo de Canales de Contacto
+                </span>
+              </div>
+              <div className="flex items-center gap-1 bg-[#141416] p-0.5 border border-white/[0.06]">
+                <button
+                  type="button"
+                  onClick={() => setPreviewTab('card')}
+                  className={`px-3 py-1 font-mono text-[10px] uppercase font-bold cursor-pointer transition-colors ${
+                    previewTab === 'card'
+                      ? 'bg-[#dc143c] text-white'
+                      : 'text-[#ac8888] hover:text-white'
+                  }`}
+                >
+                  Tarjeta del Catálogo (1 Canal)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewTab('detail')}
+                  className={`px-3 py-1 font-mono text-[10px] uppercase font-bold cursor-pointer transition-colors ${
+                    previewTab === 'detail'
+                      ? 'bg-[#dc143c] text-white'
+                      : 'text-[#ac8888] hover:text-white'
+                  }`}
+                >
+                  Ficha de Producto (Todos)
+                </button>
+              </div>
+            </div>
+
+            {previewTab === 'card' ? (
+              <div className="max-w-xs mx-auto p-4 bg-[#141416] border border-[#201f1f] space-y-3">
+                <div className="aspect-square bg-[#1c1b1b] flex items-center justify-center text-xs font-mono text-[#888] relative">
+                  <span>PRENDA MOCKUP</span>
+                  {/* Badge o botón de contacto prioritario */}
+                  {priorityChannel ? (
+                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/80 backdrop-blur border border-white/[0.1] text-white font-mono text-[10px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      <span>{priorityChannel.name}</span>
+                    </div>
+                  ) : (
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/50 text-[9px] font-mono text-[#888]">
+                      Sin canales activos
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <span className="font-mono text-[10px] text-[#ac8888] block">ZAIREN LAB</span>
+                  <span className="font-display text-xs font-bold text-white block uppercase">
+                    {mockProduct.nombre}
+                  </span>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="font-mono text-sm font-bold text-white">
+                      {mockProduct.moneda} {mockProduct.precio.toFixed(2)}
+                    </span>
+                    {priorityChannel ? (
+                      <a
+                        href={buildChannelActionUrl(priorityChannel, mockProduct)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1 bg-[#201f1f] hover:bg-[#dc143c] text-white font-mono text-[10px] uppercase tracking-wider flex items-center gap-1 border border-white/[0.1] transition-colors"
+                      >
+                        <span>Consultar</span>
+                        <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                      </a>
+                    ) : (
+                      <span className="font-mono text-[9px] text-[#ac8888]">Canal oculto</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="max-w-lg mx-auto p-5 bg-[#141416] border border-[#201f1f] space-y-4">
+                <div className="border-b border-white/[0.06] pb-2">
+                  <span className="text-[10px] font-mono text-[#dc143c] uppercase font-bold tracking-wider">
+                    ATENCIÓN DIRECTA // DISPONIBILIDAD
+                  </span>
+                  <h4 className="font-headline text-sm font-bold text-white uppercase">
+                    Consulta con la tienda oficial
+                  </h4>
+                </div>
+
+                {activeChannels.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {activeChannels.map((c) => (
+                      <a
+                        key={c.id}
+                        href={buildChannelActionUrl(c, mockProduct)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2.5 bg-[#1c1b1b] hover:bg-[#201f1f] border border-white/[0.08] hover:border-[#dc143c] transition-all flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                          <span className="font-mono text-xs text-white uppercase font-bold group-hover:text-[#dc143c]">
+                            {c.name}
+                          </span>
+                        </div>
+                        <span className="material-symbols-outlined text-[14px] text-[#ac8888] group-hover:text-white">
+                          arrow_outward
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-[#1c1b1b]/50 border border-white/[0.04] text-center font-mono text-xs text-[#ac8888]">
+                    No hay canales de contacto activos configurados actualmente. Este bloque se ocultará por completo en la tienda.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN 4: GESTIÓN DE SUCURSALES / NODOS                  */}
         {/* ======================================================== */}
         <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#dc143c] text-[20px]">store</span>
               <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
-                Sucursales & Puntos de Despacho ({sucursales.length})
-              </h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowAddSucursal((prev) => !prev)}
-              className="px-3 py-1 bg-[#1c1b1b] hover:bg-[#dc143c] text-[#FAF9F6] text-xs font-mono uppercase font-bold transition-colors border border-[#201f1f] hover:border-[#dc143c] cursor-pointer"
-            >
-              {showAddSucursal ? 'Cancelar' : '+ Añadir Sucursal'}
-            </button>
-          </div>
-
-          <p className="text-xs text-[#ac8888] font-sans">
-            Gestiona las ubicaciones de despacho de Zairen Lab. Puedes tener una única sucursal o registrar más sucursales a medida que la tienda crezca.
-          </p>
-
-          {/* Formulario Agregar Sucursal */}
-          {showAddSucursal && (
-            <div className="p-4 bg-[#1c1b1b] border border-[#dc143c]/40 space-y-3 animate-in fade-in duration-200">
-              <h4 className="font-mono text-xs text-[#ffb3b3] uppercase font-bold">
-                Registrar Nueva Sucursal
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input
-                  type="text"
-                  placeholder="Nombre (Ej: Showroom Zona Sur)"
-                  value={newSucNombre}
-                  onChange={(e) => setNewSucNombre(e.target.value)}
-                  className="px-3 py-2 bg-[#141416] text-white font-sans text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Ciudad (Ej: La Paz, Santa Cruz)"
-                  value={newSucCiudad}
-                  onChange={(e) => setNewSucCiudad(e.target.value)}
-                  className="px-3 py-2 bg-[#141416] text-white font-sans text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Dirección / Referencia"
-                  value={newSucDireccion}
-                  onChange={(e) => setNewSucDireccion(e.target.value)}
-                  className="px-3 py-2 bg-[#141416] text-white font-sans text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-                />
-              </div>
-              <div className="flex justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={handleAddSucursal}
-                  className="px-4 py-1.5 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold transition-colors cursor-pointer"
-                >
-                  Guardar Sucursal
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Tabla de Sucursales */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs">
-              <thead className="bg-[#1c1b1b] text-[#ac8888] uppercase text-[10px] border-b border-[#201f1f]">
-                <tr>
-                  <th className="py-2.5 px-3">Nombre</th>
-                  <th className="py-2.5 px-3">Ciudad</th>
-                  <th className="py-2.5 px-3">Dirección</th>
-                  <th className="py-2.5 px-3 text-center">Estado</th>
-                  <th className="py-2.5 px-3 text-right">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {sucursales.map((suc) => (
-                  <tr key={suc.id} className="hover:bg-[#1c1b1b]/50">
-                    <td className="py-3 px-3 font-bold text-white">{suc.nombre}</td>
-                    <td className="py-3 px-3 text-[#ffb3b3]">{suc.ciudad}</td>
-                    <td className="py-3 px-3 text-[#ac8888]">{suc.direccion}</td>
-                    <td className="py-3 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleSucursal(suc.id)}
-                        className={`px-2 py-0.5 text-[10px] font-bold uppercase transition-all cursor-pointer border ${
-                          suc.activa
-                            ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
-                            : 'bg-red-950 text-red-400 border-red-800'
-                        }`}
-                      >
-                        {suc.activa ? 'Activa' : 'Inactiva'}
-                      </button>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSucursal(suc.id)}
-                        className="text-[#ac8888] hover:text-[#ff5449] transition-colors p-1 cursor-pointer"
-                        title="Eliminar sucursal"
-                      >
-                        ✕
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* ======================================================== */}
-        {/* SECCIÓN 4: WHATSAPP OFICIAL & CHECKOUT                    */}
-        {/* ======================================================== */}
-        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/[0.06]">
-            <span className="material-symbols-outlined text-emerald-400 text-[20px]">chat</span>
-            <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
-              WhatsApp Oficial & Checkout
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Número Internacional (Sin +)
-              </label>
-              <input
-                type="text"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                placeholder="59170000000"
-                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-[#ffb3b3] font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Número Formato Visible
-              </label>
-              <input
-                type="text"
-                value={whatsappDisplay}
-                onChange={(e) => setWhatsappDisplay(e.target.value)}
-                placeholder="+591 70000000"
-                className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-              Plantilla Mensaje de Pedido WhatsApp
-            </label>
-            <textarea
-              rows={3}
-              value={whatsappTemplate}
-              onChange={(e) => setWhatsappTemplate(e.target.value)}
-              className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-            />
-            <span className="font-mono text-[10px] text-[#ac8888] block mt-1">
-              Variables disponibles: <code>{'{items}'}</code>, <code>{'{total}'}</code>, <code>{'{moneda}'}</code>
-            </span>
-          </div>
-        </div>
-
-        {/* ======================================================== */}
-        {/* SECCIÓN 5: REDES SOCIALES DINÁMICAS                       */}
-        {/* ======================================================== */}
-        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">share</span>
-              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
-                Redes Sociales Dinámicas
+                Nodos y Puntos de Entrega
               </h3>
             </div>
             <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
-              {activeSocialsCount} REDES VISIBLES
+              {sucursales.length} NODOS
             </span>
           </div>
 
-          <p className="text-xs text-[#ac8888] font-sans">
-            Activa las redes sociales de Zairen Lab. Se renderizarán con sus iconos oficiales en el pie de página y botones de compartir.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-            {socials.map((social) => (
-              <div
-                key={social.id}
-                className={`p-4 border transition-all rounded-none ${
-                  social.enabled && social.url
-                    ? 'bg-[#1c1b1b] border-[#dc143c]/40 shadow-[0_0_12px_rgba(220,20,60,0.1)]'
-                    : 'bg-[#1c1b1b]/50 border-white/[0.04] opacity-60'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-headline text-xs font-bold text-white uppercase">
-                    {social.name}
-                  </span>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <span className="font-mono text-[10px] text-[#ac8888]">
-                      {social.enabled ? 'ACTIVO' : 'INACTIVO'}
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={social.enabled}
-                      onChange={() => handleToggleSocial(social.id)}
-                      className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
-                    />
-                  </label>
+          <div className="space-y-2">
+            {sucursales.map((suc) => (
+              <div key={suc.id} className="p-3 bg-[#1c1b1b] border border-[#201f1f] flex items-center justify-between">
+                <div>
+                  <span className="font-headline text-xs font-bold text-white uppercase block">{suc.nombre}</span>
+                  <span className="font-mono text-[11px] text-[#ac8888]">{suc.ciudad} • {suc.direccion}</span>
                 </div>
-
-                <input
-                  type="url"
-                  value={social.url}
-                  onChange={(e) => handleUpdateSocialUrl(social.id, e.target.value)}
-                  placeholder={`https://${social.id}.com/zairenlab`}
-                  className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-                />
+                <span className="font-mono text-[10px] text-emerald-400 uppercase font-bold">Activo</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* ======================================================== */}
-        {/* SECCIÓN 6: APARIENCIA ZEN & PERSONALIZACIÓN DE INTERFAZ    */}
+        {/* SECCIÓN 5: APARIENCIA ZEN & AVISOS                        */}
         {/* ======================================================== */}
         <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-6">
           <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#dc143c] text-[20px]">palette</span>
               <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
-                Apariencia Zen & Personalización de Interfaz
+                Apariencia Zen & Avisos en Cabecera
               </h3>
             </div>
-            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
-              CONFIG ESTÉTICA
-            </span>
           </div>
 
-          <p className="text-xs text-[#ac8888] font-sans">
-            Personaliza el acento cromático, el desenfoque glassmorphism y los mensajes de bienvenida automáticos para el cliente.
-          </p>
-
-          {/* Color de Estado / Acento */}
-          <div className="space-y-3">
-            <label className="font-mono text-xs text-[#ac8888] uppercase block">
-              Color de Estado & Acento Dinámico
-            </label>
-            <div className="flex flex-wrap items-center gap-3">
-              {[
-                { name: 'Crimson Official', hex: '#dc143c' },
-                { name: 'Steel Sky (Zen)', hex: '#5c88b0' },
-                { name: 'Neon Cyber', hex: '#00f0ff' },
-                { name: 'Emerald Matrix', hex: '#10b981' },
-                { name: 'Tokyo Amber', hex: '#f59e0b' },
-                { name: 'Obsidian Violet', hex: '#8b5cf6' },
-              ].map((c) => (
-                <button
-                  key={c.hex}
-                  type="button"
-                  onClick={() => setAccentColor(c.hex)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-none border font-mono text-xs transition-all cursor-pointer ${
-                    accentColor.toLowerCase() === c.hex.toLowerCase()
-                      ? 'border-white text-white bg-white/10 shadow-sm'
-                      : 'border-white/[0.08] text-[#ac8888] hover:border-white/30'
-                  }`}
-                >
-                  <span
-                    className="w-3.5 h-3.5 border border-white/20"
-                    style={{ backgroundColor: c.hex }}
-                  />
-                  <span>{c.name}</span>
-                </button>
-              ))}
-
-              {/* Color Personalizado Input */}
-              <div className="flex items-center gap-2 ml-auto">
-                <input
-                  type="color"
-                  value={accentColor}
-                  onChange={(e) => setAccentColor(e.target.value)}
-                  className="w-7 h-7 bg-transparent cursor-pointer border border-white/20"
-                />
-                <input
-                  type="text"
-                  value={accentColor}
-                  onChange={(e) => setAccentColor(e.target.value)}
-                  className="w-24 px-2 py-1 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:outline-none"
-                  placeholder="#dc143c"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Intensidad de Desenfoque (Glassmorphism Blur) */}
-          <div className="space-y-3 pt-2">
-            <label className="font-mono text-xs text-[#ac8888] uppercase block">
-              Desenfoque Glassmorphism (Backdrop Blur)
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { id: '0px', label: '0px (Nítido / Sin Blur)' },
-                { id: '8px', label: '8px (Sutil)' },
-                { id: '16px', label: '16px (Estándar Zen)' },
-                { id: '24px', label: '24px (Profundo Glass)' },
-              ].map((b) => (
-                <button
-                  key={b.id}
-                  type="button"
-                  onClick={() => setBlurIntensity(b.id)}
-                  className={`py-2 px-3 text-center rounded-none font-mono text-xs border transition-all cursor-pointer ${
-                    blurIntensity === b.id
-                      ? 'bg-[#dc143c]/20 border-[#dc143c] text-white font-bold'
-                      : 'bg-[#1c1b1b] border-white/[0.08] text-[#ac8888] hover:text-white'
-                  }`}
-                >
-                  {b.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Saludo Personalizado para Consultas */}
-          <div className="space-y-2 pt-2">
-            <label className="font-mono text-xs text-[#ac8888] uppercase block">
-              Mensaje de Saludo Automático (Contacto & Producto)
-            </label>
-            <input
-              type="text"
-              value={customGreeting}
-              onChange={(e) => setCustomGreeting(e.target.value)}
-              placeholder="Hola Zairen Lab, me interesa consultar sobre una prenda del catálogo:"
-              className="w-full px-3.5 py-2 bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
-            />
-            <span className="font-mono text-[10px] text-[#ac8888] block">
-              Texto predeterminado que precede las consultas directas en WhatsApp y modal de producto.
-            </span>
-          </div>
-        </div>
-
-        {/* ======================================================== */}
-        {/* SECCIÓN 7: AVISO EN CABECERA Y MODO MANTENIMIENTO        */}
-        {/* ======================================================== */}
-        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">campaign</span>
-              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
-                Aviso en Cabecera (Banner) & Modo Mantenimiento
-              </h3>
-            </div>
-            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
-              CONTROL EN VIVO
-            </span>
-          </div>
-
-          {/* Banner Promocional de Cabecera */}
-          <div className="space-y-3 p-4 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-headline text-xs font-bold text-white uppercase tracking-wider">
-                  Banner Promocional Superior
-                </h4>
-                <p className="font-mono text-[11px] text-[#ac8888]">
-                  Muestra un cintillo fijo sobre el Navbar con anuncios de lanzamientos o drops.
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={bannerEnabled}
-                  onChange={(e) => setBannerEnabled(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-[#201f1f] peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-[#dc143c]"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Color de Acento Carmesí
               </label>
+              <input
+                type="text"
+                value={accentColor}
+                onChange={(e) => setAccentColor(e.target.value)}
+                className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
+              />
             </div>
-
-            {bannerEnabled && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                <div className="space-y-1">
-                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
-                    Texto del Anuncio
-                  </label>
-                  <input
-                    type="text"
-                    value={bannerText}
-                    onChange={(e) => setBannerText(e.target.value)}
-                    placeholder="DROP 2026 // ENVÍOS GRATIS A TODO EL PAÍS"
-                    className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
-                    Enlace de Destino (Opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={bannerLink}
-                    onChange={(e) => setBannerLink(e.target.value)}
-                    placeholder="#catalogo o https://..."
-                    className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Horario de Atención */}
-          <div className="space-y-2 p-4 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
-            <label className="font-mono text-xs text-[#ac8888] uppercase block">
-              Horario de Atención y Despacho
-            </label>
-            <input
-              type="text"
-              value={openingHours}
-              onChange={(e) => setOpeningHours(e.target.value)}
-              placeholder="Lun a Sáb: 09:00 - 20:00 (BOT)"
-              className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
-            />
-            <span className="font-mono text-[10px] text-[#ac8888] block">
-              Informa al cliente los horarios operativos para respuesta en WhatsApp.
-            </span>
-          </div>
-
-          {/* Modo Mantenimiento */}
-          <div className="space-y-3 p-4 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-headline text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                  <span>Modo Mantenimiento de Tienda</span>
-                  {maintenanceMode && (
-                    <span className="px-1.5 py-0.2 bg-amber-950 text-amber-300 font-mono text-[9px] uppercase font-bold">
-                      ACTIVO
-                    </span>
-                  )}
-                </h4>
-                <p className="font-mono text-[11px] text-[#ac8888]">
-                  Pausa temporalmente las ventas para actualizaciones de inventario o drops exclusivos.
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={maintenanceMode}
-                  onChange={(e) => setMaintenanceMode(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-[#201f1f] peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
+              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+                Horario de Atención Oficial
               </label>
+              <input
+                type="text"
+                value={openingHours}
+                onChange={(e) => setOpeningHours(e.target.value)}
+                className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
+              />
             </div>
-
-            {maintenanceMode && (
-              <div className="space-y-1 pt-2">
-                <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
-                  Mensaje Visible para los Clientes
-                </label>
-                <input
-                  type="text"
-                  value={maintenanceMessage}
-                  onChange={(e) => setMaintenanceMessage(e.target.value)}
-                  placeholder="Tienda en actualización de catálogo. Volvemos en breve."
-                  className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-amber-500 focus:outline-none"
-                />
-              </div>
-            )}
           </div>
-        </div>
-
-        {/* Botón Guardar Inferior */}
-        <div className="flex justify-end pt-4 pb-12">
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-8 py-3 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.35)] transition-all cursor-pointer border border-[#dc143c]"
-          >
-            <span className="material-symbols-outlined text-[18px]">save</span>
-            <span>Guardar Toda la Configuración</span>
-          </button>
         </div>
       </form>
+
+      {/* ======================================================== */}
+      {/* BARRA FLOTANTE INFERIOR AL DETECTAR CAMBIOS PENDIENTES   */}
+      {/* ======================================================== */}
+      {isDirty && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#141416]/95 backdrop-blur-xl border-t-2 border-[#dc143c] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] px-4 py-3.5 transition-all animate-in slide-in-from-bottom duration-300">
+          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+              <span className="font-headline text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                Tienes cambios sin guardar en la configuración
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={handleDiscardChanges}
+                className="flex-1 sm:flex-initial px-4 py-2 bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors border border-white/[0.08] cursor-pointer"
+              >
+                Descartar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAll}
+                className="flex-1 sm:flex-initial px-5 py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(220,20,60,0.4)] transition-all cursor-pointer border border-[#dc143c]"
+              >
+                <span className="material-symbols-outlined text-[16px]">save</span>
+                <span>Guardar y Publicar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
