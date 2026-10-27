@@ -58,7 +58,7 @@ export const siteConfig: SiteConfig = {
   slogan: 'Evolución constante, identidad propia',
   tagline: 'Menos ruido, más identidad',
   origin: '',
-  description: 'ZAIREN LAB // Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo.',
+  description: 'Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo.',
   url: import.meta.env.PUBLIC_SITE_URL || 'https://zairenlab.com',
   cloudflareDomain: import.meta.env.PUBLIC_CLOUDFLARE_DOMAIN || 'https://zairen-web.pages.dev',
 

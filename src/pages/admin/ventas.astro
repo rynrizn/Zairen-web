@@ -6,7 +6,7 @@ import { siteConfig } from '../../config/site';
 import { POSTerminal } from '../../components/admin/pos/POSTerminal';
 ---
 
-<AdminLayout title={`Terminal POS // ${siteConfig.name}`} activePath="registrar-ventas">
+<AdminLayout title="Ventas" activePath="registrar-ventas">
   <div class="max-w-[1440px] mx-auto px-4 md:px-12 flex flex-col gap-8 pb-16">
     <POSTerminal client:only="react" />
   </div>

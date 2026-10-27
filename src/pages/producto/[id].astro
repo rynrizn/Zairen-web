@@ -166,7 +166,7 @@ if (dbProd) {
 
 {isNotFound ? (
   <Layout
-    title={`Prenda no disponible // ${siteConfig.name}`}
+    title="Prenda no disponible"
     description="El producto seleccionado ya no está disponible en nuestro catálogo activo. Explora nuestras colecciones en Zairen Lab."
   >
     <Navbar />
@@ -209,7 +209,7 @@ if (dbProd) {
   </Layout>
 ) : (
   <Layout
-    title={`${product.nombre} // ${siteConfig.name}`}
+    title={product.nombre}
     description={`${product.descripcion || product.nombre} • Precio: Bs ${product.precio.toFixed(2)} • Zairen Lab // Streetwear & Aesthetic Studio.`}
     image={product.imagen}
     type="product"

@@ -6,7 +6,7 @@ import { siteConfig } from '../../config/site';
 import { InventarioManager } from '../../components/admin/inventario/InventarioManager';
 ---
 
-<AdminLayout title={`Inventario // ${siteConfig.name}`} activePath="inventario">
+<AdminLayout title="Inventario" activePath="inventario">
   <div class="w-full max-w-[1440px] mx-auto px-0 md:px-2 flex flex-col gap-6 pb-16">
     <InventarioManager client:load />
   </div>

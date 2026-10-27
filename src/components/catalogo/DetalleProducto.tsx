@@ -48,6 +48,17 @@ export function DetalleProducto({
   const seccionTexto = (seccion || coleccionSegura).toUpperCase();
   const tipoSeguro = tipo?.trim() || 'Polera';
 
+  // Sincronizar título de la pestaña con el nombre de la prenda
+  useEffect(() => {
+    if (typeof document !== 'undefined' && safeNombre) {
+      const prevTitle = document.title;
+      document.title = safeNombre;
+      return () => {
+        document.title = prevTitle;
+      };
+    }
+  }, [safeNombre]);
+
   // Si no hay id ni slug, mostrar estado de contingencia
   if (!safeId && !slug) {
     return (
