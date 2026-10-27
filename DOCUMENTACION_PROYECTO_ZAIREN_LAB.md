@@ -226,3 +226,10 @@ Lee la documentación detenidamente y propónme un plan estratégico de mejoras 
   - En la vista/modal de detalle (`DetalleProducto`): se renderiza la grilla completa con **todos los canales activos** con mensajes personalizados preformateados.
   - Si no existen canales activos, el bloque se oculta completamente sin dejar espacios vacíos.
 - **Barra flotante inferior de guardado:** Detección de estado modificado (`isDirty`), botones *"Descartar"* y *"Guardar y Publicar"*, protección con `beforeunload` y sincronización inmediata con revalidación Edge.
+
+### Fase 6: Selector de Colecciones Dinámico Accesible (Combobox)
+- **Componente `ColeccionCombobox.tsx`:** Reemplazo de chips planos horizontales por un control Combobox accesible (`role="combobox"`, `aria-expanded`, `aria-haspopup="listbox"`, `aria-activedescendant`) con navegación completa por teclado (Flechas Arriba/Abajo, Enter, Escape).
+- **Filtrado dinámico con conteo real de prendas:** Calcula en tiempo real las prendas activas por colección, filtrando colecciones vacías o "Sin colección", y presentando opción destacada *"Todas las colecciones"* con el total de inventario disponible.
+- **Buscador interactivo integrado:** Campo de búsqueda interno que filtra colecciones al vuelo mientras se escribe.
+- **Sincronización bidireccional con URL (`?coleccion=<slug>`):** Inicializa la vista desde el parámetro de consulta en la URL, actualiza la URL mediante `history.pushState` sin recargar la página, y soporta navegación nativa con el botón Atrás/Adelante (`popstate`).
+- **Compatibilidad móvil extrema (360px–390px):** Diseñado con altura mínima táctil de 44px (WCAG 2.2 AA) y ancho 100% responsivo sin generar desbordamiento horizontal (`overflow-x`).
