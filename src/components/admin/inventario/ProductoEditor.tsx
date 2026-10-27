@@ -541,6 +541,9 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       };
 
       onSave(updatedItem);
+      fetch('/api/admin/revalidar-catalogo', { method: 'POST' })
+        .then(() => toast.info('Catálogo actualizado'))
+        .catch(() => {});
       toast.success(product ? 'Prenda actualizada con éxito' : 'Nueva prenda registrada en inventario', {
         description: `Colección: ${coleccionFinal} • Stock total: ${Object.values(stock).reduce((a, b) => a + Number(b || 0), 0)} uds`,
       });

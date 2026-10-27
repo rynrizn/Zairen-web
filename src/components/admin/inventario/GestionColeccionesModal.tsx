@@ -108,6 +108,9 @@ export function GestionColeccionesModal({
 
       toast.dismiss(toastLoading);
       toast.success(data.message || 'Colección eliminada con éxito.');
+      fetch('/api/admin/revalidar-catalogo', { method: 'POST' })
+        .then(() => toast.info('Catálogo actualizado'))
+        .catch(() => {});
       await fetchColecciones();
       onChanged();
       window.dispatchEvent(new CustomEvent('inventory-changed'));
