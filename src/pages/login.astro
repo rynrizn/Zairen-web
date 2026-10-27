@@ -141,15 +141,51 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
 <script>
   import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-  // Si el usuario ya está autenticado en su navegador, redirigir directamente al panel
+  // Guarda de sesión activa anti-bucle con validación estricta de servidor
   (async () => {
+    const errorBox = document.getElementById('login-error');
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      const loopCountKey = 'zairen_login_redirect_attempts';
+      const lastAttemptKey = 'zairen_login_last_attempt_time';
+      const attempts = parseInt(sessionStorage.getItem(loopCountKey) || '0', 10);
+      const lastTime = parseInt(sessionStorage.getItem(lastAttemptKey) || '0', 10);
+      const now = Date.now();
+
+      // Detección anti-bucle: si hubo rebotes continuos en menos de 6 segundos, romper el bucle
+      if (attempts >= 2 && now - lastTime < 6000) {
+        sessionStorage.removeItem(loopCountKey);
+        await supabase.auth.signOut({ scope: 'local' });
+        document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        localStorage.removeItem('zairen_user_id');
+        localStorage.removeItem('zairen_user_role');
+        if (errorBox) {
+          errorBox.textContent = 'Tu sesión anterior ya no es válida o fue cerrada en otro dispositivo. Por favor ingresa tus credenciales.';
+          errorBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Validar con el servidor de Supabase mediante getUser(), NO simplemente getSession() local
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+
+      if (user && !userErr) {
+        sessionStorage.setItem(loopCountKey, String(attempts + 1));
+        sessionStorage.setItem(lastAttemptKey, String(now));
         const redirect = (document.getElementById('redirect-url') as HTMLInputElement)?.value || '/admin';
         window.location.replace(redirect);
+      } else {
+        // Token inválido o revocado -> limpiar almacenamiento huérfano y permitir login
+        sessionStorage.removeItem(loopCountKey);
+        await supabase.auth.signOut({ scope: 'local' });
+        document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        localStorage.removeItem('zairen_user_id');
+        localStorage.removeItem('zairen_user_role');
       }
-    } catch (e) {}
+    } catch (e) {
+      sessionStorage.removeItem('zairen_login_redirect_attempts');
+    }
   })();
 
   const form = document.getElementById('login-form') as HTMLFormElement;
@@ -187,6 +223,18 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
     isTurnstileVerified = true;
     submitBtn.disabled = false;
   });
+  // Fallback de seguridad ante fallas de hidratacion o adblockers
+  setTimeout(() => {
+    if (!isTurnstileVerified) {
+      const turnstileContainer = document.getElementById('login-turnstile');
+      if (turnstileContainer && (!window.turnstile || turnstileContainer.children.length === 0)) {
+        console.warn('[Login] Turnstile widget tardó en responder. Habilitando verificación accesible.');
+        isTurnstileVerified = true;
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }
+  }, 4500);
+
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -252,6 +300,7 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
         localStorage.setItem('zairen_user_email', data.session.user.email || email);
         localStorage.setItem('zairen_user_role', userRole);
 
+        sessionStorage.removeItem('zairen_login_redirect_attempts');
         window.location.href = redirectInput.value || '/admin';
       }
     } catch (err: any) {
