@@ -113,6 +113,24 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   };
 
   // 4. Calcular colecciones disponibles con conteo real de prendas activas
+    // Conteo de prendas por estado comercial real
+  const commercialCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      todos: initialProducts.length,
+      preventa: 0,
+      nuevo: 0,
+      promocion: 0,
+      oferta: 0,
+    };
+    initialProducts.forEach((p) => {
+      const st = p.estadoComercial;
+      if (st && counts[st] !== undefined) {
+        counts[st]++;
+      }
+    });
+    return counts;
+  }, [initialProducts]);
+
   const collectionsWithCount = useMemo(() => {
     return collections
       .map((col) => {
@@ -428,65 +446,82 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       </div>
 
       {/* ========================================================== */}
-      {/* 3. FILTROS COMERCIALES (Sin texto 'ESTADO:', adaptables)   */}
+      {/* 3. FILTROS COMERCIALES DINÁMICOS CON CONTEO REAL */}
       {/* ========================================================== */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-8 pb-3 border-b border-white/[0.04]">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin-hover">
+          {/* Filtro Todos (Siempre visible) */}
           <button
             type="button"
             onClick={() => setCommercialFilter('todos')}
             className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
               commercialFilter === 'todos'
                 ? 'bg-[#FAF9F6] text-black border-[#FAF9F6]'
-                : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
+                : 'bg-[#141416] text-[#b3b3b3] hover:text-white border-[#2A2A2A]'
             }`}
           >
-            Todos
+            Todos ({commercialCounts.todos})
           </button>
-          <button
-            type="button"
-            onClick={() => setCommercialFilter('preventa')}
-            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
-              commercialFilter === 'preventa'
-                ? 'bg-[#6d28d9] text-white border-[#8b5cf6] shadow-[0_0_10px_rgba(139,92,246,0.5)]'
-                : 'bg-[#141416] text-[#ddd6fe]/70 hover:text-white border-[#201f1f]'
-            }`}
-          >
-            Pre-Order ⚡
-          </button>
-          <button
-            type="button"
-            onClick={() => setCommercialFilter('nuevo')}
-            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
-              commercialFilter === 'nuevo'
-                ? 'bg-[#047857] text-white border-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                : 'bg-[#141416] text-[#a7f3d0]/70 hover:text-white border-[#201f1f]'
-            }`}
-          >
-            Nuevo Drop 🔥
-          </button>
-          <button
-            type="button"
-            onClick={() => setCommercialFilter('promocion')}
-            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
-              commercialFilter === 'promocion'
-                ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)]'
-                : 'bg-[#141416] text-[#fca5a5]/70 hover:text-white border-[#201f1f]'
-            }`}
-          >
-            Promoción 🏷️
-          </button>
-          <button
-            type="button"
-            onClick={() => setCommercialFilter('oferta')}
-            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
-              commercialFilter === 'oferta'
-                ? 'bg-[#b91c1c] text-white border-[#ef4444] shadow-[0_0_10px_rgba(239,68,68,0.4)]'
-                : 'bg-[#141416] text-[#fca5a5]/70 hover:text-white border-[#201f1f]'
-            }`}
-          >
-            Oferta 💥
-          </button>
+
+          {/* Filtro Pre-Order (Solo si hay prendas en preventa) */}
+          {commercialCounts.preventa > 0 && (
+            <button
+              type="button"
+              onClick={() => setCommercialFilter('preventa')}
+              className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                commercialFilter === 'preventa'
+                  ? 'bg-[#6d28d9] text-white border-[#8b5cf6] shadow-[0_0_10px_rgba(139,92,246,0.5)]'
+                  : 'bg-[#141416] text-[#b3b3b3] hover:text-white border-[#2A2A2A]'
+              }`}
+            >
+              Pre-Order ({commercialCounts.preventa})
+            </button>
+          )}
+
+          {/* Filtro Nuevo Drop (Solo si hay prendas nuevas) */}
+          {commercialCounts.nuevo > 0 && (
+            <button
+              type="button"
+              onClick={() => setCommercialFilter('nuevo')}
+              className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                commercialFilter === 'nuevo'
+                  ? 'bg-[#047857] text-white border-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                  : 'bg-[#141416] text-[#b3b3b3] hover:text-white border-[#2A2A2A]'
+              }`}
+            >
+              Nuevo Drop ({commercialCounts.nuevo})
+            </button>
+          )}
+
+          {/* Filtro Promoción (Solo si hay prendas en promoción) */}
+          {commercialCounts.promocion > 0 && (
+            <button
+              type="button"
+              onClick={() => setCommercialFilter('promocion')}
+              className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                commercialFilter === 'promocion'
+                  ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)]'
+                  : 'bg-[#141416] text-[#b3b3b3] hover:text-white border-[#2A2A2A]'
+              }`}
+            >
+              Promoción ({commercialCounts.promocion})
+            </button>
+          )}
+
+          {/* Filtro Oferta (Solo si hay prendas en oferta) */}
+          {commercialCounts.oferta > 0 && (
+            <button
+              type="button"
+              onClick={() => setCommercialFilter('oferta')}
+              className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                commercialFilter === 'oferta'
+                  ? 'bg-[#b91c1c] text-white border-[#ef4444] shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                  : 'bg-[#141416] text-[#b3b3b3] hover:text-white border-[#2A2A2A]'
+              }`}
+            >
+              Oferta ({commercialCounts.oferta})
+            </button>
+          )}
         </div>
 
         {/* Checkbox de Disponibilidad Ortogonal */}
