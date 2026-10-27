@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
 import Footer from '../components/common/Footer.astro';
@@ -9,12 +11,36 @@ import { siteConfig } from '../config/site';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { TarjetaPoleraProps } from '../components/catalogo/TarjetaPolera';
 
+// Cabeceras de caché Edge para Cloudflare Pages (*.pages.dev y dominios personalizados):
+// max-age=0 para navegadores (siempre consultan al Edge), s-maxage=3 para Cloudflare CDN edge con revalidación suave
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=3, stale-while-revalidate=5'
+);
+Astro.response.headers.set(
+  'CDN-Cache-Control',
+  'public, max-age=3, stale-while-revalidate=5'
+);
+
 // Carga de productos directamente desde la base de datos de Supabase
 let products: TarjetaPoleraProps[] = [];
 let collections: Array<{ id: string; nombre: string; slug: string }> = [];
 
 if (isSupabaseConfigured) {
   try {
+    // 1. Obtener versión del catálogo si está configurada
+    const { data: cfg } = await supabase
+      .from('configuracion')
+      .select('catalogo_version')
+      .limit(1)
+      .maybeSingle();
+
+    if (cfg?.catalogo_version) {
+      Astro.response.headers.set('X-Catalogo-Version', String(cfg.catalogo_version));
+      Astro.response.headers.set('ETag', `W/"cat-${cfg.catalogo_version}"`);
+    }
+
+    // 2. Obtener productos activos de la vista pública
     const { data: dbProducts, error: pError } = await supabase
       .from('vw_catalogo_publico')
       .select('*')
@@ -92,7 +118,7 @@ if (isSupabaseConfigured) {
 }
 ---
 
-<Layout title={`${siteConfig.name} // Catálogo Oficial`}>
+<Layout title="Zairen" isCatalog={true}>
   <!-- Pantalla de Carga Inicial Simplificada -->
   <SplashLoader />
 
@@ -108,8 +134,8 @@ if (isSupabaseConfigured) {
     />
   </main>
 
-  <!-- Carrito Drawer Global -->
-  <CarritoDrawer client:load />
+  <!-- Carrito Drawer Global Diferido a client:idle -->
+  <CarritoDrawer client:idle />
 
   <!-- Footer Oficial -->
   <Footer />

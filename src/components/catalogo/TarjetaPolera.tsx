@@ -2,8 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
-import { getOptimizedImageUrl } from '../../lib/cloudinary';
+import { getOptimizedImageUrl, getResponsiveSrcSet } from '../../lib/cloudinary';
 import { formatCurrency } from '../../config/site';
+import {
+  getFirstActiveChannel,
+  buildChannelActionUrl,
+  DEFAULT_CONTACT_CHANNELS,
+  type ContactChannel,
+} from '../../lib/contactChannels';
 
 export interface TarjetaPoleraProps {
   id: string;
@@ -21,7 +27,9 @@ export interface TarjetaPoleraProps {
   stockDisponible?: number;
   stockPorTalla?: Record<string, number>;
   esPrioritario?: boolean;
+  priority?: boolean;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno' | 'disponible' | 'agotado';
+  onSelectProduct?: (product: TarjetaPoleraProps, targetElement?: HTMLElement) => void;
 }
 
 export function TarjetaPolera({
@@ -35,10 +43,14 @@ export function TarjetaPolera({
   subtitulo = 'Algodón Peinado 280 GSM • Caída Geométrica',
   imagen,
   imagenDorsal,
+  imagenes,
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
   stockPorTalla,
+  esPrioritario = false,
+  priority = false,
   estadoComercial = 'ninguno',
+  onSelectProduct,
 }: TarjetaPoleraProps) {
   // Determinar stock de cada talla
   const getStockForTalla = (t: string) => {
@@ -59,6 +71,22 @@ export function TarjetaPolera({
   const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
+  const [priorityChannel, setPriorityChannel] = useState<ContactChannel | null>(null);
+
+  useEffect(() => {
+    const syncChannel = () => {
+      try {
+        const raw = localStorage.getItem('zairen_contact_channels');
+        const list = raw ? JSON.parse(raw) : DEFAULT_CONTACT_CHANNELS;
+        setPriorityChannel(getFirstActiveChannel(list));
+      } catch {
+        setPriorityChannel(getFirstActiveChannel(DEFAULT_CONTACT_CHANNELS));
+      }
+    };
+    syncChannel();
+    window.addEventListener('zairen-config-updated', syncChannel);
+    return () => window.removeEventListener('zairen-config-updated', syncChannel);
+  }, []);
 
   useEffect(() => {
     const available = tallas.find((t) => getStockForTalla(t) > 0);
@@ -110,21 +138,64 @@ export function TarjetaPolera({
     </svg>
   );
 
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) {
+      return;
+    }
+    if (onSelectProduct) {
+      e.preventDefault();
+      onSelectProduct(
+        {
+          id,
+          slug,
+          nombre,
+          precio,
+          coleccion,
+          coleccionSlug,
+          idColeccion,
+          subtitulo,
+          imagen,
+          imagenDorsal,
+          imagenes,
+          tallas,
+          stockDisponible,
+          stockPorTalla,
+          esPrioritario,
+          priority,
+          estadoComercial,
+        },
+        e.currentTarget
+      );
+    }
+  };
+
   const productUrl = `/producto/${slug || id}`;
+  const selectedTallaStock = getStockForTalla(selectedTalla);
 
   return (
     <article
-      className="group relative flex flex-col bg-[#141416] border border-[#201f1f] hover:border-[#dc143c]/60 transition-all duration-300 ease-out p-3 shadow-lg hover:shadow-[0_16px_36px_rgba(220,20,60,0.20)] hover:-translate-y-1.5 overflow-hidden"
+      className={`group relative flex flex-col bg-[#141416] border transition-all duration-300 ease-out p-3 shadow-lg hover:-translate-y-1.5 overflow-hidden ${
+        isSoldOut
+          ? 'border-red-950/40 opacity-70 grayscale-[25%]'
+          : 'border-[#201f1f] hover:border-[#dc143c]/60 hover:shadow-[0_16px_36px_rgba(220,20,60,0.20)]'
+      }`}
     >
       {/* Micro-línea de acento carmesí Zen en la base al hacer hover */}
       <div className="absolute bottom-0 left-0 h-[2.5px] w-0 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] group-hover:w-full transition-all duration-500 ease-out pointer-events-none z-20" />
       {/* Contenedor Fotográfico Orthogonal 4:5 */}
-      <a href={productUrl} className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
-        {/* Imagen Frontal */}
+      <a href={productUrl} onClick={handleCardClick} data-astro-prefetch="hover" className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
+        {/* Imagen Frontal Optimizada */}
         <img
           src={getOptimizedImageUrl(imagen, 600, 750)}
+          srcSet={getResponsiveSrcSet(imagen)}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           alt={nombre}
-          loading="lazy"
+          width={400}
+          height={500}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding={priority ? 'sync' : 'async'}
+          {...(priority ? { fetchPriority: 'high' } : {})}
+          style={{ viewTransitionName: `prod-img-${id}` }}
           className="w-full h-full object-cover filter contrast-[1.03] group-hover:scale-105 transition-transform duration-700 ease-out"
         />
 
@@ -132,8 +203,13 @@ export function TarjetaPolera({
         {imagenDorsal && (
           <img
             src={getOptimizedImageUrl(imagenDorsal, 600, 750)}
+            srcSet={getResponsiveSrcSet(imagenDorsal)}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             alt={`${nombre} dorsal`}
+            width={400}
+            height={500}
             loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"
           />
         )}
@@ -186,7 +262,7 @@ export function TarjetaPolera({
           <span className="text-[10px] font-mono text-[#dc143c] uppercase tracking-widest block font-bold">
             {coleccion}
           </span>
-          <a href={productUrl} className="block mt-0.5">
+          <a href={productUrl} onClick={handleCardClick} className="block mt-0.5">
             <h3 className="font-display text-sm md:text-base font-bold text-[#FAF9F6] uppercase tracking-tight line-clamp-1 group-hover:text-[#dc143c] transition-colors">
               {nombre}
             </h3>
@@ -224,6 +300,13 @@ export function TarjetaPolera({
             })}
           </div>
 
+          {/* Micro-aviso de últimas unidades por talla seleccionada */}
+          {!isSoldOut && selectedTallaStock > 0 && selectedTallaStock <= 2 && (
+            <span className="text-[9px] font-mono text-amber-400 font-bold block">
+              ⚡ Últimas {selectedTallaStock} uds ({selectedTalla})
+            </span>
+          )}
+
           {/* Precio y Botón Agregar Carrito Cuadrado / Ortogonal */}
           <div className="flex items-center justify-between pt-1">
             <div className="flex flex-col">
@@ -235,6 +318,26 @@ export function TarjetaPolera({
               </span>
             </div>
 
+            <div className="flex items-center gap-1.5">{priorityChannel && (
+              <a
+                href={buildChannelActionUrl(priorityChannel, {
+                  nombre,
+                  precio,
+                  moneda: 'Bs',
+                  url: typeof window !== 'undefined' ? `${window.location.origin}${productUrl}` : productUrl,
+                })}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title={`Consultar por ${priorityChannel.name}`}
+                aria-label={`Consultar ${nombre} por ${priorityChannel.name}`}
+                className="w-9 h-9 shrink-0 flex items-center justify-center font-bold transition-all border bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-[#dc143c] border-[#201f1f] hover:border-[#dc143c] cursor-pointer active:scale-95 mr-1.5"
+              >
+                <span className="material-symbols-outlined text-[17px]">
+                  {priorityChannel.type === 'whatsapp' ? 'chat' : 'alternate_email'}
+                </span>
+              </a>
+            )}
             <button
               type="button"
               onClick={handleAddToCart}
@@ -256,6 +359,7 @@ export function TarjetaPolera({
                 className="w-5 h-5"
               />
             </button>
+            </div>
           </div>
         </div>
       </div>

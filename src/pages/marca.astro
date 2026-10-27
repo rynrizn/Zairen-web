@@ -9,7 +9,7 @@ import { siteConfig } from '../config/site';
 ---
 
 <Layout
-  title={`Identidad & Marca // ${siteConfig.name}`}
+  title="Marca"
   description="Manifiesto, líneas de diseño y especificaciones de calidad de Zairen Lab. Indumentaria experimental con corte boxy pesado."
 >
   <Navbar activePath="/marca" />
@@ -243,6 +243,6 @@ import { siteConfig } from '../config/site';
     </section>
   </main>
 
-  <CarritoDrawer client:load />
+  <CarritoDrawer client:idle />
   <Footer />
 </Layout>

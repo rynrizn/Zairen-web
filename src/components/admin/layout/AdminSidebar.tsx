@@ -10,6 +10,14 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
+  const [userRole, setUserRole] = useState<string>('ADMIN');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedRole = localStorage.getItem('zairen_user_role') || 'ADMIN';
+      setUserRole(storedRole.toUpperCase());
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchPendingCount() {
@@ -153,6 +161,14 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
     },
   ];
 
+  const isOperator = userRole === 'OPERADOR' || userRole === 'VENDEDOR';
+  const visibleNavItems = navItems.filter((item) => {
+    if (isOperator) {
+      return ['pedidos', 'registrar-ventas', 'panel'].includes(item.id);
+    }
+    return true;
+  });
+
   return (
     <>
       {/* ======================================================== */}
@@ -248,7 +264,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
               {/* Lista Enlaces Móvil */}
               <nav className="flex flex-col gap-1.5">
-                {navItems.map((item) => {
+                {visibleNavItems.map((item) => {
                   const isActive = activePath === item.id;
                   return (
                     <a
@@ -371,7 +387,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
           {/* Menú de Enlaces */}
           <nav className="p-3 flex flex-col gap-1.5 overflow-y-auto">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = activePath === item.id;
               return (
                 <a

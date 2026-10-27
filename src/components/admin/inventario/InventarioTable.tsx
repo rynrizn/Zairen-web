@@ -13,6 +13,7 @@ export function InventarioTable({ items, selectedId, onSelect }: InventarioTable
       {items.map((item) => {
         const total = Object.values(item.stock).reduce((a, b) => a + b, 0);
         const isSelected = selectedId === item.id;
+        const sinColeccion = !item.coleccion || item.coleccion.trim() === '' || item.coleccion.toLowerCase() === 'sin colección';
 
         return (
           <div
@@ -31,22 +32,34 @@ export function InventarioTable({ items, selectedId, onSelect }: InventarioTable
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs font-bold text-[#dc143c]">{item.sku}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-none font-mono text-[10px] uppercase font-bold ${
-                      total === 0
-                        ? 'bg-red-950 text-red-400'
-                        : total <= 8
-                        ? 'bg-amber-950 text-amber-400'
-                        : 'bg-emerald-950 text-emerald-400'
-                    }`}
-                  >
-                    {total === 0 ? 'Agotado' : total <= 8 ? 'Pocas Uds' : 'Disponible'}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {sinColeccion && (
+                      <span
+                        className="px-1.5 py-0.5 rounded-none font-mono text-[9px] uppercase font-bold bg-amber-950 text-amber-300 border border-amber-500/40"
+                        title="Oculto del catálogo público"
+                      >
+                        Sin Colección
+                      </span>
+                    )}
+                    <span
+                      className={`px-2 py-0.5 rounded-none font-mono text-[10px] uppercase font-bold ${
+                        total === 0
+                          ? 'bg-red-950 text-red-400'
+                          : total <= 8
+                          ? 'bg-amber-950 text-amber-400'
+                          : 'bg-emerald-950 text-emerald-400'
+                      }`}
+                    >
+                      {total === 0 ? 'Agotado' : total <= 8 ? 'Pocas Uds' : 'Disponible'}
+                    </span>
+                  </div>
                 </div>
                 <h3 className="font-headline text-xs font-bold text-[#e5e2e1] truncate mt-0.5">
                   {item.nombre}
                 </h3>
-                <p className="font-mono text-[10px] text-[#ac8888] truncate">{item.coleccion}</p>
+                <p className="font-mono text-[10px] text-[#ac8888] truncate">
+                  {sinColeccion ? 'Sin colección asignada' : item.coleccion}
+                </p>
               </div>
             </div>
 
@@ -61,7 +74,7 @@ export function InventarioTable({ items, selectedId, onSelect }: InventarioTable
                 <span className="font-mono text-xs font-bold text-white">{total} uds</span>
                 <button
                   type="button"
-                  className="w-7 h-7 rounded-none bg-[#dc143c] text-white flex items-center justify-center"
+                  className="w-7 h-7 rounded-none bg-[#dc143c] text-white flex items-center justify-center cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">edit</span>
                 </button>

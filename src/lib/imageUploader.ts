@@ -17,7 +17,21 @@ export interface UploadResult {
   originalSize?: number;
   convertedSize?: number;
   reductionPercentage?: number;
+  hash?: string;
   error?: string;
+}
+
+/**
+ * Calcula el hash SHA-256 de un Blob en el navegador para detectar duplicados
+ */
+export async function calculateBlobHash(blob: Blob): Promise<string> {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const buffer = await blob.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  return `${blob.size}-${blob.type}`;
 }
 
 /**
@@ -141,6 +155,7 @@ export async function uploadImageToCloudinary(
     const webpBlob = await convertToWebP(file);
     const convertedSize = webpBlob.size;
     const reduction = Math.max(0, Math.round(((originalSize - convertedSize) / originalSize) * 100));
+    const blobHash = await calculateBlobHash(webpBlob);
 
     const cleanFileName = file.name.replace(/\.[^/.]+$/, '') + '.webp';
 
@@ -156,6 +171,7 @@ export async function uploadImageToCloudinary(
         originalSize,
         convertedSize,
         reductionPercentage: reduction,
+        hash: blobHash,
       };
     }
 

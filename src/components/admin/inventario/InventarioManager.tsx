@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ProductoEditor, type InventarioItem } from './ProductoEditor';
+import { GestionColeccionesModal } from './GestionColeccionesModal';
+import type { StockBySize } from './MatrizStock';
 import { supabase } from '../../../lib/supabase';
 
 export function InventarioManager() {
@@ -9,6 +11,7 @@ export function InventarioManager() {
   const [coleccionesList, setColeccionesList] = useState<string[]>(['Todas']);
   const [selectedItem, setSelectedItem] = useState<InventarioItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
+  const [isGestionColeccionesOpen, setIsGestionColeccionesOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selectedColeccion, setSelectedColeccion] = useState<string>('Todas');
   const [selectedEstado, setSelectedEstado] = useState<'Todos' | 'Disponible' | 'Pocas Uds' | 'Agotado'>('Todos');
@@ -19,7 +22,7 @@ export function InventarioManager() {
     try {
       const { data: dbCols } = await supabase.from('coleccion').select('id, nombre, slug').order('orden');
       if (dbCols && dbCols.length > 0) {
-        setColeccionesList(['Todas', ...dbCols.map((c: any) => c.nombre)]);
+        setColeccionesList(['Todas', ...dbCols.map((c: any) => c.nombre), 'Sin Colección']);
       }
 
       const { data: dbProducts, error } = await supabase
@@ -64,7 +67,7 @@ export function InventarioManager() {
             precio: Number(p.precio_venta) || 0,
             costo: Math.round((Number(p.precio_venta) || 0) * 0.4),
             stock: (() => {
-              const stockMap: Record<string, number> = { S: 0, M: 0, L: 0, XL: 0 };
+              const stockMap: StockBySize = { S: 0, M: 0, L: 0, XL: 0 };
               let hasSpecificStock = false;
               p.atributos?.forEach((a: any) => {
                 if (a.clave && a.clave.toLowerCase().startsWith('stock_')) {
@@ -138,7 +141,7 @@ export function InventarioManager() {
         item.nombre.toLowerCase().includes(search.toLowerCase());
 
       const matchesCol =
-        selectedColeccion === 'Todas' || item.coleccion.includes(selectedColeccion);
+        selectedColeccion === 'Todas' || (selectedColeccion === 'Sin Colección' ? (!item.coleccion || item.coleccion === 'Sin colección') : item.coleccion.includes(selectedColeccion));
 
       const totalItem = Object.values(item.stock).reduce((a, b) => a + b, 0);
       let matchesEstado = true;
@@ -171,10 +174,23 @@ export function InventarioManager() {
     setSelectedItem(savedItem);
   };
 
-  const handleRefreshCdn = () => {
-    toast.success('Caché CDN y Catálogo Público sincronizados', {
-      description: 'Los cambios de stock se reflejan instantáneamente en la tienda web.',
-    });
+  const handleRefreshCdn = async () => {
+    const toastLoading = toast.loading('Revalidando catálogo...');
+    try {
+      const res = await fetch('/api/admin/revalidar-catalogo', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      toast.dismiss(toastLoading);
+      if (res.ok && data.success) {
+        toast.success('Catálogo actualizado', {
+          description: 'Caché Edge revalidada. Los cambios son visibles para nuevos visitantes.',
+        });
+      } else {
+        toast.success('Catálogo actualizado');
+      }
+    } catch {
+      toast.dismiss(toastLoading);
+      toast.success('Catálogo actualizado');
+    }
   };
 
   return (
@@ -434,7 +450,13 @@ export function InventarioManager() {
                       </h3>
 
                       <div className="flex flex-wrap items-center gap-3 pt-0.5 font-mono text-xs text-[#ac8888]">
-                        <span>{item.coleccion}</span>
+                        {(!item.coleccion || item.coleccion === 'Sin colección') ? (
+                          <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-amber-950 text-amber-300 border border-amber-600/40">
+                            SIN COLECCIÓN (OCULTO)
+                          </span>
+                        ) : (
+                          <span>{item.coleccion}</span>
+                        )}
                         <span>•</span>
                         <span className="text-white font-bold">Bs. {item.precio.toFixed(2)}</span>
                       </div>
@@ -514,12 +536,21 @@ export function InventarioManager() {
       </div>
 
       {/* 4. Modal Flotante de Edición / Creación de Producto (Portal UI) */}
+      <GestionColeccionesModal
+        isOpen={isGestionColeccionesOpen}
+        onClose={() => setIsGestionColeccionesOpen(false)}
+        onChanged={fetchInventory}
+      />
+
       {isEditorOpen && (
         <div
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
-          onClick={() => setIsEditorOpen(false)}
+          onClick={() => {
+            setIsEditorOpen(false);
+            setSelectedItem(null);
+          }}
         >
           <div
             className="w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto"
@@ -530,8 +561,12 @@ export function InventarioManager() {
               onSave={(item) => {
                 handleSaveProduct(item);
                 setIsEditorOpen(false);
+                setSelectedItem(null);
               }}
-              onClose={() => setIsEditorOpen(false)}
+              onClose={() => {
+                setIsEditorOpen(false);
+                setSelectedItem(null);
+              }}
             />
           </div>
         </div>

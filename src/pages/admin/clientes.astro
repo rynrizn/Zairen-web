@@ -6,7 +6,7 @@ import { siteConfig } from '../../config/site';
 import { ClientesTable } from '../../components/admin/clientes/ClientesTable';
 ---
 
-<AdminLayout title={`Directorio de Clientes // ${siteConfig.name}`} activePath="clientes">
+<AdminLayout title="Clientes" activePath="clientes">
   <div class="max-w-[1440px] mx-auto px-4 md:px-12 flex flex-col gap-8 pb-16">
     <ClientesTable client:only="react" />
   </div>

@@ -4,6 +4,7 @@ interface TurnstileWidgetProps {
   onVerify?: ((token: string) => void) | string;
   className?: string;
   id?: string;
+  action?: string;
 }
 
 declare global {
