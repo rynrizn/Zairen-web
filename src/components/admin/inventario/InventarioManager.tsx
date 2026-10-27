@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ProductoEditor, type InventarioItem } from './ProductoEditor';
+import { GestionColeccionesModal } from './GestionColeccionesModal';
 import type { StockBySize } from './MatrizStock';
 import { supabase } from '../../../lib/supabase';
 
@@ -10,6 +11,7 @@ export function InventarioManager() {
   const [coleccionesList, setColeccionesList] = useState<string[]>(['Todas']);
   const [selectedItem, setSelectedItem] = useState<InventarioItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
+  const [isGestionColeccionesOpen, setIsGestionColeccionesOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [selectedColeccion, setSelectedColeccion] = useState<string>('Todas');
   const [selectedEstado, setSelectedEstado] = useState<'Todos' | 'Disponible' | 'Pocas Uds' | 'Agotado'>('Todos');
@@ -20,7 +22,7 @@ export function InventarioManager() {
     try {
       const { data: dbCols } = await supabase.from('coleccion').select('id, nombre, slug').order('orden');
       if (dbCols && dbCols.length > 0) {
-        setColeccionesList(['Todas', ...dbCols.map((c: any) => c.nombre)]);
+        setColeccionesList(['Todas', ...dbCols.map((c: any) => c.nombre), 'Sin Colección']);
       }
 
       const { data: dbProducts, error } = await supabase
@@ -139,7 +141,7 @@ export function InventarioManager() {
         item.nombre.toLowerCase().includes(search.toLowerCase());
 
       const matchesCol =
-        selectedColeccion === 'Todas' || item.coleccion.includes(selectedColeccion);
+        selectedColeccion === 'Todas' || (selectedColeccion === 'Sin Colección' ? (!item.coleccion || item.coleccion === 'Sin colección') : item.coleccion.includes(selectedColeccion));
 
       const totalItem = Object.values(item.stock).reduce((a, b) => a + b, 0);
       let matchesEstado = true;
@@ -435,7 +437,13 @@ export function InventarioManager() {
                       </h3>
 
                       <div className="flex flex-wrap items-center gap-3 pt-0.5 font-mono text-xs text-[#ac8888]">
-                        <span>{item.coleccion}</span>
+                        {(!item.coleccion || item.coleccion === 'Sin colección') ? (
+                          <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-amber-950 text-amber-300 border border-amber-600/40">
+                            SIN COLECCIÓN (OCULTO)
+                          </span>
+                        ) : (
+                          <span>{item.coleccion}</span>
+                        )}
                         <span>•</span>
                         <span className="text-white font-bold">Bs. {item.precio.toFixed(2)}</span>
                       </div>
@@ -515,6 +523,12 @@ export function InventarioManager() {
       </div>
 
       {/* 4. Modal Flotante de Edición / Creación de Producto (Portal UI) */}
+      <GestionColeccionesModal
+        isOpen={isGestionColeccionesOpen}
+        onClose={() => setIsGestionColeccionesOpen(false)}
+        onChanged={fetchInventory}
+      />
+
       {isEditorOpen && (
         <div
           role="dialog"
