@@ -1,5 +1,7 @@
 import { atom } from 'nanostores';
 import { siteConfig } from '../config/site';
+import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 
 export interface CartItem {
   id: string;
@@ -12,12 +14,31 @@ export interface CartItem {
   stockDisponible?: number;
 }
 
-// Cargar estado inicial desde localStorage de forma segura en navegador
+// Cargar estado inicial desde localStorage de forma segura en navegador,
+// filtrando elementos corruptos o incompletos
 function getInitialCart(): CartItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const stored = localStorage.getItem('zairen_cart_v2');
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    
+    return parsed.filter((item): item is CartItem => {
+      return (
+        item &&
+        typeof item === 'object' &&
+        typeof item.id === 'string' &&
+        item.id.trim().length > 0 &&
+        typeof item.nombre === 'string' &&
+        typeof item.talla === 'string' &&
+        item.talla.trim().length > 0 &&
+        typeof item.precio === 'number' &&
+        !isNaN(item.precio) &&
+        typeof item.cantidad === 'number' &&
+        item.cantidad > 0
+      );
+    });
   } catch (e) {
     return [];
   }
@@ -115,10 +136,83 @@ export function closeDrawer() {
 }
 
 /**
+ * Valida la existencia y disponibilidad de las prendas en el carrito contra Supabase.
+ * Retira discretamente los productos que hayan sido eliminados, archivados o inactivados.
+ */
+export async function validarYLimpiarCarrito(): Promise<{ retirados: string[] }> {
+  if (typeof window === 'undefined') return { retirados: [] };
+  const current = $cart.get();
+  if (current.length === 0) return { retirados: [] };
+
+  try {
+    const uniqueIds = Array.from(new Set(current.map((i) => i.id).filter(Boolean)));
+    if (uniqueIds.length === 0) return { retirados: [] };
+
+    // 1. Consultar por ID directo
+    const { data: dbProds, error } = await supabase
+      .from('producto')
+      .select('id, slug, activo, publicado')
+      .in('id', uniqueIds);
+
+    const activeSet = new Set<string>();
+    if (!error && dbProds) {
+      dbProds.forEach((p) => {
+        if (p.activo && p.publicado) {
+          activeSet.add(p.id);
+          if (p.slug) activeSet.add(p.slug);
+        }
+      });
+    }
+
+    // 2. Si algunos IDs no se encontraron (quizá eran slugs), consultar por slug
+    const missing = uniqueIds.filter((id) => !activeSet.has(id));
+    if (missing.length > 0) {
+      const { data: slugProds } = await supabase
+        .from('producto')
+        .select('id, slug, activo, publicado')
+        .in('slug', missing);
+
+      if (slugProds) {
+        slugProds.forEach((p) => {
+          if (p.activo && p.publicado) {
+            activeSet.add(p.id);
+            if (p.slug) activeSet.add(p.slug);
+          }
+        });
+      }
+    }
+
+    const retirados: string[] = [];
+    const validItems = current.filter((item) => {
+      const isStillAvailable = activeSet.has(item.id);
+      if (!isStillAvailable) {
+        retirados.push(item.nombre);
+      }
+      return isStillAvailable;
+    });
+
+    if (retirados.length > 0) {
+      $cart.set(validItems);
+      const nombresUnicos = Array.from(new Set(retirados));
+      const msg =
+        nombresUnicos.length === 1
+          ? `"${nombresUnicos[0]}" ya no está disponible y fue retirado de tu bolsa.`
+          : `Se retiraron ${nombresUnicos.length} prendas no disponibles de tu bolsa.`;
+      toast.info(msg, { duration: 6000 });
+    }
+
+    return { retirados };
+  } catch (err) {
+    console.warn('Error al verificar disponibilidad del carrito:', err);
+    return { retirados: [] };
+  }
+}
+
+/**
  * Métricas calculadas del carrito
  */
 export function getCartSubtotal(items: CartItem[]): number {
-  return items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  return items.reduce((sum, item) => sum + (Number(item.precio) || 0) * item.cantidad, 0);
 }
 
 export function isFreeShippingEligible(items: CartItem[]): boolean {

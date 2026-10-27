@@ -15,7 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // 1. Revalidar disponibilidad de stock en el servidor
+    // 1. Revalidar existencia del producto y disponibilidad de stock en el servidor
     const conflicts: Array<{
       id: string;
       nombre: string;
@@ -24,11 +24,38 @@ export const POST: APIRoute = async ({ request }) => {
       solicitado: number;
     }> = [];
 
+    const resolvedItems: any[] = [];
+
     for (const item of items) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
+      const query = supabase.from('producto').select('id, nombre, activo, publicado');
+      const { data: prodData } = isUuid
+        ? await query.eq('id', item.id).maybeSingle()
+        : await query.eq('slug', item.id).maybeSingle();
+
+      // Si el producto fue eliminado, archivado o no está publicado
+      if (!prodData || !prodData.activo || !prodData.publicado) {
+        conflicts.push({
+          id: item.id,
+          nombre: item.nombre,
+          talla: item.talla,
+          disponible: 0,
+          solicitado: item.cantidad,
+        });
+        continue;
+      }
+
+      const realId = prodData.id;
+      resolvedItems.push({
+        ...item,
+        id: realId,
+        nombre: prodData.nombre || item.nombre,
+      });
+
       const { data: attrRows } = await supabase
         .from('atributo_producto')
         .select('valor')
-        .eq('producto_id', item.id)
+        .eq('producto_id', realId)
         .ilike('clave', `stock_${item.talla}`)
         .maybeSingle();
 
@@ -40,7 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
         const { data: invRows } = await supabase
           .from('inventario')
           .select('cantidad, cantidad_reservada')
-          .eq('producto_id', item.id)
+          .eq('producto_id', realId)
           .maybeSingle();
         if (invRows) {
           stockReal = Math.max(0, (invRows.cantidad || 0) - (invRows.cantidad_reservada || 0));
@@ -69,7 +96,7 @@ export const POST: APIRoute = async ({ request }) => {
               (c) =>
                 `La talla ${c.talla} de "${c.nombre}" ${
                   c.disponible === 0
-                    ? 'se ha agotado'
+                    ? 'ya no está disponible'
                     : `solo tiene ${c.disponible} unidad(es) disponible(s)`
                 }`
             )
@@ -87,7 +114,7 @@ export const POST: APIRoute = async ({ request }) => {
       const rpcPayload = {
         p_cliente_nombre: clientName || 'Cliente Web',
         p_cliente_telefono: clientPhone || '',
-        p_items: items.map((i: any) => ({
+        p_items: resolvedItems.map((i: any) => ({
           producto_id: i.id,
           nombre: i.nombre,
           talla: i.talla,
@@ -135,7 +162,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Insertar renglones de detalle_pedido
-        const details = items.map((i: any) => ({
+        const details = resolvedItems.map((i: any) => ({
           pedido_id: newOrder.id,
           producto_id: i.id,
           producto_nombre: i.nombre,

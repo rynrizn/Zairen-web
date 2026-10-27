@@ -11,6 +11,7 @@ import {
   getCartShippingCost,
   getCartTotal,
   isFreeShippingEligible,
+  validarYLimpiarCarrito,
 } from '../../stores/cartStore';
 import { siteConfig, formatCurrency } from '../../config/site';
 import { generateWhatsAppOrderUrl } from '../../utils/whatsapp';
@@ -59,6 +60,19 @@ export function CarritoDrawer() {
     }
   }, []);
 
+  // Validar y depurar items del carrito al abrir el drawer o al montar
+  useEffect(() => {
+    if (isOpen && cart.length > 0) {
+      validarYLimpiarCarrito();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      validarYLimpiarCarrito();
+    }
+  }, []);
+
   const subtotal = getCartSubtotal(cart);
   const shipping = getCartShippingCost(cart);
   const total = getCartTotal(cart);
@@ -80,10 +94,7 @@ export function CarritoDrawer() {
       return;
     }
 
-    // 2. Verificación Humana Requerida
-    // Verificación no bloqueante para WhatsApp checkout directo
-
-    // 3. Limitador de Frecuencia (Rate Limit: 15s)
+    // 2. Limitador de Frecuencia (Rate Limit: 15s)
     const now = Date.now();
     if (now - lastOrderAttemptRef.current < 15000) {
       toast.warning('Por favor espera 15 segundos antes de generar otro pedido.');
@@ -111,6 +122,8 @@ export function CarritoDrawer() {
 
       if (!validateRes.ok || !validateData.success) {
         toast.dismiss(toastLoading);
+        // Depurar items eliminados o no disponibles de inmediato
+        await validarYLimpiarCarrito();
         if (validateData.error === 'STOCK_INSUFICIENTE') {
           toast.error(validateData.message || 'Una de las prendas seleccionadas se ha agotado.', {
             duration: 8000,
@@ -140,264 +153,277 @@ export function CarritoDrawer() {
     }
   };
 
+  // Bloquear scroll de la página cuando el Drawer esté abierto
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (isOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
   return (
-    <>
-      {/* Backdrop translúcido con desenfoque progresivo */}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Bolsa de Compras"
+      className="fixed inset-0 z-50 flex justify-end"
+    >
+      {/* Backdrop con desenfoque zen minimalista */}
       <div
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
         onClick={closeDrawer}
-        className={`fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-all duration-300 ease-out ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        aria-hidden="true"
       />
 
-      {/* Panel Deslizante Drawer con Spring Easing */}
-      <aside
-        className={`fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[450px] bg-[#141416] border-l border-white/[0.1] shadow-[-20px_0_60px_rgba(0,0,0,0.85)] flex flex-col justify-between transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
+      {/* Panel Lateral Orthogonal */}
+      <div className="relative w-full max-w-md bg-[#0A0A0A] border-l border-[#201f1f] flex flex-col h-full shadow-2xl z-10 transition-transform duration-300 ease-out">
         {/* Cabecera del Drawer */}
-        <div className="p-6 border-b border-white/[0.08] flex items-center justify-between bg-[#141416]/95 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-none bg-[#201f1f] text-[#dc143c] flex items-center justify-center border border-white/[0.06]">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                <path d="M3 6h18" />
-                <path d="M16 10a4 4 0 0 1-8 0" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="font-display text-sm font-bold uppercase tracking-wider text-[#FAF9F6]">
-                Bolsa de Compras
-              </h2>
-              <span className="font-mono text-[10px] text-[#ac8888] tracking-widest uppercase">
-                ZAIREN // {cart.length} {cart.length === 1 ? 'PRENDA' : 'PRENDAS'}
-              </span>
-            </div>
+        <div className="flex items-center justify-between p-4 border-b border-[#201f1f] bg-[#141416]">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#dc143c]" />
+            <h2 className="font-display text-base font-bold uppercase tracking-tight text-[#FAF9F6]">
+              Bolsa de Compras
+            </h2>
+            <span className="text-xs font-mono text-[#ac8888]">
+              ({cart.reduce((sum, item) => sum + item.cantidad, 0)})
+            </span>
           </div>
 
-          {/* Botón Cerrar */}
           <button
             type="button"
             onClick={closeDrawer}
             aria-label="Cerrar bolsa"
-            className="w-8 h-8 rounded-none bg-[#1c1b1b] hover:bg-[#dc143c] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer border border-[#201f1f]"
+            className="w-8 h-8 rounded-none flex items-center justify-center text-[#ac8888] hover:text-[#FAF9F6] hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-[#201f1f]"
           >
             ✕
           </button>
         </div>
 
-        {/* Barra de Progreso de Envío Gratis (OPCIONAL: sólo se muestra si está activada en Admin) */}
+        {/* Barra de Progreso de Envío Gratis Opcional (Controlada desde Admin) */}
         {mostrarPromoEnvio && (
-          <div className="px-6 py-3 bg-[#0a0a0a] border-b border-white/[0.06] animate-in fade-in duration-200">
-            <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
-              <span className="text-[#ac8888]">
-                {isFree
-                  ? '🎉 ¡CALIFICAS PARA ENVÍO GRATIS!'
-                  : `Faltan ${formatCurrency(amountToFreeShipping)} para Envío Gratis`}
-              </span>
-              <span className="text-[#ffb3b3] font-bold">{freeShippingProgress}%</span>
-            </div>
-            <div className="w-full h-1 bg-[#201f1f] rounded-none overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#dc143c] to-[#ff2d55] transition-all duration-300"
-                style={{ width: `${freeShippingProgress}%` }}
-              />
-            </div>
+          <div className="p-3 bg-[#141416]/50 border-b border-[#201f1f] text-xs font-mono">
+            {isFree ? (
+              <p className="text-[#a7f3d0] font-bold flex items-center gap-1.5">
+                <span>✓</span> ¡Calificas para ENVÍO GRATIS a toda Bolivia!
+              </p>
+            ) : (
+              <div>
+                <p className="text-[#ac8888] mb-1.5">
+                  Agrega{' '}
+                  <span className="text-[#FAF9F6] font-bold">
+                    {formatCurrency(amountToFreeShipping)}
+                  </span>{' '}
+                  más para envío gratuito
+                </p>
+                <div className="w-full h-1 bg-[#201f1f] overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#dc143c] to-[#ff4d6d] transition-all duration-300"
+                    style={{ width: `${freeShippingProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Lista de Items en Carrito */}
-        <div className="flex-1 overflow-y-auto p-6 divide-y divide-white/[0.06]">
-          {cart.length > 0 ? (
+        {/* Lista de Items */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {cart.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
+              <div className="w-16 h-16 border border-dashed border-[#201f1f] flex items-center justify-center text-2xl text-[#ac8888]">
+                ⛩️
+              </div>
+              <div>
+                <p className="font-display text-sm font-bold uppercase text-[#FAF9F6] tracking-tight">
+                  Tu bolsa está vacía
+                </p>
+                <p className="text-xs font-body text-[#ac8888] mt-1">
+                  Explora las piezas disponibles en el catálogo de Zairen Lab.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeDrawer}
+                className="mt-2 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#0A0A0A] bg-[#FAF9F6] hover:bg-[#dc143c] hover:text-white transition-colors cursor-pointer"
+              >
+                Ver Catálogo
+              </button>
+            </div>
+          ) : (
             cart.map((item) => (
-              <div key={`${item.id}-${item.talla}`} className="py-4 first:pt-0 last:pb-0 flex gap-4">
-                {/* Miniatura Ortogonal */}
-                <div className="w-16 h-20 rounded-none overflow-hidden bg-[#0a0a0a] shrink-0 border border-[#201f1f]">
-                  <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover rounded-none" />
-                </div>
+              <div
+                key={`${item.id}-${item.talla}`}
+                className="flex gap-3 p-3 bg-[#141416] border border-[#201f1f] relative group"
+              >
+                {/* Imagen Cuadrada Orthogonal */}
+                <img
+                  src={item.imagen}
+                  alt={item.nombre}
+                  className="w-20 h-20 object-cover bg-[#0A0A0A] border border-[#201f1f] shrink-0"
+                />
 
-                {/* Datos y Cantidad */}
-                <div className="flex-1 flex flex-col justify-between">
+                {/* Detalles de la prenda */}
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-display text-xs font-bold uppercase text-[#FAF9F6] line-clamp-1">
+                      <h3 className="font-display text-xs md:text-sm font-bold text-[#FAF9F6] uppercase tracking-tight truncate">
                         {item.nombre}
-                      </h4>
+                      </h3>
                       <button
                         type="button"
                         onClick={() => removeItem(item.id, item.talla)}
-                        className="text-[#ac8888] hover:text-[#ff5449] text-xs transition-colors p-1 cursor-pointer"
-                        title="Eliminar prenda"
+                        className="text-[#ac8888] hover:text-[#dc143c] text-xs p-0.5 cursor-pointer"
+                        title="Eliminar de la bolsa"
                       >
                         ✕
                       </button>
                     </div>
+
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="px-2 py-0.5 rounded-none bg-[#1c1b1b] text-[10px] font-mono text-[#ffb3b3] border border-[#201f1f]">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#201f1f] text-[#FAF9F6] font-bold">
                         TALLA: {item.talla}
                       </span>
                       {item.sku && (
-                        <span className="text-[10px] font-mono text-[#ac8888]">
+                        <span className="text-[9px] font-mono text-[#ac8888] truncate">
                           {item.sku}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Precios y Stepper Ortogonal */}
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="font-mono text-xs font-bold text-white">
-                      {formatCurrency(item.precio * item.cantidad)}
-                    </span>
-
-                    {/* Stepper - / + Ortogonal */}
-                    <div className="flex items-center border border-[#201f1f] rounded-none bg-[#0a0a0a]">
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#201f1f]/60">
+                    {/* Control de Cantidad */}
+                    <div className="flex items-center border border-[#201f1f] bg-[#0A0A0A]">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad - 1)}
-                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white transition-colors cursor-pointer"
+                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white cursor-pointer"
                       >
                         -
                       </button>
-                      <span className="px-2 font-mono text-xs text-[#FAF9F6] font-bold">
+                      <span className="w-8 text-center text-xs font-mono font-bold text-[#FAF9F6]">
                         {item.cantidad}
                       </span>
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad + 1)}
                         disabled={item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible}
-                        title={item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible ? 'Máximo stock disponible alcanzado' : 'Añadir otra unidad'}
-                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+                        className={`w-6 h-6 flex items-center justify-center text-xs ${
+                          item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible
+                            ? 'text-white/20 cursor-not-allowed'
+                            : 'text-[#ac8888] hover:text-white cursor-pointer'
+                        }`}
                       >
                         +
                       </button>
+                    </div>
+
+                    {/* Precio Unitario / Subtotal */}
+                    <div className="text-right">
+                      <span className="font-mono text-xs md:text-sm font-bold text-[#FAF9F6]">
+                        {formatCurrency(item.precio * item.cantidad)}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             ))
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center py-16">
-              <div className="w-12 h-12 rounded-none bg-[#1c1b1b] text-[#dc143c] flex items-center justify-center mb-3 border border-[#201f1f]">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                  <path d="M3 6h18" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-              </div>
-              <p className="font-display text-sm font-bold uppercase text-[#FAF9F6]">
-                Tu bolsa está vacía
-              </p>
-              <p className="font-body text-xs text-[#ac8888] max-w-xs mt-1">
-                Explora el catálogo y añade tus prendas seleccionadas por talla.
-              </p>
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="mt-4 px-6 py-2 rounded-none bg-[#1c1b1b] hover:bg-[#201f1f] text-xs font-mono text-white uppercase tracking-wider border border-[#201f1f] hover:border-[#dc143c] transition-colors cursor-pointer"
-              >
-                Ver Catálogo
-              </button>
-            </div>
           )}
         </div>
 
-        {/* Footer / Resumen, Anti-Bot y Botón WhatsApp */}
+        {/* Pie de Pedido y Checkout */}
         {cart.length > 0 && (
-          <div className="p-6 border-t border-white/[0.08] bg-[#141416]/95 backdrop-blur-md space-y-4">
-            {/* Honeypot invisible para atrapar bots */}
-            <div className="sr-only" aria-hidden="true" style={{ display: 'none' }}>
-              <input
-                type="text"
-                name="website_url"
-                tabIndex={-1}
-                autoComplete="off"
-                value={honeypotValue}
-                onChange={(e) => setHoneypotValue(e.target.value)}
-              />
-            </div>
-
-            {/* Nota opcional */}
+          <div className="p-4 bg-[#141416] border-t border-[#201f1f] space-y-3">
+            {/* Notas del Cliente para el Pedido */}
             <div>
               <label htmlFor="order-notes" className="block text-[10px] font-mono text-[#ac8888] uppercase tracking-wider mb-1">
-                Instrucciones / Ciudad de Envío (Opcional)
+                Instrucciones o Referencia de Entrega (Opcional):
               </label>
-              <input
+              <textarea
                 id="order-notes"
-                type="text"
                 value={clientNotes}
                 onChange={(e) => setClientNotes(e.target.value)}
-                placeholder="Ej: Envío a domicilio, pago con QR..."
-                className="w-full bg-[#0a0a0a] border border-[#201f1f] rounded-none px-3 py-2 text-xs font-mono text-[#FAF9F6] placeholder:text-[#ac8888]/60 focus:outline-none focus:border-[#dc143c]"
+                placeholder="Ej: Enviar a nombre de Juan Pérez, zona central..."
+                rows={2}
+                maxLength={200}
+                className="w-full bg-[#0A0A0A] border border-[#201f1f] text-xs font-body text-[#FAF9F6] p-2 focus:border-[#dc143c] focus:outline-none resize-none"
               />
             </div>
 
-            {/* Desglose de Precios */}
-            <div className="space-y-1.5 text-xs font-mono">
+            {/* Desglose Económico */}
+            <div className="space-y-1.5 pt-2 border-t border-[#201f1f] text-xs font-mono">
               <div className="flex justify-between text-[#ac8888]">
-                <span>Subtotal ({cart.length} prendas)</span>
+                <span>Subtotal</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between text-[#ac8888]">
-                <span>Envío Express</span>
-                <span className={isFree && mostrarPromoEnvio ? 'text-emerald-400 font-bold' : ''}>
-                  {isFree && mostrarPromoEnvio ? '¡GRATIS!' : formatCurrency(shipping)}
-                </span>
+                <span>Envío (Nacional)</span>
+                <span>{isFree ? 'GRATIS' : formatCurrency(shipping)}</span>
               </div>
-              <div className="pt-2 border-t border-white/[0.06] flex justify-between items-baseline">
-                <div>
-                  <span className="font-display text-sm font-bold text-[#FAF9F6] uppercase block">
-                    Total a Confirmar
-                  </span>
-                  <span className="text-[10px] text-[#ac8888]">
-                    Coordinación directa por WhatsApp
-                  </span>
-                </div>
-                <span className="font-mono text-xl font-bold text-[#dc143c] tracking-tight">
-                  {formatCurrency(total)}
-                </span>
+              <div className="flex justify-between text-[#FAF9F6] font-bold text-sm pt-1 border-t border-[#201f1f]">
+                <span>TOTAL APROX.</span>
+                <span className="text-[#dc143c]">{formatCurrency(total)}</span>
               </div>
             </div>
 
-            {/* Widget de Verificación Cloudflare Turnstile Anti-Bot (Solo cuando el drawer está abierto) */}
-            {isOpen && (
-              <TurnstileWidget onVerify={() => setTurnstileVerified(true)} />
-            )}
+            {/* Cloudflare Turnstile Invisible / Interactivo para Protección de Pedidos */}
+            <div className="pt-1">
+              <TurnstileWidget action="checkout_order" />
+            </div>
 
-            {/* Botón Primario WhatsApp Checkout Ortogonal */}
+            {/* Honeypot Anti-Bot (Oculto) */}
+            <input
+              type="text"
+              name="company_tax_id_ref"
+              value={honeypotValue}
+              onChange={(e) => setHoneypotValue(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              className="absolute opacity-0 pointer-events-none -left-[9999px]"
+            />
+
+            {/* Botón de Checkout Directo hacia WhatsApp */}
             <button
               type="button"
               onClick={handleCheckoutWhatsApp}
               disabled={isSubmitting}
-              className="w-full py-4 px-6 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_4px_24px_rgba(220,20,60,0.45)] hover:shadow-[0_6px_30px_rgba(222,5,65,0.6)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed border border-[#dc143c]"
+              className={`w-full py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg ${
+                isSubmitting
+                  ? 'bg-[#1c1b1b] text-[#8F8F8C] cursor-not-allowed border border-[#201f1f]'
+                  : 'bg-[#dc143c] hover:bg-[#b01030] text-white border border-[#dc143c]'
+              }`}
             >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.37C9.37 7.37 9.1 7.43 8.88 7.68C8.65 7.92 8.02 8.51 8.02 9.73C8.02 10.95 8.91 12.12 9.03 12.28C9.16 12.45 10.77 14.93 13.23 16C13.82 16.25 14.28 16.41 14.63 16.52C15.22 16.71 15.77 16.68 16.2 16.62C16.67 16.55 17.65 16.03 17.86 15.45C18.06 14.86 18.06 14.36 18 14.26C17.94 14.15 17.79 14.09 17.56 13.98C17.34 13.87 16.25 13.33 16.05 13.26C15.84 13.18 15.69 13.15 15.54 13.38C15.38 13.61 14.94 14.15 14.81 14.3C14.68 14.45 14.54 14.47 14.32 14.36C14.09 14.24 13.37 14.01 12.52 13.25C11.86 12.66 11.41 11.93 11.29 11.71C11.16 11.49 11.27 11.37 11.39 11.25C11.49 11.14 11.62 10.98 11.73 10.84C11.85 10.71 11.89 10.61 11.96 10.46C12.04 10.31 12 10.18 11.94 10.07C11.89 9.96 11.43 8.84 11.25 8.38C11.06 7.93 10.88 7.99 10.74 7.99C10.61 7.98 10.46 7.98 10.31 7.98C10.16 7.98 9.91 8.04 9.71 8.25C9.53 8.46 9.53 7.37 9.53 7.37Z"/>
-              </svg>
-              <span>Finalizar Pedido por WhatsApp</span>
+              {isSubmitting ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span>Revalidando existencias...</span>
+                </>
+              ) : (
+                <>
+                  <span>Completar Pedido vía WhatsApp</span>
+                  <span>→</span>
+                </>
+              )}
             </button>
 
-            {/* Acciones secundarias */}
-            <div className="flex items-center justify-between text-[11px] font-mono">
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#ac8888]">
               <button
                 type="button"
                 onClick={clearCart}
-                className="text-[#ac8888] hover:text-[#ff5449] transition-colors uppercase tracking-wider cursor-pointer"
+                className="hover:text-[#dc143c] transition-colors underline cursor-pointer"
               >
-                Vaciar Pedido
+                Vaciar bolsa
               </button>
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="text-[#ac8888] hover:text-white transition-colors uppercase tracking-wider cursor-pointer"
-              >
-                Continuar Explorando →
-              </button>
+              <span>Atención 1 a 1 sin intermediarios</span>
             </div>
           </div>
         )}
-      </aside>
-    </>
+      </div>
+    </div>
   );
 }
