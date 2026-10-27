@@ -215,7 +215,7 @@ import { siteConfig } from '../../config/site';
     try {
       const { data } = await supabase
         .from('configuracion')
-        .select('canales_ordenados, redes_sociales, apariencia')
+        .select('redes_sociales, canales_contacto, apariencia')
         .eq('id', 1)
         .maybeSingle();
 

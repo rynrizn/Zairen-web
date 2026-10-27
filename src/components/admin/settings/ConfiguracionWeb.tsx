@@ -87,6 +87,20 @@ export function ConfiguracionWeb() {
   const [maintenanceMessage, setMaintenanceMessage] = useState<string>('Tienda en actualización de catálogo. Volvemos en breve.');
   const [openingHours, setOpeningHours] = useState<string>('Lun a Sáb: 09:00 - 20:00 (BOT)');
   const [dropStatus, setDropStatus] = useState<string>('DROP 01 DISPONIBLE');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('zairen_admin_sidebar_collapsed') === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleToggle = (e: any) => {
+      setSidebarCollapsed(Boolean(e.detail?.isCollapsed));
+    };
+    window.addEventListener('sidebar-toggle', handleToggle);
+    return () => window.removeEventListener('sidebar-toggle', handleToggle);
+  }, []);
 
   // Helper para crear snapshot de estado y comparar suciedad
   const getSnapshot = () =>
@@ -218,6 +232,26 @@ export function ConfiguracionWeb() {
             if (data.apariencia.saludo_personalizado) setCustomGreeting(data.apariencia.saludo_personalizado);
             if (data.apariencia.moneda_activa) setCurrency(data.apariencia.moneda_activa);
             if (data.apariencia.tasa_cambio) setExchangeRate(data.apariencia.tasa_cambio);
+            if ((data.apariencia as any).drop_status) setDropStatus((data.apariencia as any).drop_status);
+
+            // Banner promocional dentro de apariencia
+            if ((data.apariencia as any).banner_promocional) {
+              const bp = (data.apariencia as any).banner_promocional;
+              if (typeof bp.activo === 'boolean') setBannerEnabled(bp.activo);
+              if (bp.texto) setBannerText(bp.texto);
+              if (bp.link) setBannerLink(bp.link);
+            }
+            if ((data.apariencia as any).modo_mantenimiento) {
+              const mm = (data.apariencia as any).modo_mantenimiento;
+              if (typeof mm.activo === 'boolean') setMaintenanceMode(mm.activo);
+              if (mm.mensaje) setMaintenanceMessage(mm.mensaje);
+            }
+            if ((data.apariencia as any).horario_atencion) {
+              setOpeningHours((data.apariencia as any).horario_atencion);
+            }
+            if (Array.isArray((data.apariencia as any).canales_ordenados) && (data.apariencia as any).canales_ordenados.length > 0) {
+              setChannels((data.apariencia as any).canales_ordenados.filter((c: any) => c.id !== 'twitter' && c.id !== 'x' && c.type !== 'twitter'));
+            }
           }
 
           // Banner Promocional, Horarios & Modo Mantenimiento
@@ -397,7 +431,6 @@ export function ConfiguracionWeb() {
         whatsapp_mensaje_template: waTemplate,
         moneda_codigo: currency,
         moneda_simbolo: currency === 'BOB' ? 'Bs' : '$',
-        canales_ordenados: channels,
         canales_contacto: {
           whatsapp: { activo: Boolean(waChannel?.enabled), telefono: waNumber },
           canales: channels,
@@ -423,17 +456,19 @@ export function ConfiguracionWeb() {
           saludo_personalizado: customGreeting,
           tasa_cambio: exchangeRate > 0 ? exchangeRate : 6.96,
           moneda_activa: currency,
+          drop_status: dropStatus,
+          banner_promocional: {
+            activo: bannerEnabled,
+            texto: bannerText,
+            link: bannerLink,
+          },
+          modo_mantenimiento: {
+            activo: maintenanceMode,
+            mensaje: maintenanceMessage,
+          },
+          horario_atencion: openingHours,
+          canales_ordenados: channels,
         },
-        banner_promocional: {
-          activo: bannerEnabled,
-          texto: bannerText,
-          link: bannerLink,
-        },
-        modo_mantenimiento: {
-          activo: maintenanceMode,
-          mensaje: maintenanceMessage,
-        },
-        horario_atencion: openingHours,
         updated_at: new Date().toISOString(),
       };
 
@@ -1249,8 +1284,12 @@ export function ConfiguracionWeb() {
       {/* BARRA FLOTANTE INFERIOR AL DETECTAR CAMBIOS PENDIENTES   */}
       {/* ======================================================== */}
       {isDirty && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#141416]/95 backdrop-blur-xl border-t-2 border-[#dc143c] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] px-4 py-3.5 transition-all animate-in slide-in-from-bottom duration-300">
-          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div
+          className={`fixed bottom-0 right-0 z-50 bg-[#141416]/95 backdrop-blur-xl border-t-2 border-[#dc143c] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] px-4 py-3.5 transition-all duration-300 animate-in slide-in-from-bottom ${
+            sidebarCollapsed ? 'left-0 md:left-20' : 'left-0 md:left-64'
+          }`}
+        >
+          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 px-2 sm:px-4">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
               <span className="font-headline text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
