@@ -519,7 +519,10 @@ export function InventarioManager() {
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
-          onClick={() => setIsEditorOpen(false)}
+          onClick={() => {
+            setIsEditorOpen(false);
+            setSelectedItem(null);
+          }}
         >
           <div
             className="w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto"
@@ -530,8 +533,12 @@ export function InventarioManager() {
               onSave={(item) => {
                 handleSaveProduct(item);
                 setIsEditorOpen(false);
+                setSelectedItem(null);
               }}
-              onClose={() => setIsEditorOpen(false)}
+              onClose={() => {
+                setIsEditorOpen(false);
+                setSelectedItem(null);
+              }}
             />
           </div>
         </div>
