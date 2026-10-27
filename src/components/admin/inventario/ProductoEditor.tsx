@@ -652,30 +652,51 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
               </div>
             </div>
 
-            {/* Colección */}
+            {/* Colección Dinámica */}
             <div>
-              <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block mb-1">
-                Colección / Línea de Diseño
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-mono text-xs text-[#ac8888] uppercase tracking-wider block">
+                  Colección / Línea de Diseño
+                </label>
+                <a
+                  href="/admin/colecciones"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-mono text-[10px] text-[#dc143c] hover:underline uppercase font-bold"
+                >
+                  Gestionar colecciones ↗
+                </a>
+              </div>
               <select
                 value={coleccion}
                 onChange={(e) => setColeccion(e.target.value)}
                 className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2.5 rounded-none border border-white/[0.08] focus:border-[#dc143c] focus:outline-none"
               >
-                <option value="Anime Mecha // Drop 01">Anime Mecha // Drop 01</option>
-                <option value="Cyberpunk Tokyo // Spec">Cyberpunk Tokyo // Spec</option>
-                <option value="Streetwear Zen // Core">Streetwear Zen // Core</option>
-                <option value="Essentials">Essentials</option>
+                <option value="">-- Seleccionar Colección --</option>
+                {coleccionesDisponibles.map((col) => (
+                  <option key={col.id} value={col.nombre}>
+                    {col.nombre}
+                  </option>
+                ))}
                 <option value="__nueva__">+ Crear nueva colección...</option>
               </select>
               {coleccion === '__nueva__' && (
-                <input
-                  type="text"
-                  value={seccionNueva}
-                  onChange={(e) => setSeccionNueva(e.target.value)}
-                  placeholder="Nombre de la nueva colección..."
-                  className="w-full bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2 rounded-none border border-[#dc143c] mt-1.5 focus:outline-none"
-                />
+                <div className="flex items-center gap-2 mt-1.5">
+                  <input
+                    type="text"
+                    value={seccionNueva}
+                    onChange={(e) => setSeccionNueva(e.target.value)}
+                    placeholder="Nombre de la nueva colección..."
+                    className="flex-1 bg-[#1c1b1b] text-white font-mono text-xs px-3.5 py-2 rounded-none border border-[#dc143c] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCrearColeccion}
+                    className="px-3.5 py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold cursor-pointer transition-colors"
+                  >
+                    Guardar
+                  </button>
+                </div>
               )}
             </div>
 

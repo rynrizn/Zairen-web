@@ -106,6 +106,18 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       ),
     },
     {
+      label: 'Colecciones',
+      path: '/admin/colecciones',
+      id: 'colecciones',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect width="18" height="18" x="3" y="3" rx="2" />
+          <path d="M3 9h18" />
+          <path d="M9 21V9" />
+        </svg>
+      ),
+    },
+    {
       label: 'Registrar Ventas',
       path: '/admin/ventas',
       id: 'registrar-ventas',
