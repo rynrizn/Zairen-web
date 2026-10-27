@@ -30,7 +30,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const nextCursor = url.searchParams.get('next_cursor') || undefined;
     const limitParam = parseInt(url.searchParams.get('limit') || '30', 10);
     const limit = Math.min(Math.max(limitParam, 10), 100);
-    const prefix = url.searchParams.get('prefix') || 'zairen/';
+    const prefixParam = url.searchParams.get('prefix');
+    // Si prefixParam es 'all' o '', no se filtra por prefijo para ver toda la cuenta
+    // Si no se especifica, por defecto busca en 'zairen/'
+    const prefix = prefixParam === 'all' || prefixParam === '' ? '' : (prefixParam ?? 'zairen/');
 
     // 3. Obtener variables de entorno (Cloudflare Worker runtime o Node)
     const cfEnv = (locals as any)?.runtime?.env || {};
@@ -161,7 +164,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'private, max-age=60, s-maxage=60',
+          'Cache-Control': mappedResources.length > 0
+          ? 'private, max-age=60, s-maxage=60'
+          : 'no-cache, no-store, must-revalidate',
         },
       }
     );
