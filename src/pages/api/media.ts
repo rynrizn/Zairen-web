@@ -73,18 +73,29 @@ export const GET: APIRoute = async ({ request, locals }) => {
         used_count: 1,
       }));
 
+      const warningDetail = !apiKey && !apiSecret
+        ? 'CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET no están configuradas en las variables de entorno de Cloudflare Pages.'
+        : !apiKey
+        ? 'CLOUDINARY_API_KEY no está configurada en las variables de entorno.'
+        : 'CLOUDINARY_API_SECRET no está configurada en las variables de entorno.';
+
       return new Response(
         JSON.stringify({
           success: true,
           resources: items,
           next_cursor: null,
-          warning: 'CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET no configuradas. Mostrando recursos de BD.',
+          warning: `${warningDetail} Mostrando ${items.length} fotos recuperadas de la base de datos local.`,
+          diag: {
+            cloudNameConfigured: Boolean(cloudName),
+            apiKeyConfigured: Boolean(apiKey),
+            apiSecretConfigured: Boolean(apiSecret),
+          },
         }),
         {
           status: 200,
           headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'private, max-age=30',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
           },
         }
       );
@@ -123,8 +134,20 @@ export const GET: APIRoute = async ({ request, locals }) => {
         JSON.stringify({
           success: false,
           error: errJson?.error?.message || `Error ${cldResponse.status} de Cloudinary Admin API`,
+          diag: {
+            cloudNameConfigured: Boolean(cloudName),
+            apiKeyConfigured: Boolean(apiKey),
+            apiSecretConfigured: Boolean(apiSecret),
+            cldStatus: cldResponse.status,
+          },
         }),
-        { status: cldResponse.status, headers: { 'Content-Type': 'application/json' } }
+        {
+          status: cldResponse.status,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+          },
+        }
       );
     }
 
