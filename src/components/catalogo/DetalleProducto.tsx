@@ -7,56 +7,100 @@ import { getOptimizedImageUrl } from '../../lib/cloudinary';
 import { ShareProductModal } from './ShareProductModal';
 
 export interface DetalleProductoProps {
-  id: string;
-  nombre: string;
+  id?: string;
+  nombre?: string;
   slug?: string;
-  precio: number;
+  precio?: number;
   coleccion?: string;
   seccion?: string;
   tipo?: string;
   descripcion?: string;
-  imagenes: string[];
+  imagenes?: string[];
   tallas?: string[];
   stockDisponible?: number;
   stockPorTalla?: Record<string, number>;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'disponible' | 'agotado' | 'ninguno';
 }
 
+const FALLBACK_IMAGE = 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp';
+
 export function DetalleProducto({
-  id,
-  nombre,
+  id = '',
+  nombre = 'Prenda Zairen',
   slug,
-  precio,
-  coleccion = 'DROP 01',
+  precio = 0,
+  coleccion = 'General',
   seccion,
   tipo = 'Polera',
   descripcion = '',
   imagenes = [],
   tallas = ['S', 'M', 'L', 'XL'],
-  stockDisponible = 10,
+  stockDisponible = 0,
   stockPorTalla,
   estadoComercial = 'disponible',
 }: DetalleProductoProps) {
-  // Asegurar mínimo 1 imagen
-  const safeImages = imagenes.length > 0 ? imagenes : [
-    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1000&auto=format&fit=crop',
-  ];
+  // 1. Normalización y blindaje de datos nulos
+  const safeId = id || slug || '';
+  const safeSlug = slug || id || 'prenda';
+  const safeNombre = nombre?.trim() || 'Prenda de Autor';
+  const safePrecio = typeof precio === 'number' && !isNaN(precio) && precio >= 0 ? precio : Number(precio) || 0;
+  const coleccionSegura = coleccion?.trim() || 'General';
+  const seccionTexto = (seccion || coleccionSegura).toUpperCase();
+  const tipoSeguro = tipo?.trim() || 'Polera';
+
+  // Si no hay id ni slug, mostrar estado de contingencia
+  if (!safeId && !slug) {
+    return (
+      <div className="detail-bento-container py-12 flex flex-col items-center text-center">
+        <div className="border border-[#201f1f] bg-[#141416] p-8 max-w-md w-full relative">
+          <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-[#dc143c]"></div>
+          <span className="text-xs font-mono font-bold text-[#dc143c] uppercase tracking-widest block mb-2">
+            ERROR // PRENDA NO DISPONIBLE
+          </span>
+          <h2 className="font-display text-xl font-bold text-[#FAF9F6] uppercase mb-4">
+            Prenda no encontrada
+          </h2>
+          <p className="text-xs font-body text-[#ac8888] mb-6">
+            La prenda solicitada no cuenta con un identificador válido o ha sido retirada del catálogo.
+          </p>
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#FAF9F6] hover:bg-[#dc143c] text-[#0A0A0A] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors"
+          >
+            ← Volver al Catálogo
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Sanitización de imágenes: filtrar strings no vacíos y asegurar al menos 1
+  const rawImages = Array.isArray(imagenes)
+    ? imagenes.filter((img): img is string => typeof img === 'string' && img.trim().length > 0)
+    : [];
+  const safeImages = rawImages.length > 0 ? rawImages : [FALLBACK_IMAGE];
 
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
+  const currentImage = safeImages[Math.min(activeImageIndex, safeImages.length - 1)] || safeImages[0];
+
+  // Sanitización de tallas
+  const tallasDisponibles = Array.isArray(tallas) && tallas.length > 0 ? tallas : ['S', 'M', 'L', 'XL'];
+
   const getStockForTalla = (t: string) => {
-    if (stockPorTalla && Object.keys(stockPorTalla).length > 0) {
-      return stockPorTalla[t] ?? 0;
+    if (stockPorTalla && typeof stockPorTalla === 'object' && Object.keys(stockPorTalla).length > 0) {
+      return Number(stockPorTalla[t]) || 0;
     }
-    if (tallas.length === 1) return stockDisponible;
-    return stockDisponible > 0 ? 1 : 0;
+    if (tallasDisponibles.length === 1) return Number(stockDisponible) || 0;
+    return (Number(stockDisponible) || 0) > 0 ? 1 : 0;
   };
 
-  const totalStockAvailable = stockPorTalla && Object.keys(stockPorTalla).length > 0
-    ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
-    : stockDisponible;
+  const totalStockAvailable = (stockPorTalla && typeof stockPorTalla === 'object' && Object.keys(stockPorTalla).length > 0)
+    ? Object.values(stockPorTalla).reduce((a, b) => a + (Number(b) || 0), 0)
+    : (Number(stockDisponible) || 0);
+
   const isSoldOut = totalStockAvailable <= 0 || estadoComercial === 'agotado';
 
-  const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
+  const firstAvailableTalla = tallasDisponibles.find((t) => getStockForTalla(t) > 0) || tallasDisponibles[0] || 'M';
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -64,13 +108,11 @@ export function DetalleProducto({
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
-    const available = tallas.find((t) => getStockForTalla(t) > 0);
+    const available = tallasDisponibles.find((t) => getStockForTalla(t) > 0);
     if (available && getStockForTalla(selectedTalla) <= 0) {
       setSelectedTalla(available);
     }
-  }, [tallas, stockPorTalla, stockDisponible]);
-  const currentImage = safeImages[activeImageIndex] || safeImages[0];
-  const seccionTexto = (seccion || coleccion).toUpperCase();
+  }, [tallasDisponibles, stockPorTalla, stockDisponible]);
 
   // Color de badge de estado comercial según CatalogoV0
   const getEstadoBadge = () => {
@@ -132,18 +174,18 @@ export function DetalleProducto({
     }
 
     addItem({
-      id,
-      nombre,
-      precio,
+      id: safeId,
+      nombre: safeNombre,
+      precio: safePrecio,
       talla: selectedTalla,
       imagen: currentImage,
-      sku: slug?.toUpperCase(),
+      sku: safeSlug.toUpperCase(),
       stockDisponible: stockForSelected,
     });
 
     setIsAdded(true);
-    toast.success(`${nombre} (${selectedTalla}) añadido a la bolsa`, {
-      description: `Total: ${formatCurrency(precio)}`,
+    toast.success(`${safeNombre} (${selectedTalla}) añadido a la bolsa`, {
+      description: `Total: ${formatCurrency(safePrecio)}`,
     });
 
     setTimeout(() => {
@@ -154,7 +196,7 @@ export function DetalleProducto({
   const handleDirectWhatsApp = () => {
     if (isSoldOut) return;
     const text = encodeURIComponent(
-      `Hola Zairen Lab, me interesa adquirir: ${nombre} en talla ${selectedTalla}. ¿Está disponible?`
+      `Hola Zairen Lab, me interesa adquirir: ${safeNombre} en talla ${selectedTalla}. ¿Está disponible?`
     );
     window.open(`https://wa.me/${siteConfig.whatsapp.number}?text=${text}`, '_blank');
   };
@@ -195,7 +237,7 @@ export function DetalleProducto({
           <span>/</span>
           <span className="text-[#dc143c] font-bold uppercase">{seccionTexto}</span>
           <span>/</span>
-          <span className="text-white truncate max-w-[180px] sm:max-w-none">{nombre}</span>
+          <span className="text-white truncate max-w-[180px] sm:max-w-none">{safeNombre}</span>
         </nav>
       </div>
 
@@ -211,7 +253,7 @@ export function DetalleProducto({
             <img
               key={activeImageIndex}
               src={getOptimizedImageUrl(currentImage, 1000, 1250)}
-              alt={`${nombre} - Vista ${activeImageIndex + 1}`}
+              alt={`${safeNombre} - Vista ${activeImageIndex + 1}`}
               className="w-full h-full object-contain sm:object-cover bento-image-active transition-transform duration-500 ease-out hover:scale-[1.03]"
             />
 
@@ -289,9 +331,9 @@ export function DetalleProducto({
               <div className="bento-section-tag">
                 <span className="tag-crimson">{seccionTexto}</span>
                 <span className="tag-sep"></span>
-                <span className="tag-muted">{tipo}</span>
+                <span className="tag-muted">{tipoSeguro}</span>
               </div>
-              <h1 className="bento-title">{nombre}</h1>
+              <h1 className="bento-title">{safeNombre}</h1>
             </div>
 
             {/* Botones Cabecera: Compartir en Redes (Sin QR) + Favoritos */}
@@ -327,7 +369,7 @@ export function DetalleProducto({
           </div>
 
           <div className="bento-footer-row">
-            <span className="bento-id">ID: {slug || id}</span>
+            <span className="bento-id">ID: {safeSlug}</span>
             {stockDisponible > 0 && stockDisponible <= 4 && (
               <span className="text-[11px] font-mono text-amber-400 font-bold uppercase animate-pulse">
                 ⚡ Solo {stockDisponible} uds disponibles
@@ -354,7 +396,7 @@ export function DetalleProducto({
           </div>
 
           <div className="bento-talla-grid">
-            {tallas.map((talla) => {
+            {tallasDisponibles.map((talla) => {
               const isSelected = selectedTalla === talla;
               const stockThisTalla = getStockForTalla(talla);
               const isTallaAgotada = isSoldOut || stockThisTalla <= 0;
@@ -384,7 +426,7 @@ export function DetalleProducto({
         <div className="bento-cell bento-actions">
           <div className="bento-price-block">
             <span className="bento-cell-label" style={{ marginBottom: 0 }}>PRECIO</span>
-            <span className="bento-price-value">Bs. {precio.toFixed(2)}</span>
+            <span className="bento-price-value">{formatCurrency(safePrecio)}</span>
           </div>
 
           <div className="bento-actions-btns">
@@ -453,7 +495,7 @@ export function DetalleProducto({
           </button>
           <img
             src={currentImage}
-            alt={nombre}
+            alt={safeNombre}
             className="max-w-[95vw] max-h-[90vh] object-contain rounded-none shadow-2xl"
           />
         </div>
@@ -463,11 +505,11 @@ export function DetalleProducto({
       <ShareProductModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        nombre={nombre}
-        precio={precio}
+        nombre={safeNombre}
+        precio={safePrecio}
         imagen={currentImage}
-        slug={slug}
-        id={id}
+        slug={safeSlug}
+        id={safeId}
       />
     </div>
   );
