@@ -36,14 +36,16 @@ interface ProductoEditorProps {
 }
 
 export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps) {
-  const [sku, setSku] = useState(product?.sku || 'ZRN-NEW');
+  const [sku, setSku] = useState(
+    product?.sku || `ZRN-${Date.now().toString(36).slice(-4).toUpperCase()}`
+  );
   const [nombre, setNombre] = useState(product?.nombre || '');
-  const [coleccion, setColeccion] = useState(product?.coleccion || 'Essentials');
+  const [coleccion, setColeccion] = useState(product?.coleccion || '');
   const [seccionNueva, setSeccionNueva] = useState('');
   const [tipo, setTipo] = useState(product?.tipo || 'Polera');
   const [tipoNuevo, setTipoNuevo] = useState('');
   const [precio, setPrecio] = useState<number | ''>(
-    typeof product?.precio === 'number' && !Number.isNaN(product.precio) ? product.precio : 145
+    typeof product?.precio === 'number' && !Number.isNaN(product.precio) ? product.precio : ''
   );
   const [costo, setCosto] = useState<number | ''>(
     typeof product?.costo === 'number' && !Number.isNaN(product.costo) ? product.costo : 55
@@ -57,7 +59,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       : 'S, M, L, XL'
   );
   const [descripcion, setDescripcion] = useState<string>(
-    product?.descripcion || 'Polera oversize con cuello estructurado en algodón pesado.'
+    product?.descripcion || ''
   );
   const [imagenes, setImagenes] = useState<string[]>(
     product?.imagenes && product.imagenes.length > 0
@@ -71,7 +73,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   const [publicado, setPublicado] = useState<boolean>(product ? product.publicado : true);
   const [destacado, setDestacado] = useState<boolean>(product ? product.destacado : false);
   const [stock, setStock] = useState<StockBySize>(
-    product?.stock || { S: 4, M: 10, L: 8, XL: 2 }
+    product?.stock || { S: 0, M: 0, L: 0, XL: 0 }
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
