@@ -302,8 +302,9 @@ export function TarjetaPolera({
 
           {/* Micro-aviso de últimas unidades por talla seleccionada */}
           {!isSoldOut && selectedTallaStock > 0 && selectedTallaStock <= 2 && (
-            <span className="text-[9px] font-mono text-amber-400 font-bold block">
-              ⚡ Últimas {selectedTallaStock} uds ({selectedTalla})
+            <span className="text-[9px] font-mono text-amber-400 font-bold flex items-center gap-1">
+              <span className="material-symbols-outlined text-[12px] text-amber-400">bolt</span>
+              <span>Últimas {selectedTallaStock} uds ({selectedTalla})</span>
             </span>
           )}
 
