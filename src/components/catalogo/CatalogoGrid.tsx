@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { TarjetaPolera, type TarjetaPoleraProps } from './TarjetaPolera';
 import { GuiaTallasModal } from './GuiaTallasModal';
+import { ColeccionCombobox } from './ColeccionCombobox';
 
 interface CatalogoGridProps {
   initialProducts: TarjetaPoleraProps[];
@@ -16,6 +17,75 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [mobileDensity, setMobileDensity] = useState<'compact' | 'large'>('compact');
   const [isGuiaOpen, setIsGuiaOpen] = useState<boolean>(false);
+
+  // 1. Sincronización inicial con URL query param ?coleccion=<slug>
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const colFromUrl = params.get('coleccion');
+    if (colFromUrl) {
+      const match = collections.find(
+        (c) => c.slug === colFromUrl || c.slug.toLowerCase() === colFromUrl.toLowerCase()
+      );
+      if (match) {
+        setSelectedCollection(match.slug);
+      } else if (colFromUrl === 'todas') {
+        setSelectedCollection('todas');
+      }
+    }
+  }, [collections]);
+
+  // 2. Escuchar cambios de historial en el navegador (botón Atrás / Adelante)
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const col = params.get('coleccion') || 'todas';
+      setSelectedCollection(col);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // 3. Handler de selección con sincronización pushState
+  const handleCollectionSelect = (slug: string) => {
+    setSelectedCollection(slug);
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (slug === 'todas') {
+      url.searchParams.delete('coleccion');
+    } else {
+      url.searchParams.set('coleccion', slug);
+    }
+    window.history.pushState({}, '', url.toString());
+  };
+
+  // 4. Calcular colecciones disponibles con conteo real de prendas activas
+  const collectionsWithCount = useMemo(() => {
+    return collections
+      .map((col) => {
+        const selNorm = col.slug.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const count = initialProducts.filter((p) => {
+          const prodColNorm = (p.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const prodSlugNorm = ((p as any).coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          return (
+            (p as any).coleccionSlug === col.slug ||
+            prodSlugNorm === selNorm ||
+            prodColNorm === selNorm ||
+            prodColNorm.includes(selNorm) ||
+            selNorm.includes(prodColNorm)
+          );
+        }).length;
+
+        return {
+          id: col.id,
+          nombre: col.nombre.split('//')[0]?.trim() || col.nombre,
+          slug: col.slug,
+          count,
+        };
+      })
+      .filter((c) => c.count > 0 && !c.slug.includes('sin-coleccion'));
+  }, [collections, initialProducts]);
+
 
   // Filtrado y ordenamiento reactivo
   const filteredProducts = useMemo(() => {
@@ -195,38 +265,15 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       {/* ========================================================== */}
       {/* 2. BARRA DE FILTROS, SCROLLBAR FINA Y BUSCADOR             */}
       {/* ========================================================== */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
-        {/* Chips de Colección con Scroll Horizontal Fino Interactivo */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin-hover">
-          <button
-            type="button"
-            onClick={() => setSelectedCollection('todas')}
-            className={`px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border ${
-              selectedCollection === 'todas'
-                ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.5)]'
-                : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
-            }`}
-          >
-            Todas ({initialProducts.length})
-          </button>
-
-          {collections.map((col) => {
-            const isSelected = selectedCollection === col.slug;
-            return (
-              <button
-                key={col.id}
-                type="button"
-                onClick={() => setSelectedCollection(col.slug)}
-                className={`px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border ${
-                  isSelected
-                    ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.5)]'
-                    : 'bg-[#141416] text-[#ac8888] hover:text-white border-[#201f1f]'
-                }`}
-              >
-                {col.nombre.split('//')[0]?.trim() || col.nombre}
-              </button>
-            );
-          })}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-end justify-between gap-4 mb-6">
+        {/* Selector de Colección Accesible en Combobox (Fase 6) */}
+        <div className="flex-shrink-0">
+          <ColeccionCombobox
+            collections={collectionsWithCount}
+            selectedSlug={selectedCollection}
+            totalCount={initialProducts.length}
+            onSelect={handleCollectionSelect}
+          />
         </div>
 
         {/* Buscador y Selector de Orden Ampliado */}
