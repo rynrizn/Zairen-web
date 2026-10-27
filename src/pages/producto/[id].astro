@@ -20,7 +20,7 @@ const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 let dbProd: any = null;
 
-// 1. Búsqueda primaria en la vista pública
+// 1. Búsqueda primaria en la vista pública (solo prendas activas y con colección activa)
 if (isUuid) {
   const { data, error } = await supabase
     .from('vw_catalogo_publico')
@@ -39,127 +39,206 @@ if (isUuid) {
 
 // 2. Fallback de contingencia directamente a la tabla base producto
 if (!dbProd) {
-  const query = supabase.from('producto').select('*');
+  const query = supabase
+    .from('producto')
+    .select('*, coleccion:coleccion_id(nombre, slug)');
   const { data, error } = isUuid
-    ? await query.eq('id_producto', id).maybeSingle()
+    ? await query.eq('id', id).maybeSingle()
     : await query.eq('slug', id).maybeSingle();
 
-  if (!error && data) {
-    dbProd = data;
+  // Solo considerar disponible si existe, está activo y publicado
+  if (!error && data && data.activo && data.publicado) {
+    dbProd = {
+      id_producto: data.id,
+      nombre: data.nombre,
+      slug: data.slug,
+      descripcion: data.descripcion,
+      precio_venta: data.precio_venta,
+      destacado: data.destacado,
+      es_prioritario: data.es_prioritario,
+      estado_comercial: data.estado_comercial || 'disponible',
+      coleccion: data.coleccion?.nombre || 'General',
+      coleccion_slug: data.coleccion?.slug || 'general',
+      stock_disponible: 0,
+    };
   }
 }
 
-if (!dbProd) {
-  console.warn(`[Zairen Lab] Producto no encontrado con id/slug: "${id}". Redirigiendo al catálogo.`);
-  return Astro.redirect('/');
+const isNotFound = !dbProd;
+if (isNotFound) {
+  Astro.response.status = 404;
 }
 
-const stockPorTalla: Record<string, number> = {};
-if (dbProd.atributos && typeof dbProd.atributos === 'object') {
-  Object.entries(dbProd.atributos).forEach(([k, v]) => {
-    const match = k.toLowerCase().match(/^stock_([a-z0-9]+)$/);
-    if (match) {
-      const sizeKey = match[1].toUpperCase();
-      stockPorTalla[sizeKey] = parseInt(String(v), 10) || 0;
-    }
-  });
-}
+// Procesar datos del producto si fue encontrado
+let product: any = null;
+let productImages: string[] = [];
 
-if (Object.keys(stockPorTalla).length === 0) {
-  try {
-    const { data: attrData } = await supabase
-      .from('atributo_producto')
-      .select('clave, valor')
-      .eq('producto_id', dbProd.id_producto)
-      .ilike('clave', 'stock_%');
-    if (attrData && attrData.length > 0) {
-      attrData.forEach((a: any) => {
-        const match = a.clave.toLowerCase().match(/^stock_([a-z0-9]+)$/);
-        if (match) {
-          stockPorTalla[match[1].toUpperCase()] = parseInt(String(a.valor), 10) || 0;
+if (dbProd) {
+  const stockPorTalla: Record<string, number> = {};
+  if (dbProd.atributos && typeof dbProd.atributos === 'object') {
+    Object.entries(dbProd.atributos).forEach(([k, v]) => {
+      const match = k.toLowerCase().match(/^stock_([a-z0-9]+)$/);
+      if (match) {
+        const sizeKey = match[1].toUpperCase();
+        stockPorTalla[sizeKey] = parseInt(String(v), 10) || 0;
+      }
+    });
+  }
+
+  const prodId = dbProd.id_producto || dbProd.id;
+  if (Object.keys(stockPorTalla).length === 0 && prodId) {
+    try {
+      const { data: attrData } = await supabase
+        .from('atributo_producto')
+        .select('clave, valor')
+        .eq('producto_id', prodId)
+        .ilike('clave', 'stock_%');
+      if (attrData && attrData.length > 0) {
+        attrData.forEach((a: any) => {
+          const match = a.clave.toLowerCase().match(/^stock_([a-z0-9]+)$/);
+          if (match) {
+            stockPorTalla[match[1].toUpperCase()] = parseInt(String(a.valor), 10) || 0;
+          }
+        });
+      }
+    } catch (e) {}
+  }
+
+  const tallasConStock = Object.keys(stockPorTalla);
+  const tallasFinal = tallasConStock.length > 0
+    ? tallasConStock
+    : (Array.isArray(dbProd.tallas) && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL']);
+
+  const stockCalculado = Object.keys(stockPorTalla).length > 0
+    ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
+    : Number(dbProd.stock_disponible || 0);
+
+  const fallbackLogo = 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp';
+  const imgPortada = (typeof dbProd.imagen_portada === 'string' && dbProd.imagen_portada.trim().length > 0)
+    ? dbProd.imagen_portada
+    : fallbackLogo;
+
+  const rawPrecio = Number(dbProd.precio_venta);
+  const precioFinal = !isNaN(rawPrecio) && rawPrecio >= 0 ? rawPrecio : 0;
+
+  product = {
+    id: prodId || '',
+    slug: dbProd.slug || id,
+    nombre: dbProd.nombre || 'Prenda de Autor',
+    precio: precioFinal,
+    coleccion: dbProd.coleccion || 'General',
+    seccion: dbProd.coleccion || 'General',
+    tipo: 'Polera',
+    descripcion: dbProd.descripcion || '',
+    imagen: imgPortada,
+    imagenDorsal: dbProd.imagen_dorsal || undefined,
+    tallas: tallasFinal,
+    stockPorTalla: Object.keys(stockPorTalla).length > 0 ? stockPorTalla : undefined,
+    stockDisponible: Math.max(Number(dbProd.stock_disponible || 0), stockCalculado),
+    esPrioritario: Boolean(dbProd.es_prioritario),
+    estadoComercial: dbProd.estado_comercial || 'disponible',
+  };
+
+  productImages = [product.imagen];
+  if (product.imagenDorsal && typeof product.imagenDorsal === 'string' && product.imagenDorsal.trim().length > 0) {
+    productImages.push(product.imagenDorsal);
+  }
+
+  if (prodId) {
+    try {
+      const { data: dbImgs } = await supabase
+        .from('imagen')
+        .select('url_imagen')
+        .eq('producto_id', prodId)
+        .order('orden', { ascending: true });
+
+      if (dbImgs && dbImgs.length > 0) {
+        const additional = dbImgs.map((img) => img.url_imagen).filter(Boolean);
+        const combined = Array.from(new Set([product.imagen, product.imagenDorsal, ...additional].filter(Boolean))) as string[];
+        if (combined.length > 0) {
+          productImages = combined;
         }
-      });
-    }
-  } catch (e) {}
-}
-
-const tallasConStock = Object.keys(stockPorTalla);
-const tallasFinal = tallasConStock.length > 0
-  ? tallasConStock
-  : (dbProd.tallas && dbProd.tallas.length > 0 ? dbProd.tallas : ['S', 'M', 'L', 'XL']);
-
-const stockCalculado = Object.keys(stockPorTalla).length > 0
-  ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
-  : Number(dbProd.stock_disponible || 0);
-
-const product = {
-  id: dbProd.id_producto,
-  slug: dbProd.slug,
-  nombre: dbProd.nombre,
-  precio: Number(dbProd.precio_venta),
-  coleccion: dbProd.coleccion || 'General',
-  seccion: dbProd.coleccion || 'General',
-  tipo: 'Polera',
-  descripcion: dbProd.descripcion || '',
-  imagen: dbProd.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
-  imagenDorsal: dbProd.imagen_dorsal,
-  tallas: tallasFinal,
-  stockPorTalla: Object.keys(stockPorTalla).length > 0 ? stockPorTalla : undefined,
-  stockDisponible: Math.max(Number(dbProd.stock_disponible || 0), stockCalculado),
-  esPrioritario: Boolean(dbProd.es_prioritario),
-  estadoComercial: dbProd.estado_comercial || 'disponible',
-};
-
-let productImages: string[] = [product.imagen];
-if (product.imagenDorsal) productImages.push(product.imagenDorsal);
-
-try {
-  const { data: dbImgs } = await supabase
-    .from('imagen')
-    .select('url_imagen')
-    .eq('producto_id', dbProd.id_producto)
-    .order('orden', { ascending: true });
-
-  if (dbImgs && dbImgs.length > 0) {
-    const additional = dbImgs.map((img) => img.url_imagen).filter(Boolean);
-    const combined = Array.from(new Set([product.imagen, product.imagenDorsal, ...additional].filter(Boolean))) as string[];
-    if (combined.length > 0) {
-      productImages = combined;
-    }
+      }
+    } catch (e) {}
   }
-} catch (e) {}
+}
 ---
 
-<Layout
-  title={`${product.nombre} // ${siteConfig.name}`}
-  description={`${product.descripcion || product.nombre} • Precio: Bs ${product.precio.toFixed(2)} • Zairen Lab // Streetwear & Aesthetic Studio.`}
-  image={product.imagen}
-  type="product"
-  price={product.precio}
->
-  <Navbar />
+{isNotFound ? (
+  <Layout
+    title={`Prenda no disponible // ${siteConfig.name}`}
+    description="El producto seleccionado ya no está disponible en nuestro catálogo activo. Explora nuestras colecciones en Zairen Lab."
+  >
+    <Navbar />
 
-  <main class="pt-24 pb-16 min-h-screen">
-    <DetalleProducto
-      client:load
-      id={product.id}
-      slug={product.slug}
-      nombre={product.nombre}
-      precio={product.precio}
-      coleccion={product.coleccion}
-      seccion={product.seccion}
-      tipo={product.tipo}
-      descripcion={product.descripcion}
-      imagenes={productImages}
-      tallas={product.tallas}
-      stockDisponible={product.stockDisponible}
-      stockPorTalla={product.stockPorTalla}
-      estadoComercial={product.estadoComercial}
-    />
-  </main>
+    <main class="pt-28 pb-20 min-h-[75vh] flex items-center justify-center px-4">
+      <div class="max-w-md w-full mx-auto text-center border border-[#201f1f] bg-[#141416] p-8 md:p-10 relative overflow-hidden shadow-2xl">
+        <!-- Acento superior carmesí -->
+        <div class="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c]"></div>
 
-  <!-- Carrito Drawer Global -->
-  <CarritoDrawer client:idle />
+        <div class="mb-5 flex justify-center">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-widest text-[#dc143c] bg-[#dc143c]/10 border border-[#dc143c]/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#dc143c] animate-pulse"></span>
+            CATÁLOGO // ESTADO 404
+          </span>
+        </div>
 
-  <Footer />
-</Layout>
+        <h1 class="font-display text-2xl md:text-3xl font-bold uppercase tracking-tight text-[#FAF9F6] mb-3">
+          Este producto ya no está disponible
+        </h1>
+
+        <p class="font-body text-xs md:text-sm text-[#ac8888] mb-8 leading-relaxed max-w-sm mx-auto">
+          La prenda que buscas ha sido retirada, archivada o se encuentra agotada temporalmente. Puedes explorar las colecciones activas y nuevos lanzamientos.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a
+            href="/"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FAF9F6] hover:bg-[#dc143c] text-[#0A0A0A] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors duration-200 border border-transparent hover:border-[#dc143c]"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Volver al Catálogo
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <Footer />
+  </Layout>
+) : (
+  <Layout
+    title={`${product.nombre} // ${siteConfig.name}`}
+    description={`${product.descripcion || product.nombre} • Precio: Bs ${product.precio.toFixed(2)} • Zairen Lab // Streetwear & Aesthetic Studio.`}
+    image={product.imagen}
+    type="product"
+    price={product.precio}
+  >
+    <Navbar />
+
+    <main class="pt-24 pb-16 min-h-screen">
+      <DetalleProducto
+        client:load
+        id={product.id}
+        slug={product.slug}
+        nombre={product.nombre}
+        precio={product.precio}
+        coleccion={product.coleccion}
+        seccion={product.seccion}
+        tipo={product.tipo}
+        descripcion={product.descripcion}
+        imagenes={productImages}
+        tallas={product.tallas}
+        stockDisponible={product.stockDisponible}
+        stockPorTalla={product.stockPorTalla}
+        estadoComercial={product.estadoComercial}
+      />
+    </main>
+
+    <!-- Carrito Drawer Global -->
+    <CarritoDrawer client:idle />
+
+    <Footer />
+  </Layout>
+)}
