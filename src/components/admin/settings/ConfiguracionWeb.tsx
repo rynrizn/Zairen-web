@@ -1013,7 +1013,7 @@ export function ConfiguracionWeb() {
                       />
                       {hasError && (
                         <span className="font-mono text-[10px] text-red-400 block mt-1">
-                          ⚠️ {phoneVal.error || socialVal.error}
+                          <span className="material-symbols-outlined text-[14px] text-amber-400 inline align-middle mr-1">warning</span>{phoneVal.error || socialVal.error}
                         </span>
                       )}
                     </div>
@@ -1286,9 +1286,9 @@ export function ConfiguracionWeb() {
               </p>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 {[
-                  { label: '🟢 Drop 01 Disponible', val: 'DROP 01 DISPONIBLE' },
-                  { label: '🟡 Pre-Order Activo', val: 'PRE-ORDER ACTIVO' },
-                  { label: '🔴 Sold Out / Agotado', val: 'SOLD OUT // CERRADO' },
+                  { label: '● Drop 01 Disponible', val: 'DROP 01 DISPONIBLE' },
+                  { label: '● Pre-Order Activo', val: 'PRE-ORDER ACTIVO' },
+                  { label: '● Sold Out / Agotado', val: 'SOLD OUT // CERRADO' },
                   { label: '⏳ Próximo Drop', val: 'PRÓXIMO DROP EN PREPARACIÓN' },
                 ].map((item) => (
                   <button
