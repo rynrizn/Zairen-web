@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { siteConfig, type SocialNetwork } from '../config/site';
+import type { ContactChannel } from './contactChannels';
 
 export interface AppConfig {
   id: number;
@@ -11,6 +12,8 @@ export interface AppConfig {
   whatsapp_numero: string;
   whatsapp_display: string;
   whatsapp_mensaje_template: string;
+  canales_ordenados?: ContactChannel[];
+  canales_contacto?: Record<string, any>;
   redes_sociales: Array<{
     id: string;
     nombre: string;
