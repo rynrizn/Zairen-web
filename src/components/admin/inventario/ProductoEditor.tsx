@@ -709,7 +709,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
               <div className="grid grid-cols-5 gap-2 pt-1">
                 {imagenes.map((img, idx) => (
                   <div
-                    key={idx}
+                    key={`${img}-${idx}`}
                     className="relative aspect-[3/4] bg-[#0E0F11] border border-white/[0.1] rounded-none overflow-hidden group"
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
@@ -884,11 +884,11 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
                 </div>
               ) : mediaImages.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-                  {mediaImages.map((url, i) => {
+                  {mediaImages.map((url) => {
                     const isAlreadyAdded = imagenes.includes(url);
                     return (
                       <div
-                        key={i}
+                        key={url}
                         onClick={() => !isAlreadyAdded && handleSelectFromMedia(url)}
                         className={`relative aspect-[3/4] bg-[#0E0F11] border transition-all cursor-pointer overflow-hidden group ${
                           isAlreadyAdded
