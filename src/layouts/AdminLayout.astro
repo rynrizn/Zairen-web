@@ -133,9 +133,23 @@ const { title = 'Admin // ZAIREN LAB', activePath = 'panel' } = Astro.props;
             .eq('id', session.user.id)
             .maybeSingle();
 
-          if (profile && (!profile.activo || !['ADMIN', 'SUPERADMIN'].includes(profile.rol))) {
+          const userRol = profile?.rol?.toUpperCase() || 'ADMIN';
+          const isActive = profile ? profile.activo : true;
+
+          if (!isActive || !['ADMIN', 'SUPERADMIN', 'OPERADOR', 'VENDEDOR'].includes(userRol)) {
             document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
             window.location.replace('/login?error=unauthorized');
+            return;
+          }
+
+          localStorage.setItem('zairen_user_role', userRol);
+
+          // Restricción de rutas protegidas para OPERADOR
+          const isOperator = userRol === 'OPERADOR' || userRol === 'VENDEDOR';
+          const restrictedForOperator = ['/admin/metricas', '/admin/configuracion', '/admin/usuarios', '/admin/interfaz-web'];
+          if (isOperator && restrictedForOperator.some((p) => window.location.pathname.startsWith(p))) {
+            window.location.replace('/admin/pedidos');
+            return;
           }
         } catch (e) {}
       }
