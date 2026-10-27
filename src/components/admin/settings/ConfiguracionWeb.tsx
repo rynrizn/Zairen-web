@@ -101,6 +101,14 @@ export function ConfiguracionWeb() {
     'Hola Zairen Lab, me interesa consultar sobre una prenda del catálogo:'
   );
 
+  // 7. Banner Promocional, Horarios & Modo Mantenimiento
+  const [bannerEnabled, setBannerEnabled] = useState<boolean>(false);
+  const [bannerText, setBannerText] = useState<string>('NUEVO DROP 2026 // ENVÍOS A TODA BOLIVIA');
+  const [bannerLink, setBannerLink] = useState<string>('#catalogo');
+  const [maintenanceMode, setMaintenanceMode] = useState<boolean>(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState<string>('Tienda en actualización de catálogo. Volvemos en breve.');
+  const [openingHours, setOpeningHours] = useState<string>('Lun a Sáb: 09:00 - 20:00 (BOT)');
+
   // Cargar configuraciones guardadas al iniciar desde Supabase (y localStorage de fallback)
   useEffect(() => {
     let isMounted = true;
@@ -161,6 +169,20 @@ export function ConfiguracionWeb() {
             if (data.apariencia.saludo_personalizado) setCustomGreeting(data.apariencia.saludo_personalizado);
             if (data.apariencia.moneda_activa) setCurrency(data.apariencia.moneda_activa);
             if (data.apariencia.tasa_cambio) setExchangeRate(data.apariencia.tasa_cambio);
+          }
+
+          // Banner Promocional, Horarios & Modo Mantenimiento
+          if (data.banner_promocional) {
+            if (typeof data.banner_promocional.activo === 'boolean') setBannerEnabled(data.banner_promocional.activo);
+            if (data.banner_promocional.texto) setBannerText(data.banner_promocional.texto);
+            if (data.banner_promocional.link) setBannerLink(data.banner_promocional.link);
+          }
+          if (data.modo_mantenimiento) {
+            if (typeof data.modo_mantenimiento.activo === 'boolean') setMaintenanceMode(data.modo_mantenimiento.activo);
+            if (data.modo_mantenimiento.mensaje) setMaintenanceMessage(data.modo_mantenimiento.mensaje);
+          }
+          if (data.horario_atencion) {
+            setOpeningHours(data.horario_atencion);
           }
         }
       } catch (err) {
@@ -289,6 +311,16 @@ export function ConfiguracionWeb() {
           tasa_cambio: exchangeRate > 0 ? exchangeRate : 6.96,
           moneda_activa: currency,
         },
+        banner_promocional: {
+          activo: bannerEnabled,
+          texto: bannerText,
+          link: bannerLink,
+        },
+        modo_mantenimiento: {
+          activo: maintenanceMode,
+          mensaje: maintenanceMessage,
+        },
+        horario_atencion: openingHours,
         updated_at: new Date().toISOString(),
       };
 
@@ -315,6 +347,12 @@ export function ConfiguracionWeb() {
         localStorage.setItem('zairen_blur_intensity', blurIntensity);
         localStorage.setItem('zairen_custom_greeting', customGreeting);
         localStorage.setItem('zairen_socials', JSON.stringify(socials));
+        localStorage.setItem('zairen_banner_enabled', String(bannerEnabled));
+        localStorage.setItem('zairen_banner_text', bannerText);
+        localStorage.setItem('zairen_banner_link', bannerLink);
+        localStorage.setItem('zairen_maintenance_mode', String(maintenanceMode));
+        localStorage.setItem('zairen_maintenance_message', maintenanceMessage);
+        localStorage.setItem('zairen_opening_hours', openingHours);
         document.documentElement.style.setProperty('--color-brand-crimson', accentColor);
         document.documentElement.style.setProperty('--color-primary-container', accentColor);
         window.dispatchEvent(new Event('zairen-config-updated'));
@@ -876,6 +914,146 @@ export function ConfiguracionWeb() {
               Texto predeterminado que precede las consultas directas en WhatsApp y modal de producto.
             </span>
           </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN 7: AVISO EN CABECERA Y MODO MANTENIMIENTO        */}
+        {/* ======================================================== */}
+        <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-6">
+          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#dc143c] text-[20px]">campaign</span>
+              <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
+                Aviso en Cabecera (Banner) & Modo Mantenimiento
+              </h3>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-none bg-[#1c1b1b] text-[#ffb3b3] font-mono text-[10px] uppercase font-bold border border-[#201f1f]">
+              CONTROL EN VIVO
+            </span>
+          </div>
+
+          {/* Banner Promocional de Cabecera */}
+          <div className="space-y-3 p-4 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-headline text-xs font-bold text-white uppercase tracking-wider">
+                  Banner Promocional Superior
+                </h4>
+                <p className="font-mono text-[11px] text-[#ac8888]">
+                  Muestra un cintillo fijo sobre el Navbar con anuncios de lanzamientos o drops.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={bannerEnabled}
+                  onChange={(e) => setBannerEnabled(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-[#201f1f] peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-[#dc143c]"></div>
+              </label>
+            </div>
+
+            {bannerEnabled && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
+                    Texto del Anuncio
+                  </label>
+                  <input
+                    type="text"
+                    value={bannerText}
+                    onChange={(e) => setBannerText(e.target.value)}
+                    placeholder="DROP 2026 // ENVÍOS GRATIS A TODO EL PAÍS"
+                    className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
+                    Enlace de Destino (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={bannerLink}
+                    onChange={(e) => setBannerLink(e.target.value)}
+                    placeholder="#catalogo o https://..."
+                    className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Horario de Atención */}
+          <div className="space-y-2 p-4 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
+            <label className="font-mono text-xs text-[#ac8888] uppercase block">
+              Horario de Atención y Despacho
+            </label>
+            <input
+              type="text"
+              value={openingHours}
+              onChange={(e) => setOpeningHours(e.target.value)}
+              placeholder="Lun a Sáb: 09:00 - 20:00 (BOT)"
+              className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-[#dc143c] focus:outline-none"
+            />
+            <span className="font-mono text-[10px] text-[#ac8888] block">
+              Informa al cliente los horarios operativos para respuesta en WhatsApp.
+            </span>
+          </div>
+
+          {/* Modo Mantenimiento */}
+          <div className="space-y-3 p-4 bg-[#1c1b1b] rounded-none border border-white/[0.04]">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-headline text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <span>Modo Mantenimiento de Tienda</span>
+                  {maintenanceMode && (
+                    <span className="px-1.5 py-0.2 bg-amber-950 text-amber-300 font-mono text-[9px] uppercase font-bold">
+                      ACTIVO
+                    </span>
+                  )}
+                </h4>
+                <p className="font-mono text-[11px] text-[#ac8888]">
+                  Pausa temporalmente las ventas para actualizaciones de inventario o drops exclusivos.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={maintenanceMode}
+                  onChange={(e) => setMaintenanceMode(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-[#201f1f] peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            </div>
+
+            {maintenanceMode && (
+              <div className="space-y-1 pt-2">
+                <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
+                  Mensaje Visible para los Clientes
+                </label>
+                <input
+                  type="text"
+                  value={maintenanceMessage}
+                  onChange={(e) => setMaintenanceMessage(e.target.value)}
+                  placeholder="Tienda en actualización de catálogo. Volvemos en breve."
+                  className="w-full px-3 py-2 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#2A2A2A] focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Botón Guardar Inferior */}
+        <div className="flex justify-end pt-4 pb-12">
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-8 py-3 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(220,20,60,0.35)] transition-all cursor-pointer border border-[#dc143c]"
+          >
+            <span className="material-symbols-outlined text-[18px]">save</span>
+            <span>Guardar Toda la Configuración</span>
+          </button>
         </div>
       </form>
     </div>
