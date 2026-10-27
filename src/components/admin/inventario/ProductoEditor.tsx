@@ -77,6 +77,110 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estados del selector modal de Mediateca Cloudinary
+  interface ColeccionOpcion {
+    id: string;
+    nombre: string;
+    slug: string;
+    totalProductos?: number;
+  }
+  const [coleccionesDisponibles, setColeccionesDisponibles] = useState<ColeccionOpcion[]>([]);
+  const [isLoadingCols, setIsLoadingCols] = useState<boolean>(false);
+
+  const cargarColecciones = async () => {
+    setIsLoadingCols(true);
+    try {
+      const res = await fetch('/api/admin/colecciones');
+      const data = await res.json().catch(() => ({}));
+      if (data.success && Array.isArray(data.colecciones)) {
+        setColeccionesDisponibles(data.colecciones);
+      } else {
+        const { data: dbCols } = await supabase
+          .from('coleccion')
+          .select('id, nombre, slug')
+          .order('orden', { ascending: true })
+          .order('nombre', { ascending: true });
+        if (dbCols) {
+          setColeccionesDisponibles(dbCols.map((c: any) => ({ ...c, totalProductos: 0 })));
+        }
+      }
+    } catch (e) {
+      console.warn('Error al cargar colecciones:', e);
+    } finally {
+      setIsLoadingCols(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarColecciones();
+  }, []);
+
+  const normalizarTexto = (texto: string) => {
+    return texto
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  };
+
+  const handleCrearColeccion = async () => {
+    const nombreLimpio = seccionNueva.trim();
+    if (!nombreLimpio) {
+      toast.error('El nombre de la nueva colección no puede estar vacío');
+      return;
+    }
+
+    const normNombre = normalizarTexto(nombreLimpio);
+    const colExistente = coleccionesDisponibles.find(
+      (c) => normalizarTexto(c.nombre) === normNombre || normalizarTexto(c.slug) === normNombre
+    );
+
+    if (colExistente) {
+      toast.info(`La colección "${colExistente.nombre}" ya existe. Seleccionada automáticamente.`);
+      setColeccion(colExistente.nombre);
+      setSeccionNueva('');
+      return;
+    }
+
+    const toastCreando = toast.loading('Creando nueva colección...');
+    try {
+      const baseSlug = normNombre.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const finalSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+      const { data: newCol, error } = await supabase
+        .from('coleccion')
+        .insert({
+          nombre: nombreLimpio,
+          slug: finalSlug,
+          activa: true,
+          orden: coleccionesDisponibles.length + 1,
+        })
+        .select('id, nombre, slug')
+        .single();
+
+      if (error || !newCol) {
+        throw error || new Error('No se pudo crear la colección');
+      }
+
+      toast.dismiss(toastCreando);
+      toast.success(`Colección "${newCol.nombre}" creada y seleccionada`);
+
+      const nuevaOpcion: ColeccionOpcion = {
+        id: newCol.id,
+        nombre: newCol.nombre,
+        slug: newCol.slug,
+        totalProductos: 0,
+      };
+
+      setColeccionesDisponibles((prev) => [...prev, nuevaOpcion]);
+      setColeccion(newCol.nombre);
+      setSeccionNueva('');
+      window.dispatchEvent(new CustomEvent('inventory-changed'));
+    } catch (err: any) {
+      toast.dismiss(toastCreando);
+      toast.error('Error al crear colección: ' + (err?.message || 'Error desconocido'));
+    }
+  };
+
   const [showMediaLibrary, setShowMediaLibrary] = useState<boolean>(false);
   const [isLoadingMedia, setIsLoadingMedia] = useState<boolean>(false);
   const [mediaImages, setMediaImages] = useState<string[]>([]);
@@ -199,22 +303,55 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
 
   const handleDeleteProduct = async () => {
     if (!product) return;
-    if (!confirm(`¿Estás seguro de eliminar "${nombre}" del catálogo y de la base de datos?`)) return;
+    if (!confirm(`¿Estás seguro de retirar o eliminar "${nombre}" del catálogo?`)) return;
 
-    const toastLoading = toast.loading('Eliminando prenda...');
+    const toastLoading = toast.loading('Procesando eliminación...');
     try {
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
-      if (isUUID) {
-        await supabase.from('producto').delete().eq('id', product.id);
+      const res = await fetch('/api/admin/productos', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: product.id }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        toast.dismiss(toastLoading);
+        if (data.error === 'REQUIERE_ARCHIVO') {
+          const deseaArchivar = confirm(
+            `La prenda "${nombre}" tiene ${data.pedidosAsociados} pedido(s) asociados en el historial contable.\n\nPara proteger la trazabilidad de ventas, NO puede borrarse físicamente. ¿Deseas ARCHIVARLA (desactivarla para que no aparezca en la tienda pública)?`
+          );
+          if (deseaArchivar) {
+            const archToast = toast.loading('Archivando prenda...');
+            const archRes = await fetch('/api/admin/productos', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: product.id, forzarArchivo: true }),
+            });
+            const archData = await archRes.json().catch(() => ({}));
+            toast.dismiss(archToast);
+            if (archRes.ok && archData.success) {
+              toast.success(archData.message || 'Prenda archivada exitosamente.');
+              onClose();
+              window.dispatchEvent(new CustomEvent('inventory-changed'));
+            } else {
+              toast.error(archData.error || 'No se pudo archivar la prenda.');
+            }
+          }
+          return;
+        } else {
+          toast.error(data.error || 'Error al procesar la eliminación.');
+          return;
+        }
       }
+
       toast.dismiss(toastLoading);
-      toast.success('Prenda eliminada con éxito');
+      toast.success(data.message || 'Prenda eliminada definitivamente.');
       onClose();
-      // Notificar recarga
       window.dispatchEvent(new CustomEvent('inventory-changed'));
     } catch (err: any) {
       toast.dismiss(toastLoading);
-      toast.error('Error al eliminar: ' + (err?.message || 'Error desconocido'));
+      toast.error('Error al procesar: ' + (err?.message || 'Error de conexión'));
     }
   };
 
