@@ -406,7 +406,7 @@ export function DetalleProducto({
             <span className="bento-id">ID: {safeSlug}</span>
             {stockDisponible > 0 && stockDisponible <= 4 && (
               <span className="text-[11px] font-mono text-amber-400 font-bold uppercase animate-pulse">
-                ⚡ Solo {stockDisponible} uds disponibles
+                <span className="material-symbols-outlined text-[14px] text-amber-400 inline align-middle mr-1">bolt</span>Solo {stockDisponible} uds disponibles
               </span>
             )}
           </div>

@@ -401,7 +401,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             title="Ver medidas en centímetros de prendas"
             className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
           >
-            <span>📏</span>
+            <span className="material-symbols-outlined text-[16px] text-[#dc143c]">straighten</span>
             <span className="hidden sm:inline">Guía de Tallas</span>
             <span className="sm:hidden">Tallas</span>
           </button>
