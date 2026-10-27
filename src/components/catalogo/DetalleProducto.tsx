@@ -5,6 +5,12 @@ import { MorphIcon } from '../ui/MorphIcon';
 import { siteConfig, formatCurrency } from '../../config/site';
 import { getOptimizedImageUrl } from '../../lib/cloudinary';
 import { ShareProductModal } from './ShareProductModal';
+import {
+  getActiveChannels,
+  buildChannelActionUrl,
+  DEFAULT_CONTACT_CHANNELS,
+  type ContactChannel,
+} from '../../lib/contactChannels';
 
 export interface DetalleProductoProps {
   id?: string;
@@ -47,6 +53,23 @@ export function DetalleProducto({
   const coleccionSegura = coleccion?.trim() || 'General';
   const seccionTexto = (seccion || coleccionSegura).toUpperCase();
   const tipoSeguro = tipo?.trim() || 'Polera';
+
+  const [activeChannels, setActiveChannels] = useState<ContactChannel[]>([]);
+
+  useEffect(() => {
+    const syncChannels = () => {
+      try {
+        const raw = localStorage.getItem('zairen_contact_channels');
+        const list = raw ? JSON.parse(raw) : DEFAULT_CONTACT_CHANNELS;
+        setActiveChannels(getActiveChannels(list));
+      } catch {
+        setActiveChannels(getActiveChannels(DEFAULT_CONTACT_CHANNELS));
+      }
+    };
+    syncChannels();
+    window.addEventListener('zairen-config-updated', syncChannels);
+    return () => window.removeEventListener('zairen-config-updated', syncChannels);
+  }, []);
 
   // Sincronizar título de la pestaña con el nombre de la prenda
   useEffect(() => {
@@ -486,6 +509,49 @@ export function DetalleProducto({
           </div>
         </div>
 
+        {/* ===== BOX 6: CANALES DE CONTACTO OFICIALES (Fase 5) ===== */}
+        {activeChannels.length > 0 && (
+          <div className="bento-cell col-span-full bg-[#141416] p-5 border border-[#201f1f]">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#dc143c] text-[18px]">support_agent</span>
+                <span className="bento-cell-label" style={{ marginBottom: 0 }}>
+                  CANALES DE CONTACTO DIRECTO
+                </span>
+              </div>
+              <span className="font-mono text-[10px] text-[#ac8888] uppercase">
+                Atención Inmediata
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {activeChannels.map((c) => (
+                <a
+                  key={c.id}
+                  href={buildChannelActionUrl(c, {
+                    nombre: safeNombre,
+                    precio: safePrecio,
+                    moneda: 'Bs',
+                    url: typeof window !== 'undefined' ? window.location.href : '',
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-[#1c1b1b] hover:bg-[#201f1f] border border-white/[0.08] hover:border-[#dc143c] flex items-center justify-between transition-all group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                    <span className="font-mono text-xs font-bold text-[#FAF9F6] uppercase truncate group-hover:text-[#dc143c]">
+                      {c.name}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[14px] text-[#ac8888] group-hover:text-white shrink-0">
+                    open_in_new
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Pantalla Completa (Lightbox Zoom) */}
