@@ -34,7 +34,7 @@
 
 ## 3. Identidad de Marca y Restricciones Operativas (Brand Rules)
 
-1. **Restricción de Origen y Jerga:** Queda estrictamente prohibido mencionar términos como *"taller de costura"*, *"confección textil"*, *"Tarija"*, *"Tokyo-Tarija"* o referencias a talleres artesanales locales. La marca se comunica como un estudio independiente de diseño contemporáneo (*Zairen Lab // Aesthetic Studio*).
+1. **Restricción de Origen y Jerga:** Queda estrictamente prohibido mencionar términos asociados a talleres artesanales, manufactura tradicional o referencias geográficas locales. La marca se comunica como un estudio independiente de diseño contemporáneo (*Zairen Lab // Aesthetic Studio*).
 2. **Geometría y Estilo:** Bordes rectos ortogonales (`rounded-none`), micro-líneas de acento degradadas en carmesí Zen (`#DC143C`), sombras volumétricas controladas y tipografías monoespaciadas para SKUs y códigos técnicos.
 3. **Persistencia de Tema:** Soporte completo de modo Claro / Oscuro sincronizado en `localStorage` (`zairen_theme`) y blindado ante el retroceso de historial del navegador (*bfcache*) mediante escuchadores `pageshow`.
 4. **Acceso Administrativo Discreto:** El enlace al login administrativo en el pie de página está mimetizado como un microtexto técnico (`sys.v2`), sin apariencia de botón. Si el usuario ya cuenta con sesión abierta en Supabase, el sistema lo redirige de inmediato a `/admin` sin solicitar credenciales nuevamente.
@@ -204,3 +204,25 @@ Lee la documentación detenidamente y propónme un plan estratégico de mejoras 
 - **Blindaje ante datos nulos en `DetalleProducto.tsx`:** Normalización defensiva de imágenes (placeholder oficial de Zairen Lab si el arreglo está vacío o no contiene strings válidos), tallas (`['S', 'M', 'L', 'XL']` por defecto), precios seguros sin `NaN`, y SKUs formateados sin dependencias de valores nulos.
 - **Saneamiento reactivo de carrito persistido:** Implementación de `validarYLimpiarCarrito()` en `cartStore.ts`. Verifica la existencia y estado activo de las prendas almacenadas en `localStorage` (`zairen_cart_v2`) al iniciar o abrir el `CarritoDrawer`, retirando automáticamente cualquier prenda eliminada con una notificación discreta (`toast.info`).
 - **Validación robusta en checkout:** `/api/checkout-validate` valida existencia y estado activo de cada producto antes de calcular inventarios, resolviendo identificadores UUID y slugs.
+
+### Fase 2: Colecciones Dinámicas y Eliminación Segura
+- **Funciones RPC PostgreSQL:** `eliminar_coleccion_segura(p_coleccion_id)` y `eliminar_o_archivar_producto_seguro(p_producto_id)` ejecutadas con permisos de seguridad definer.
+- **Regla de negocio de colecciones:** Bloqueo automático si existen productos con stock disponible ($>0$ unidades); desacoplamiento a `coleccion_id = NULL` ("Sin colección") si todos sus productos están agotados, ocultándolos automáticamente del catálogo público pero manteniéndolos visibles en el panel administrativo con insignia ámbar.
+- **Regla de negocio de productos:** Si el producto cuenta con pedidos en `detalle_pedido`, se archiva (`activo = false, publicado = false`) preservando el historial contable; si no tiene pedidos, se eliminan registros dependientes (`inventario`, `atributo_producto`, `imagen`) protegiendo los activos multimedia de Cloudinary.
+
+### Fase 3: Revalidación Casi Instantánea del Catálogo (Edge Cache)
+- **SSR con cabeceras de caché Edge:** `src/pages/index.astro` configurado con `Cache-Control: public, max-age=0, s-maxage=3, stale-while-revalidate=5` para propagación en $\le 3$ segundos en Cloudflare Pages sin requerir purgas de zona no disponibles en `*.pages.dev`.
+- **Control de versiones del catálogo:** Tabla `configuracion` almacena `catalogo_version` incrementado mediante trigger (`trg_incrementar_version_catalogo`) y mediante endpoint seguro `/api/admin/revalidar-catalogo`.
+
+### Fase 4: Títulos de Página y Consistencia de Marca
+- **Eliminación sistemática de sufijos redundantes:** Retirado todo sufijo `// ZAIRENLAB` en pestañas y metadatos (`<title>`, `og:title`, `twitter:title`).
+- **Nombres directos por sección:** Páginas del panel muestran exclusivamente su área ("Inventario", "Pedidos", "Ventas", "Usuarios", "Clientes", "Interfaz web", "Ingresar"). Ficha de producto muestra exclusivamente el nombre de la prenda. Catálogo público muestra "Zairen".
+- **Sincronización dinámica de título en modal:** Al abrir el detalle de una prenda, el título del documento se sincroniza en vivo con el nombre del producto y se restaura al cerrar.
+
+### Fase 5: Canales de Contacto Oficiales y Prioridades
+- **Arquitectura de Canales Dinámicos (`src/lib/contactChannels.ts`):** Soporte unificado para WhatsApp, Instagram, TikTok, Facebook y canales web personalizados, con reordenamiento interactivo (prioridad por orden ascendente) y validación de formatos telefónicos y handles.
+- **Política de visibilidad en el catálogo:**
+  - En la tarjeta del catálogo (`TarjetaPolera`): se muestra exclusivamente el **primer canal activo** según el orden de prioridad, manteniendo una interfaz minimalista y libre de saturación de iconos.
+  - En la vista/modal de detalle (`DetalleProducto`): se renderiza la grilla completa con **todos los canales activos** con mensajes personalizados preformateados.
+  - Si no existen canales activos, el bloque se oculta completamente sin dejar espacios vacíos.
+- **Barra flotante inferior de guardado:** Detección de estado modificado (`isDirty`), botones *"Descartar"* y *"Guardar y Publicar"*, protección con `beforeunload` y sincronización inmediata con revalidación Edge.

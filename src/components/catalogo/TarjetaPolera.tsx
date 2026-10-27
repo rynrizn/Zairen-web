@@ -4,6 +4,12 @@ import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
 import { getOptimizedImageUrl, getResponsiveSrcSet } from '../../lib/cloudinary';
 import { formatCurrency } from '../../config/site';
+import {
+  getFirstActiveChannel,
+  buildChannelActionUrl,
+  DEFAULT_CONTACT_CHANNELS,
+  type ContactChannel,
+} from '../../lib/contactChannels';
 
 export interface TarjetaPoleraProps {
   id: string;
@@ -62,6 +68,22 @@ export function TarjetaPolera({
   const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
+  const [priorityChannel, setPriorityChannel] = useState<ContactChannel | null>(null);
+
+  useEffect(() => {
+    const syncChannel = () => {
+      try {
+        const raw = localStorage.getItem('zairen_contact_channels');
+        const list = raw ? JSON.parse(raw) : DEFAULT_CONTACT_CHANNELS;
+        setPriorityChannel(getFirstActiveChannel(list));
+      } catch {
+        setPriorityChannel(getFirstActiveChannel(DEFAULT_CONTACT_CHANNELS));
+      }
+    };
+    syncChannel();
+    window.addEventListener('zairen-config-updated', syncChannel);
+    return () => window.removeEventListener('zairen-config-updated', syncChannel);
+  }, []);
 
   useEffect(() => {
     const available = tallas.find((t) => getStockForTalla(t) > 0);
@@ -262,6 +284,26 @@ export function TarjetaPolera({
               </span>
             </div>
 
+            <div className="flex items-center gap-1.5">{priorityChannel && (
+              <a
+                href={buildChannelActionUrl(priorityChannel, {
+                  nombre,
+                  precio,
+                  moneda: 'Bs',
+                  url: typeof window !== 'undefined' ? `${window.location.origin}${productUrl}` : productUrl,
+                })}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title={`Consultar por ${priorityChannel.name}`}
+                aria-label={`Consultar ${nombre} por ${priorityChannel.name}`}
+                className="w-9 h-9 shrink-0 flex items-center justify-center font-bold transition-all border bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-[#dc143c] border-[#201f1f] hover:border-[#dc143c] cursor-pointer active:scale-95 mr-1.5"
+              >
+                <span className="material-symbols-outlined text-[17px]">
+                  {priorityChannel.type === 'whatsapp' ? 'chat' : 'alternate_email'}
+                </span>
+              </a>
+            )}
             <button
               type="button"
               onClick={handleAddToCart}
@@ -283,6 +325,7 @@ export function TarjetaPolera({
                 className="w-5 h-5"
               />
             </button>
+            </div>
           </div>
         </div>
       </div>
