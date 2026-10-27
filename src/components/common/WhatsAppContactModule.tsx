@@ -9,25 +9,25 @@ export function WhatsAppContactModule() {
   const topics = [
     {
       id: 'catalogo',
-      title: '📦 Disponibilidad & Drops',
+      title: 'Disponibilidad & Drops',
       desc: 'Preguntas sobre tallas, disponibilidad y lanzamientos.',
       defaultMsg: 'Hola Zairen Lab, quisiera consultar sobre la disponibilidad de prendas y próximos drops.',
     },
     {
       id: 'cotizacion',
-      title: '✂️ Cotización & Encargos',
+      title: 'Cotización & Encargos',
       desc: 'Cotización para proyectos especiales y pedidos exclusivos.',
       defaultMsg: 'Hola Zairen Lab, me gustaría realizar una cotización para un pedido con ustedes.',
     },
     {
       id: 'entregas',
-      title: '🚚 Consultas de Entrega',
+      title: 'Consultas de Entrega',
       desc: 'Información directa sobre tiempos y coordinación de despacho.',
       defaultMsg: 'Hola Zairen Lab, deseo consultar sobre la coordinación y tiempos de entrega.',
     },
     {
       id: 'tallas',
-      title: '📏 Asesoría de Medidas',
+      title: 'Asesoría de Medidas',
       desc: 'Orientación para elegir la talla boxy oversized ideal.',
       defaultMsg: 'Hola Zairen Lab, necesito orientación para elegir mi talla de acuerdo a mis medidas.',
     },
@@ -74,7 +74,7 @@ export function WhatsAppContactModule() {
               LÍNEA OFICIAL DE ATENCIÓN
             </div>
             <div className="font-mono text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-[#25D366]">📱</span>
+              <span className="material-symbols-outlined text-[18px] text-[#25D366]">chat</span>
               <span>{siteConfig.whatsapp.displayNumber}</span>
             </div>
             <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 pt-1">

@@ -466,7 +466,7 @@ export function InventarioManager() {
                   {/* Fila de Tallas y Stock Total Adaptable */}
                   <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-2.5 border-t border-white/[0.06]">
                     <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
-                      {['S', 'M', 'L', 'XL'].map((talla) => {
+                      {(Object.keys(item.stock).length > 0 ? Object.keys(item.stock) : ['S', 'M', 'L', 'XL']).map((talla) => {
                         const stockTalla = item.stock[talla] || 0;
                         return (
                           <span
@@ -546,14 +546,14 @@ export function InventarioManager() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
           onClick={() => {
             setIsEditorOpen(false);
             setSelectedItem(null);
           }}
         >
           <div
-            className="w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#141416] border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto"
+            className="w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-[#141416] sm:border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <ProductoEditor

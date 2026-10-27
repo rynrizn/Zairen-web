@@ -37,8 +37,14 @@ export function MediaLibraryModal({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
   const [filterUsed, setFilterUsed] = useState<'all' | 'used' | 'unused'>('all');
+  const [folderScope, setFolderScope] = useState<'zairen/' | ''>('zairen/');
+  const [warningMsg, setWarningMsg] = useState<string | null>(null);
 
-  const fetchMedia = async (cursor?: string, append: boolean = false) => {
+  const fetchMedia = async (
+    cursor?: string,
+    append: boolean = false,
+    targetScope: 'zairen/' | '' = folderScope
+  ) => {
     if (append) {
       setIsLoadingMore(true);
     } else {
@@ -54,6 +60,11 @@ export function MediaLibraryModal({
       const params = new URLSearchParams({ limit: '30' });
       if (cursor) {
         params.set('next_cursor', cursor);
+      }
+      if (targetScope) {
+        params.set('prefix', targetScope);
+      } else {
+        params.set('prefix', 'all');
       }
 
       const headers: Record<string, string> = {
@@ -74,6 +85,12 @@ export function MediaLibraryModal({
       }
 
       const data = await res.json();
+      if (data.warning) {
+        setWarningMsg(data.warning);
+      } else {
+        setWarningMsg(null);
+      }
+
       if (data.success && Array.isArray(data.resources)) {
         if (append) {
           setResources((prev) => [...prev, ...data.resources]);
@@ -92,11 +109,17 @@ export function MediaLibraryModal({
     }
   };
 
+  const handleScopeChange = (newScope: 'zairen/' | '') => {
+    setFolderScope(newScope);
+    fetchMedia(undefined, false, newScope);
+  };
+
   useEffect(() => {
     if (isOpen) {
       setSelectedUrls([]);
       setSearchQuery('');
-      fetchMedia();
+      setWarningMsg(null);
+      fetchMedia(undefined, false, folderScope);
     }
   }, [isOpen]);
 
@@ -157,11 +180,11 @@ export function MediaLibraryModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-[#141416] border border-white/[0.12] w-full max-w-4xl max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl overflow-hidden my-auto"
+        className="bg-[#141416] sm:border border-white/[0.12] w-full max-w-4xl h-full sm:h-auto sm:max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera Ortogonal */}
@@ -186,6 +209,19 @@ export function MediaLibraryModal({
             ✕
           </button>
         </div>
+
+        {/* Banner de Advertencia de Diagnóstico */}
+        {warningMsg && (
+          <div className="bg-amber-950/40 border border-amber-600/40 px-3 py-2.5 my-2 font-mono text-[11px] text-amber-200 flex items-start gap-2">
+            <span className="material-symbols-outlined text-[16px] text-amber-400 shrink-0 mt-0.5">
+              warning
+            </span>
+            <div className="flex-1 leading-relaxed">
+              <span className="font-bold text-amber-300">Aviso del servidor: </span>
+              {warningMsg}
+            </div>
+          </div>
+        )}
 
         {/* Barra de Filtros, Búsqueda y Estadísticas Rápidas */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 py-3 border-b border-white/[0.06]">
@@ -212,22 +248,52 @@ export function MediaLibraryModal({
             )}
           </div>
 
-          {/* Filtros de Uso */}
-          <div className="flex items-center gap-1 font-mono text-[11px] shrink-0 bg-[#1c1b1b] p-1 border border-white/[0.06]">
-            {(['all', 'used', 'unused'] as const).map((mode) => (
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Selector de Carpeta */}
+            <div className="flex items-center gap-1 font-mono text-[11px] shrink-0 bg-[#1c1b1b] p-1 border border-white/[0.06]">
               <button
-                key={mode}
                 type="button"
-                onClick={() => setFilterUsed(mode)}
-                className={`px-2.5 py-1 rounded-none uppercase transition-colors cursor-pointer ${
-                  filterUsed === mode
-                    ? 'bg-[#dc143c] text-white font-bold'
+                onClick={() => handleScopeChange('zairen/')}
+                className={`px-2 py-1 rounded-none uppercase transition-colors cursor-pointer ${
+                  folderScope === 'zairen/'
+                    ? 'bg-white text-black font-bold'
                     : 'text-[#ac8888] hover:text-white'
                 }`}
+                title="Fotos en carpeta zairen/"
               >
-                {mode === 'all' ? 'Todas' : mode === 'used' ? 'En Uso' : 'Sin Usar'}
+                📁 zairen/
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => handleScopeChange('')}
+                className={`px-2 py-1 rounded-none uppercase transition-colors cursor-pointer ${
+                  folderScope === ''
+                    ? 'bg-white text-black font-bold'
+                    : 'text-[#ac8888] hover:text-white'
+                }`}
+                title="Todas las fotos de Cloudinary"
+              >
+                🌐 Todo
+              </button>
+            </div>
+
+            {/* Filtros de Uso */}
+            <div className="flex items-center gap-1 font-mono text-[11px] shrink-0 bg-[#1c1b1b] p-1 border border-white/[0.06]">
+              {(['all', 'used', 'unused'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setFilterUsed(mode)}
+                  className={`px-2.5 py-1 rounded-none uppercase transition-colors cursor-pointer ${
+                    filterUsed === mode
+                      ? 'bg-[#dc143c] text-white font-bold'
+                      : 'text-[#ac8888] hover:text-white'
+                  }`}
+                >
+                  {mode === 'all' ? 'Todas' : mode === 'used' ? 'En Uso' : 'Sin Usar'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -334,13 +400,22 @@ export function MediaLibraryModal({
               })}
             </div>
           ) : (
-            <div className="py-12 text-center flex flex-col items-center justify-center space-y-2">
+            <div className="py-12 text-center flex flex-col items-center justify-center space-y-3">
               <span className="material-symbols-outlined text-[28px] text-[#ac8888]">
                 photo_library
               </span>
               <p className="font-mono text-xs text-[#ac8888]">
-                No se encontraron imágenes con los filtros seleccionados.
+                No se encontraron imágenes {folderScope ? 'en la carpeta zairen/' : 'en Cloudinary'}.
               </p>
+              {folderScope === 'zairen/' && (
+                <button
+                  type="button"
+                  onClick={() => handleScopeChange('')}
+                  className="px-3.5 py-1.5 bg-[#201f1f] hover:bg-white hover:text-black text-white font-mono text-xs uppercase border border-white/[0.1] transition-colors cursor-pointer"
+                >
+                  Explorar todo Cloudinary
+                </button>
+              )}
             </div>
           )}
 
@@ -359,8 +434,8 @@ export function MediaLibraryModal({
           )}
         </div>
 
-        {/* Footer con Acciones */}
-        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
+        {/* Footer con Acciones Fijo en Móvil */}
+        <div className="sticky bottom-0 z-20 bg-[#141416]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
           <div className="font-mono text-xs text-[#ac8888]">
             {selectedUrls.length > 0 ? (
               <span className="text-white font-bold">

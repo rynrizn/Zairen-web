@@ -3,6 +3,9 @@
 -- ARCHIVO 08: REGLAS DE ELIMINACIÓN SEGURA DE COLECCIONES Y PRODUCTOS
 -- ============================================================
 
+-- 0. Asegurar que las prendas puedan quedar huérfanas en "Sin colección" al eliminar un drop
+ALTER TABLE public.producto ALTER COLUMN coleccion_id DROP NOT NULL;
+
 -- 1. Función RPC para eliminar colección con validación de stock de prendas
 CREATE OR REPLACE FUNCTION public.eliminar_coleccion_segura(p_coleccion_id UUID)
 RETURNS JSONB

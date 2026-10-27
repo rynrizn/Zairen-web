@@ -43,7 +43,18 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
     }
   }, []);
 
-  const toggleCollapsed = () => {
+    useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+const toggleCollapsed = () => {
     const next = !isCollapsed;
     setIsCollapsed(next);
     if (typeof window !== 'undefined') {
@@ -55,9 +66,12 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
 
   const handleLogout = async () => {
     if (confirm('¿Deseas cerrar la sesión administrativa de Zairen Lab?')) {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      localStorage.removeItem('zairen_user_id');
+      localStorage.removeItem('zairen_user_email');
+      localStorage.removeItem('zairen_user_role');
       window.location.href = '/login';
     }
   };
@@ -99,6 +113,18 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
           <path d="m3.3 7 8.7 5 8.7-5" />
           <path d="M12 22V12" />
+        </svg>
+      ),
+    },
+    {
+      label: 'Colecciones',
+      path: '/admin/colecciones',
+      id: 'colecciones',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect width="18" height="18" x="3" y="3" rx="2" />
+          <path d="M3 9h18" />
+          <path d="M9 21V9" />
         </svg>
       ),
     },
@@ -174,13 +200,13 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       {/* ======================================================== */}
       {/* 1. BARRA SUPERIOR MÓVIL (Con botón de 3 líneas horizontales) */}
       {/* ======================================================== */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 z-40 bg-[#141416]/95 backdrop-blur-xl border-b border-[#2A2A2A] px-4 flex items-center justify-between">
+      <header className="lg:hidden fixed top-0 left-0 right-0 min-h-16 z-40 bg-[#141416]/95 backdrop-blur-xl border-b border-[#2A2A2A] px-4 pt-[env(safe-area-inset-top,0px)] flex items-center justify-between">
         {/* Botón 3 Líneas Horizontales (Hamburguesa) */}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Abrir menú de navegación de administración"
-          className="w-10 h-10 rounded-none bg-[#1c1b1b] border border-[#2A2A2A] flex items-center justify-center text-white cursor-pointer active:scale-95 transition-transform"
+          className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-none bg-[#1c1b1b] border border-[#2A2A2A] flex items-center justify-center text-white cursor-pointer active:scale-95 transition-transform"
         >
           {/* 3 Líneas Horizontales */}
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -198,16 +224,16 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
           </span>
         </div>
 
-        {/* Acciones Móviles */}
+        {/* Acciones Móviles con Targets Táctiles de 44px */}
         <div className="flex items-center gap-2">
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
             title="Ver tienda web"
-            className="w-9 h-9 rounded-none bg-[#1c1b1b] border border-[#2A2A2A] text-[#ac8888] hover:text-white flex items-center justify-center"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-none bg-[#1c1b1b] border border-[#2A2A2A] text-[#ac8888] hover:text-white flex items-center justify-center"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
             </svg>
           </a>
@@ -215,9 +241,9 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
             type="button"
             onClick={handleLogout}
             title="Cerrar sesión"
-            className="w-9 h-9 rounded-none bg-[#1c1b1b] hover:bg-[#dc143c] border border-[#2A2A2A] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-none bg-[#1c1b1b] hover:bg-[#dc143c] border border-[#2A2A2A] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
             </svg>
           </button>
@@ -231,7 +257,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
         <div
           role="dialog"
           aria-modal="true"
-          className="md:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          className="lg:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setMobileOpen(false)}
         >
           <div
@@ -256,7 +282,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="w-8 h-8 rounded-none bg-[#1c1b1b] text-[#ac8888] hover:text-white flex items-center justify-center cursor-pointer"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-none bg-[#1c1b1b] text-[#ac8888] hover:text-white flex items-center justify-center cursor-pointer font-mono text-xs"
                 >
                   ✕
                 </button>
@@ -271,7 +297,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
                       key={item.id}
                       href={item.path}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-none text-xs font-mono uppercase tracking-wider transition-all border ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 min-h-[44px] rounded-none text-xs font-mono uppercase tracking-wider transition-all border ${
                         isActive
                           ? 'bg-[#dc143c] text-white font-bold border-[#dc143c] shadow-[0_0_12px_rgba(220,20,60,0.4)]'
                           : 'text-[#ac8888] hover:bg-[#1c1b1b] hover:text-white border-transparent'
@@ -323,7 +349,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       {/* 3. SIDEBAR LATERAL PROFESIONAL DESKTOP / TABLET          */}
       {/* ======================================================== */}
       <aside
-        className={`hidden md:flex flex-col justify-between fixed top-0 left-0 bottom-0 z-40 bg-[#141416]/95 backdrop-blur-2xl border-r border-white/[0.08] transition-all duration-300 ${
+        className={`hidden lg:flex flex-col justify-between fixed top-0 left-0 bottom-0 z-40 bg-[#141416]/95 backdrop-blur-2xl border-r border-white/[0.08] transition-all duration-300 ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
