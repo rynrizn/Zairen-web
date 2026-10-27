@@ -125,7 +125,7 @@ export function ColeccionCombobox({
   return (
     <div
       ref={containerRef}
-      className="relative inline-block w-full sm:w-80 text-left select-none"
+      className="relative inline-block w-full sm:w-80 text-left select-none max-w-full"
       onKeyDown={handleKeyDown}
     >
       <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ac8888] mb-1.5 font-bold">
@@ -140,18 +140,19 @@ export function ColeccionCombobox({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-controls={listboxId}
+        aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
         aria-label="Seleccionar colección de prendas"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-[#141416] hover:bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] hover:border-[#dc143c] focus:border-[#dc143c] focus:outline-none transition-all cursor-pointer shadow-md"
+        className="w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 bg-[#141416] hover:bg-[#1c1b1b] text-white font-mono text-xs rounded-none border border-[#201f1f] hover:border-[#dc143c] focus:border-[#dc143c] focus:outline-none transition-all cursor-pointer shadow-md"
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 pr-2">
           <span className="w-1.5 h-1.5 bg-[#dc143c] shrink-0"></span>
-          <span className="truncate uppercase font-bold text-[#FAF9F6]">
+          <span className="truncate uppercase font-bold text-[#FAF9F6] text-[11px] sm:text-xs">
             {activeCollection.nombre}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 ml-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="px-1.5 py-0.5 bg-[#201f1f] text-[#ffb3b3] font-mono text-[10px] font-bold">
             {activeCollection.count}
           </span>
@@ -174,10 +175,11 @@ export function ColeccionCombobox({
         <div
           id={listboxId}
           role="listbox"
+          aria-label="Lista de colecciones disponibles"
           className="absolute z-40 left-0 right-0 mt-1 bg-[#141416] border border-[#dc143c]/40 shadow-[0_12px_36px_rgba(0,0,0,0.85)] max-h-72 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Input de filtro interactivo */}
-          <div className="p-2 border-b border-white/[0.08] bg-[#1a191b] flex items-center gap-2">
+          <div className="p-2.5 border-b border-white/[0.08] bg-[#1a191b] flex items-center gap-2">
             <svg className="w-3.5 h-3.5 text-[#ac8888] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
@@ -187,15 +189,16 @@ export function ColeccionCombobox({
               type="text"
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
-              placeholder="Escribe para buscar..."
-              aria-label="Buscar colección"
+              placeholder="Buscar colección..."
+              aria-label="Filtrar colecciones por nombre"
               className="w-full bg-transparent text-white font-mono text-xs placeholder:text-[#666] focus:outline-none"
             />
             {filterText && (
               <button
                 type="button"
                 onClick={() => setFilterText('')}
-                className="text-[#ac8888] hover:text-white font-mono text-xs"
+                className="text-[#ac8888] hover:text-white font-mono text-xs px-1"
+                aria-label="Limpiar búsqueda"
               >
                 ✕
               </button>
@@ -212,11 +215,12 @@ export function ColeccionCombobox({
                 return (
                   <div
                     key={col.id}
+                    id={`${listboxId}-opt-${idx}`}
                     role="option"
                     aria-selected={isSelected}
                     onClick={() => handleSelect(col.slug)}
                     onMouseEnter={() => setHighlightedIndex(idx)}
-                    className={`px-3.5 py-2.5 flex items-center justify-between text-xs font-mono transition-colors cursor-pointer ${
+                    className={`min-h-[40px] px-3.5 py-2.5 flex items-center justify-between text-xs font-mono transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-[#dc143c]/15 text-[#ffb3b3] border-l-2 border-[#dc143c]'
                         : isHighlighted
@@ -224,11 +228,11 @@ export function ColeccionCombobox({
                         : 'text-[#ac8888] hover:text-white'
                     }`}
                   >
-                    <div className="flex items-center gap-2 truncate">
+                    <div className="flex items-center gap-2 truncate pr-2">
                       {isSelected && (
                         <span className="w-1.5 h-1.5 rounded-full bg-[#dc143c] shrink-0"></span>
                       )}
-                      <span className="uppercase font-bold truncate">
+                      <span className="uppercase font-bold truncate text-[11px] sm:text-xs">
                         {col.nombre}
                       </span>
                     </div>
