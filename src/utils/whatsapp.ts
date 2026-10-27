@@ -32,7 +32,7 @@ export function generateWhatsAppOrderUrl(items: CartItem[], clientNotes?: string
 
   const shippingText = shipping === 0 ? '¡GRATIS! (Supera Bs 250)' : `Bs ${shipping.toFixed(2)}`;
 
-  let message = `⛩️ *NUEVO PEDIDO${orderTag} // ${siteConfig.name}*\n`;
+  let message = `*NUEVO PEDIDO${orderTag} // ${siteConfig.name}*\n`;
   message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
   message += `👕 *DETALLE DE PRENDAS:*\n${itemsList}\n\n`;
   message += `━━━━━━━━━━━━━━━━━━━━\n`;

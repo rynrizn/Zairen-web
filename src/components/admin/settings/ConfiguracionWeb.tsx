@@ -86,6 +86,7 @@ export function ConfiguracionWeb() {
   const [maintenanceMode, setMaintenanceMode] = useState<boolean>(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState<string>('Tienda en actualización de catálogo. Volvemos en breve.');
   const [openingHours, setOpeningHours] = useState<string>('Lun a Sáb: 09:00 - 20:00 (BOT)');
+  const [dropStatus, setDropStatus] = useState<string>('DROP 01 DISPONIBLE');
 
   // Helper para crear snapshot de estado y comparar suciedad
   const getSnapshot = () =>
@@ -462,6 +463,7 @@ export function ConfiguracionWeb() {
         localStorage.setItem('zairen_banner_enabled', String(bannerEnabled));
         localStorage.setItem('zairen_banner_text', bannerText);
         localStorage.setItem('zairen_banner_link', bannerLink);
+        localStorage.setItem('zairen_drop_status', dropStatus);
         localStorage.setItem('zairen_maintenance_mode', String(maintenanceMode));
         localStorage.setItem('zairen_maintenance_message', maintenanceMessage);
         localStorage.setItem('zairen_opening_hours', openingHours);
@@ -657,6 +659,19 @@ export function ConfiguracionWeb() {
                 disabled={!freeShippingEnabled}
                 className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none disabled:opacity-40"
               />
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {[200, 250, 350, 500].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setFreeShippingThreshold(amt)}
+                    disabled={!freeShippingEnabled}
+                    className={`px-2 py-0.5 text-[10px] font-mono uppercase border cursor-pointer transition-all ${freeShippingThreshold === amt ? 'bg-[#dc143c] text-white border-[#dc143c]' : 'bg-[#141416] text-[#8F8F8C] hover:text-white border-[#201f1f] disabled:opacity-30'}`}
+                  >
+                    Bs {amt}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
@@ -670,6 +685,18 @@ export function ConfiguracionWeb() {
                 placeholder="24 a 48 hrs"
                 className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
               />
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {['24 a 48 hrs', 'Mismo día', '2 a 3 días'].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setDeliveryTime(t)}
+                    className={`px-2 py-0.5 text-[10px] font-mono uppercase border cursor-pointer transition-all ${deliveryTime === t ? 'bg-[#dc143c] text-white border-[#dc143c]' : 'bg-[#141416] text-[#8F8F8C] hover:text-white border-[#201f1f]'}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -1052,32 +1079,158 @@ export function ConfiguracionWeb() {
         </div>
 
         {/* ======================================================== */}
-        {/* SECCIÓN 5: APARIENCIA ZEN & AVISOS                        */}
+        {/* SECCIÓN 5: APARIENCIA ZEN, ESTADO DE DROP & AVISOS       */}
         {/* ======================================================== */}
         <div className="bg-[#141416] p-6 rounded-none border border-[#201f1f] shadow-xl space-y-6">
           <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#dc143c] text-[20px]">palette</span>
               <h3 className="font-headline text-sm font-bold text-white uppercase tracking-wider">
-                Apariencia Zen & Avisos en Cabecera
+                Apariencia Zen, Estado del Drop & Banner de Avisos
               </h3>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
-                Color de Acento Carmesí
+            
+            {/* Control 1-Click: Insignia de Estado del Drop en Footer */}
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
+                  Insignia Estado del Drop (Footer)
+                </label>
+                <span className="font-mono text-[10px] text-emerald-400 font-bold uppercase">
+                  {dropStatus}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#8F8F8C] font-mono">
+                Cambia con 1 solo clic el estado visible junto al copyright en el pie de página:
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {[
+                  { label: '🟢 Drop 01 Disponible', val: 'DROP 01 DISPONIBLE' },
+                  { label: '🟡 Pre-Order Activo', val: 'PRE-ORDER ACTIVO' },
+                  { label: '🔴 Sold Out / Agotado', val: 'SOLD OUT // CERRADO' },
+                  { label: '⏳ Próximo Drop', val: 'PRÓXIMO DROP EN PREPARACIÓN' },
+                ].map((item) => (
+                  <button
+                    key={item.val}
+                    type="button"
+                    onClick={() => setDropStatus(item.val)}
+                    className={`py-2 px-2 text-[10px] font-mono uppercase font-bold border transition-all cursor-pointer text-center ${
+                      dropStatus === item.val
+                        ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.3)]'
+                        : 'bg-[#141416] text-[#8F8F8C] hover:text-white border-[#201f1f]'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Control 1-Click: Color de Acento Carmesí */}
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-3">
+              <label className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
+                Color de Acento Zairen Lab
               </label>
+              <p className="text-[11px] text-[#8F8F8C] font-mono">
+                Selecciona una muestra rápida para cambiar el tono de realce en botones y badges:
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {[
+                  { name: 'Carmesí Zairen', hex: '#dc143c' },
+                  { name: 'Rojo Tokio', hex: '#e60026' },
+                  { name: 'Carmesí Oscuro', hex: '#990000' },
+                  { name: 'Blanco Puro', hex: '#ffffff' },
+                  { name: 'Cyber Emerald', hex: '#10b981' },
+                ].map((c) => (
+                  <button
+                    key={c.hex}
+                    type="button"
+                    onClick={() => setAccentColor(c.hex)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-mono uppercase border transition-all cursor-pointer ${
+                      accentColor.toLowerCase() === c.hex.toLowerCase()
+                        ? 'border-[#dc143c] bg-[#141416] text-white shadow-[0_0_10px_rgba(220,20,60,0.3)]'
+                        : 'border-[#201f1f] bg-[#141416] text-[#8F8F8C] hover:text-white'
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full border border-black/30 shrink-0" style={{ backgroundColor: c.hex }}></span>
+                    <span>{c.name}</span>
+                  </button>
+                ))}
+              </div>
               <input
                 type="text"
                 value={accentColor}
                 onChange={(e) => setAccentColor(e.target.value)}
-                className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
+                className="w-full px-3 py-1 bg-[#141416] text-white font-mono text-xs border border-[#201f1f] mt-1"
               />
             </div>
-            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f]">
-              <label className="font-mono text-xs text-[#ac8888] uppercase block mb-1">
+
+            {/* Control 1-Click: Banner Superior Promocional */}
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-3 md:col-span-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
+                    Banner de Avisos Superior
+                  </span>
+                  <span className="text-[11px] text-[#8F8F8C] font-mono">
+                    Activa un aviso de texto en la cabecera de la tienda
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBannerEnabled(!bannerEnabled)}
+                  className={`px-3 py-1 font-mono text-[10px] uppercase font-bold border transition-all cursor-pointer ${
+                    bannerEnabled
+                      ? 'bg-emerald-950 text-emerald-400 border-emerald-800 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
+                      : 'bg-[#141416] text-[#8F8F8C] border-[#201f1f]'
+                  }`}
+                >
+                  {bannerEnabled ? '✓ BANNER ACTIVADO' : '✕ BANNER DESACTIVADO'}
+                </button>
+              </div>
+
+              {bannerEnabled && (
+                <div className="space-y-2 pt-2 border-t border-white/[0.04]">
+                  <label className="font-mono text-[10px] text-[#ac8888] uppercase block">
+                    Mensajes Rápidos (1-Clic)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'NUEVO DROP 2026 // ENVÍOS A TODA BOLIVIA',
+                      'ENVÍOS GRATIS EN COMPRAS MAYORES A BS 250',
+                      'EDICIÓN LIMITADA // STOCK CONTADO POR TALLA',
+                      'PRE-VENTA EXCLUSIVA // PRE-ORDER 2026',
+                    ].map((msg) => (
+                      <button
+                        key={msg}
+                        type="button"
+                        onClick={() => setBannerText(msg)}
+                        className={`px-2.5 py-1 text-[10px] font-mono uppercase border transition-all cursor-pointer ${
+                          bannerText === msg
+                            ? 'bg-[#dc143c]/20 text-white border-[#dc143c]'
+                            : 'bg-[#141416] text-[#8F8F8C] hover:text-white border-[#201f1f]'
+                        }`}
+                      >
+                        {msg}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    value={bannerText}
+                    onChange={(e) => setBannerText(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs border border-[#201f1f] focus:border-[#dc143c] focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Horario de Atención Oficial */}
+            <div className="p-4 bg-[#1c1b1b] border border-[#201f1f] space-y-2 md:col-span-2">
+              <label className="font-mono text-xs text-[#ac8888] uppercase block font-bold">
                 Horario de Atención Oficial
               </label>
               <input
@@ -1087,6 +1240,7 @@ export function ConfiguracionWeb() {
                 className="w-full px-3 py-1.5 bg-[#141416] text-white font-mono text-xs rounded-none border border-[#201f1f]"
               />
             </div>
+
           </div>
         </div>
       </form>

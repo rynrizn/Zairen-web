@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * ⛩️ OPTIMIZACIÓN DE IMÁGENES CLOUDINARY // ZAIREN LAB
+ * OPTIMIZACIÓN DE IMÁGENES CLOUDINARY // ZAIREN LAB
  * =====================================================================
  */
 

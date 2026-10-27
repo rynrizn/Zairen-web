@@ -1,4 +1,4 @@
-# ⛩️ ZAIREN LAB // TOKYO EXPERIMENTAL APPAREL
+# ZAIREN LAB // TOKYO EXPERIMENTAL APPAREL
 > Web E-Commerce Profesional & Sistema Integral de Gestión de Inventario (SaaS / Vendible)
 
 Plataforma integral construida con **Astro 5**, **React 19**, **Tailwind CSS (Tokens Neo-Tokyo Zen)**, **Supabase PostgreSQL** y **Cloudflare Pages**.

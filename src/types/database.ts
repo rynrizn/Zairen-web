@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * ⛩️ TIPOS DE DATOS SUPABASE // ZAIREN LAB (PostgreSQL Schema)
+ * TIPOS DE DATOS SUPABASE // ZAIREN LAB (PostgreSQL Schema)
  * =====================================================================
  */
 

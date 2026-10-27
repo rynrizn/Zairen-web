@@ -235,8 +235,12 @@ export function CarritoDrawer() {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
-              <div className="w-16 h-16 border border-dashed border-[#201f1f] flex items-center justify-center text-2xl text-[#ac8888]">
-                ⛩️
+              <div className="w-16 h-16 border border-dashed border-[#201f1f] flex items-center justify-center text-[#ac8888]">
+                <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                  <path d="M3 6h18" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
               </div>
               <div>
                 <p className="font-display text-sm font-bold uppercase text-[#FAF9F6] tracking-tight">

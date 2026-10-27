@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * ⛩️ UPLOADER Y CONVERSOR WEBP AUTOMÁTICO CLOUDINARY // ZAIREN LAB
+ * UPLOADER Y CONVERSOR WEBP AUTOMÁTICO CLOUDINARY // ZAIREN LAB
  * =====================================================================
  * Convierte de forma estricta e incondicional cualquier imagen en el
  * cliente a formato WebP antes de transmitirla a Cloudinary.
