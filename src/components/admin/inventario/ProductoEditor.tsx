@@ -938,8 +938,8 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
           </div>
         </div>
 
-        {/* Footer con Acciones */}
-        <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between">
+        {/* Footer con Acciones Fijo en Móvil */}
+        <div className="sticky bottom-0 z-20 bg-[#141416]/95 backdrop-blur-md -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 pt-3 pb-3 border-t border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-mono text-[#ac8888]">
             <span className="w-2 h-2 rounded-none bg-emerald-400"></span>
             <span>SKU: {sku}</span>

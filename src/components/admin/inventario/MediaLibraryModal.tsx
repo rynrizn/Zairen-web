@@ -180,11 +180,11 @@ export function MediaLibraryModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-[#141416] border border-white/[0.12] w-full max-w-4xl max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl overflow-hidden my-auto"
+        className="bg-[#141416] sm:border border-white/[0.12] w-full max-w-4xl h-full sm:h-auto sm:max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera Ortogonal */}
@@ -434,8 +434,8 @@ export function MediaLibraryModal({
           )}
         </div>
 
-        {/* Footer con Acciones */}
-        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
+        {/* Footer con Acciones Fijo en Móvil */}
+        <div className="sticky bottom-0 z-20 bg-[#141416]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
           <div className="font-mono text-xs text-[#ac8888]">
             {selectedUrls.length > 0 ? (
               <span className="text-white font-bold">
