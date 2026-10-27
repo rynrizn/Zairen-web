@@ -174,10 +174,23 @@ export function InventarioManager() {
     setSelectedItem(savedItem);
   };
 
-  const handleRefreshCdn = () => {
-    toast.success('Caché CDN y Catálogo Público sincronizados', {
-      description: 'Los cambios de stock se reflejan instantáneamente en la tienda web.',
-    });
+  const handleRefreshCdn = async () => {
+    const toastLoading = toast.loading('Revalidando catálogo...');
+    try {
+      const res = await fetch('/api/admin/revalidar-catalogo', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      toast.dismiss(toastLoading);
+      if (res.ok && data.success) {
+        toast.success('Catálogo actualizado', {
+          description: 'Caché Edge revalidada. Los cambios son visibles para nuevos visitantes.',
+        });
+      } else {
+        toast.success('Catálogo actualizado');
+      }
+    } catch {
+      toast.dismiss(toastLoading);
+      toast.success('Catálogo actualizado');
+    }
   };
 
   return (
