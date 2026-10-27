@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { TarjetaPolera, type TarjetaPoleraProps } from './TarjetaPolera';
 import { GuiaTallasModal } from './GuiaTallasModal';
 import { ColeccionCombobox } from './ColeccionCombobox';
+import { ModalDetalleProducto } from './ModalDetalleProducto';
 
 interface CatalogoGridProps {
   initialProducts: TarjetaPoleraProps[];
@@ -17,6 +18,58 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [mobileDensity, setMobileDensity] = useState<'compact' | 'large'>('compact');
   const [isGuiaOpen, setIsGuiaOpen] = useState<boolean>(false);
+  const [selectedProductForModal, setSelectedProductForModal] = useState<TarjetaPoleraProps | null>(null);
+  const originCardElementRef = useRef<HTMLElement | null>(null);
+
+  // Abrir modal e interceptar URL con pushState
+  const handleOpenProductModal = (product: TarjetaPoleraProps, targetEl?: HTMLElement) => {
+    originCardElementRef.current = targetEl || null;
+    setSelectedProductForModal(product);
+    if (typeof window !== 'undefined') {
+      const productPath = `/producto/${product.slug || product.id}`;
+      window.history.pushState({ modalOpen: true, id: product.id }, '', productPath);
+    }
+  };
+
+  // Cerrar modal y restaurar URL
+  const handleCloseProductModal = () => {
+    setSelectedProductForModal(null);
+    if (typeof window !== 'undefined') {
+      if (window.location.pathname.startsWith('/producto')) {
+        const search = window.location.search;
+        window.history.pushState({}, '', '/' + search);
+      }
+    }
+  };
+
+  // Escuchar popstate para sincronización con historial (Atrás/Adelante)
+  useEffect(() => {
+    const handlePopStateModal = () => {
+      if (window.location.pathname.startsWith('/producto')) {
+        const slugOrId = window.location.pathname.replace('/producto/', '').replace(/\/$/, '');
+        const found = initialProducts.find((p) => p.slug === slugOrId || p.id === slugOrId);
+        if (found) {
+          setSelectedProductForModal(found);
+        }
+      } else {
+        setSelectedProductForModal(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopStateModal);
+    return () => window.removeEventListener('popstate', handlePopStateModal);
+  }, [initialProducts]);
+
+  // Si el usuario carga directamente /producto/[slug] en una navegación de cliente
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/producto')) {
+      const slugOrId = window.location.pathname.replace('/producto/', '').replace(/\/$/, '');
+      const found = initialProducts.find((p) => p.slug === slugOrId || p.id === slugOrId);
+      if (found) {
+        setSelectedProductForModal(found);
+      }
+    }
+  }, [initialProducts]);
+
 
   // 1. Sincronización inicial con URL query param ?coleccion=<slug>
   useEffect(() => {
@@ -496,6 +549,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
                         key={producto.id}
                         {...producto}
                         priority={secIdx === 0 && prodIdx === 0}
+                        onSelectProduct={handleOpenProductModal}
                       />
                     ))}
                   </div>
@@ -533,6 +587,14 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
 
       {/* Modal de Guía de Tallas */}
       <GuiaTallasModal isOpen={isGuiaOpen} onClose={() => setIsGuiaOpen(false)} />
+
+      {/* Modal Ficha Completa de Producto (Fase 7) */}
+      <ModalDetalleProducto
+        isOpen={Boolean(selectedProductForModal)}
+        onClose={handleCloseProductModal}
+        product={selectedProductForModal}
+        originRef={originCardElementRef.current}
+      />
     </section>
   );
 }
