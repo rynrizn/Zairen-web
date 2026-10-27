@@ -181,7 +181,7 @@ export function CarritoDrawer() {
       />
 
       {/* Panel Lateral Orthogonal */}
-      <div className="relative w-full max-w-md bg-[#0A0A0A] border-l border-[#201f1f] flex flex-col h-full shadow-2xl z-10 transition-transform duration-300 ease-out">
+      <div className="relative w-full max-w-md bg-[#0A0A0A] border-l border-[#201f1f] flex flex-col h-full shadow-2xl z-10 transition-transform duration-300 ease-out animate-in slide-in-from-right duration-300">
         {/* Cabecera del Drawer */}
         <div className="flex items-center justify-between p-4 border-b border-[#201f1f] bg-[#141416]">
           <div className="flex items-center gap-2">
@@ -302,7 +302,7 @@ export function CarritoDrawer() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad - 1)}
-                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white cursor-pointer"
+                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform"
                       >
                         -
                       </button>
@@ -316,7 +316,7 @@ export function CarritoDrawer() {
                         className={`w-6 h-6 flex items-center justify-center text-xs ${
                           item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible
                             ? 'text-white/20 cursor-not-allowed'
-                            : 'text-[#ac8888] hover:text-white cursor-pointer'
+                            : 'text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform'
                         }`}
                       >
                         +

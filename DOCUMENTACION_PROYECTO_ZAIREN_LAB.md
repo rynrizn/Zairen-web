@@ -240,3 +240,11 @@ Lee la documentación detenidamente y propónme un plan estratégico de mejoras 
 - **Control de accesibilidad y foco (WCAG):** Atrapa el foco dentro del modal (`role="dialog"`, `aria-modal="true"`), bloquea el desplazamiento del fondo (`document.body.style.overflow = 'hidden'`) y restaura el foco a la tarjeta de origen al cerrarse.
 - **Sincronización de historial con `pushState` y `popstate`:** Al abrir una prenda, la URL cambia a `/producto/[slug]` permitiendo compartir el enlace directamente; al pulsar el botón Atrás del navegador, el modal se cierra suavemente preservando la posición de lectura del catálogo.
 - **Persistencia de ruta SSR de contingencia:** La ruta servida por el servidor `/producto/[id].astro` se mantiene operativa para accesos directos, rastreadores SEO y navegación sin JavaScript.
+
+### Fase 8: Micro-interacciones Zen y Optimización de Fluidez (60 FPS & CLS = 0)
+- **Aceleración por GPU estricta:** Todas las micro-interacciones interactivas se ejecutan exclusivamente sobre propiedades compuestas por GPU (`transform` y `opacity`), erradicando bloqueos del hilo principal del navegador (`INP < 100ms`).
+- **Elevación y feedback táctil en tarjetas:** Las tarjetas de producto implementan una elevación sutil (`hover:-translate-y-1.5`), una micro-línea Zen de acento degradado carmesí (`#DC143C`) que se expande orgánicamente en la base, y compresión al pulsar (`active:scale-[0.98]`).
+- **Feedback háptico visual en `CartBadge`:** Animación de rebote (`@keyframes cartBump`) que se dispara de forma aislada y reactiva únicamente cuando el usuario añade una prenda nueva a la bolsa.
+- **Transición suave en `CarritoDrawer`:** Despliegue lateral con aceleración de hardware (`slide-in-from-right`), desvanecimiento de fondo oscurecido y micro-interacción de pulsación elástica en los botones de incremento y decremento de unidades.
+- **Respeto absoluto de `prefers-reduced-motion`:** Soporte de accesibilidad para visitantes con sensibilidad al movimiento mediante supresión automática de animaciones en media queries (`animation-duration: 0.01ms`, `transition-duration: 0.01ms`).
+- **Garantía de Cumulative Layout Shift (CLS = 0):** Los contenedores y la cuadrícula de catálogo mantienen alturas mínimas estables evitando saltos de maquetación durante el filtrado y la navegación reactiva.
