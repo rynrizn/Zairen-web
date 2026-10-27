@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
-import { getOptimizedImageUrl } from '../../lib/cloudinary';
+import { getOptimizedImageUrl, getResponsiveSrcSet } from '../../lib/cloudinary';
 import { formatCurrency } from '../../config/site';
 
 export interface TarjetaPoleraProps {
@@ -21,6 +21,7 @@ export interface TarjetaPoleraProps {
   stockDisponible?: number;
   stockPorTalla?: Record<string, number>;
   esPrioritario?: boolean;
+  priority?: boolean;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'ninguno' | 'disponible' | 'agotado';
 }
 
@@ -38,6 +39,8 @@ export function TarjetaPolera({
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 10,
   stockPorTalla,
+  esPrioritario = false,
+  priority = false,
   estadoComercial = 'ninguno',
 }: TarjetaPoleraProps) {
   // Determinar stock de cada talla
@@ -125,11 +128,17 @@ export function TarjetaPolera({
       <div className="absolute bottom-0 left-0 h-[2.5px] w-0 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] group-hover:w-full transition-all duration-500 ease-out pointer-events-none z-20" />
       {/* Contenedor Fotográfico Orthogonal 4:5 */}
       <a href={productUrl} data-astro-prefetch="hover" className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
-        {/* Imagen Frontal */}
+        {/* Imagen Frontal Optimizada */}
         <img
           src={getOptimizedImageUrl(imagen, 600, 750)}
+          srcSet={getResponsiveSrcSet(imagen)}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           alt={nombre}
-          loading="lazy"
+          width={400}
+          height={500}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding={priority ? 'sync' : 'async'}
+          {...(priority ? { fetchPriority: 'high' } : {})}
           style={{ viewTransitionName: `prod-img-${id}` }}
           className="w-full h-full object-cover filter contrast-[1.03] group-hover:scale-105 transition-transform duration-700 ease-out"
         />
@@ -138,8 +147,13 @@ export function TarjetaPolera({
         {imagenDorsal && (
           <img
             src={getOptimizedImageUrl(imagenDorsal, 600, 750)}
+            srcSet={getResponsiveSrcSet(imagenDorsal)}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             alt={`${nombre} dorsal`}
+            width={400}
+            height={500}
             loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"
           />
         )}
