@@ -53,11 +53,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   const [estadoComercial, setEstadoComercial] = useState<'nuevo' | 'disponible' | 'preventa' | 'oferta' | 'agotado'>(
     product?.estadoComercial || 'nuevo'
   );
-  const [tallasTexto, setTallasTexto] = useState<string>(
-    product?.tallas && product.tallas.length > 0
-      ? product.tallas.join(', ')
-      : 'S, M, L, XL'
-  );
+
   const [descripcion, setDescripcion] = useState<string>(
     product?.descripcion || ''
   );
@@ -72,9 +68,19 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [publicado, setPublicado] = useState<boolean>(product ? product.publicado : true);
   const [destacado, setDestacado] = useState<boolean>(product ? product.destacado : false);
-  const [stock, setStock] = useState<StockBySize>(
-    product?.stock || { S: 0, M: 0, L: 0, XL: 0 }
-  );
+  const [stock, setStock] = useState<StockBySize>(() => {
+    if (product?.stock && Object.keys(product.stock).length > 0) {
+      return product.stock;
+    }
+    if (product?.tallas && product.tallas.length > 0) {
+      const initStock: StockBySize = {};
+      product.tallas.forEach((t) => {
+        initStock[t.toUpperCase()] = 0;
+      });
+      return initStock;
+    }
+    return { S: 0, M: 0, L: 0, XL: 0 };
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -197,16 +203,11 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     if (product) {
       setSku(product.sku);
       setNombre(product.nombre);
-      setColeccion(product.coleccion || product.seccion || 'Essentials');
+      setColeccion(product.coleccion || product.seccion || '');
       setTipo(product.tipo || 'Polera');
-      setPrecio(typeof product.precio === 'number' && !Number.isNaN(product.precio) ? product.precio : 145);
+      setPrecio(typeof product.precio === 'number' && !Number.isNaN(product.precio) ? product.precio : '');
       setCosto(typeof product.costo === 'number' && !Number.isNaN(product.costo) ? product.costo : 55);
       setEstadoComercial(product.estadoComercial || 'disponible');
-      setTallasTexto(
-        product.tallas && product.tallas.length > 0
-          ? product.tallas.join(', ')
-          : 'S, M, L, XL'
-      );
       setDescripcion(product.descripcion || '');
       setImagenes(
         product.imagenes && product.imagenes.length > 0
@@ -217,16 +218,23 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       );
       setPublicado(product.publicado);
       setDestacado(product.destacado);
-      setStock(product.stock || { S: 0, M: 0, L: 0, XL: 0 });
+      if (product.stock && Object.keys(product.stock).length > 0) {
+        setStock(product.stock);
+      } else if (product.tallas && product.tallas.length > 0) {
+        const s: StockBySize = {};
+        product.tallas.forEach((t) => { s[t.toUpperCase()] = 0; });
+        setStock(s);
+      } else {
+        setStock({ S: 0, M: 0, L: 0, XL: 0 });
+      }
     } else {
-      setSku(`ZRN-${Math.floor(100 + Math.random() * 900)}`);
+      setSku(`ZRN-${Date.now().toString(36).slice(-4).toUpperCase()}`);
       setNombre('');
-      setColeccion('Essentials');
+      setColeccion('');
       setTipo('Polera');
-      setPrecio(145);
+      setPrecio('');
       setCosto(55);
       setEstadoComercial('nuevo');
-      setTallasTexto('S, M, L, XL');
       setDescripcion('');
       setImagenes([]);
       setStock({ S: 0, M: 0, L: 0, XL: 0 });
@@ -367,10 +375,9 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
     const toastLoading = toast.loading('Guardando prenda en la base de datos...');
 
     try {
-      const tallasArray = tallasTexto
-        .split(',')
-        .map((t) => t.trim().toUpperCase())
-        .filter(Boolean);
+      const tallasArray = Object.keys(stock).length > 0
+        ? Object.keys(stock).map((t) => t.trim().toUpperCase())
+        : ['S', 'M', 'L', 'XL'];
 
       const coleccionFinal = seccionNueva.trim() !== '' ? seccionNueva.trim() : coleccion;
       const tipoFinal = tipoNuevo.trim() !== '' ? tipoNuevo.trim() : tipo;
