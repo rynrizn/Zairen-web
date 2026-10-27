@@ -36,3 +36,16 @@ export function getOptimizedImageUrl(
 
   return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${publicIdOrUrl}.webp`;
 }
+
+/**
+ * Genera un srcset responsivo con transformaciones f_auto,q_auto de Cloudinary
+ */
+export function getResponsiveSrcSet(
+  publicIdOrUrl: string,
+  widths: number[] = [360, 480, 600, 800, 1000]
+): string {
+  if (!publicIdOrUrl) return '';
+  return widths
+    .map((w) => `${getOptimizedImageUrl(publicIdOrUrl, w, Math.round(w * 1.25))} ${w}w`)
+    .join(', ');
+}
