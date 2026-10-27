@@ -81,6 +81,12 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   const [mediaImages, setMediaImages] = useState<string[]>([]);
 
   useEffect(() => {
+    // Reiniciar estados de mediateca al alternar producto
+    setShowMediaLibrary(false);
+    setIsLoadingMedia(false);
+    setMediaImages([]);
+    setInputUrl('');
+
     if (product) {
       setSku(product.sku);
       setNombre(product.nombre);
