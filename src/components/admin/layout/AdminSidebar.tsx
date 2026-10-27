@@ -43,7 +43,18 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
     }
   }, []);
 
-  const toggleCollapsed = () => {
+    useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+const toggleCollapsed = () => {
     const next = !isCollapsed;
     setIsCollapsed(next);
     if (typeof window !== 'undefined') {
@@ -189,7 +200,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       {/* ======================================================== */}
       {/* 1. BARRA SUPERIOR MÓVIL (Con botón de 3 líneas horizontales) */}
       {/* ======================================================== */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 z-40 bg-[#141416]/95 backdrop-blur-xl border-b border-[#2A2A2A] px-4 flex items-center justify-between">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 z-40 bg-[#141416]/95 backdrop-blur-xl border-b border-[#2A2A2A] px-4 flex items-center justify-between">
         {/* Botón 3 Líneas Horizontales (Hamburguesa) */}
         <button
           type="button"
@@ -246,7 +257,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
         <div
           role="dialog"
           aria-modal="true"
-          className="md:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          className="lg:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setMobileOpen(false)}
         >
           <div
@@ -338,7 +349,7 @@ export function AdminSidebar({ activePath = 'panel' }: AdminSidebarProps) {
       {/* 3. SIDEBAR LATERAL PROFESIONAL DESKTOP / TABLET          */}
       {/* ======================================================== */}
       <aside
-        className={`hidden md:flex flex-col justify-between fixed top-0 left-0 bottom-0 z-40 bg-[#141416]/95 backdrop-blur-2xl border-r border-white/[0.08] transition-all duration-300 ${
+        className={`hidden lg:flex flex-col justify-between fixed top-0 left-0 bottom-0 z-40 bg-[#141416]/95 backdrop-blur-2xl border-r border-white/[0.08] transition-all duration-300 ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >

@@ -61,11 +61,11 @@ const finalTitle = formatPageTitle(title);
     {/* Área de Contenido Principal Dinámica */}
     <main
       id="admin-main-wrapper"
-      class="w-full max-w-full flex-1 pt-20 md:pt-6 pb-12 px-3 sm:px-6 md:px-8 transition-all duration-300 md:pl-64 relative z-10 overflow-x-hidden"
+      class="w-full max-w-full flex-1 pt-20 lg:pt-6 pb-12 px-3 sm:px-6 lg:px-8 transition-all duration-300 lg:pl-64 relative z-10 overflow-x-hidden"
     >
       <div class="max-w-[1600px] mx-auto">
         {/* Topbar de Administración Desktop con Selector de Tema */}
-        <div class="hidden md:flex items-center justify-between px-2 pb-5 mb-6 border-b border-white/[0.08]">
+        <div class="hidden lg:flex items-center justify-between px-2 pb-5 mb-6 border-b border-white/[0.08]">
           <div class="flex items-center gap-3">
             <span class="w-2 h-2 bg-[#dc143c]"></span>
             <span class="font-mono text-xs text-[#ffb3b3] uppercase tracking-wider font-bold">
@@ -162,17 +162,17 @@ const finalTitle = formatPageTitle(title);
       if (wrapper) {
         const isCollapsed = localStorage.getItem('zairen_admin_sidebar_collapsed') === 'true';
         if (isCollapsed) {
-          wrapper.classList.remove('md:pl-64');
-          wrapper.classList.add('md:pl-20');
+          wrapper.classList.remove('lg:pl-64');
+          wrapper.classList.add('lg:pl-20');
         }
 
         window.addEventListener('sidebar-toggle', (e: any) => {
           if (e.detail?.isCollapsed) {
-            wrapper.classList.remove('md:pl-64');
-            wrapper.classList.add('md:pl-20');
+            wrapper.classList.remove('lg:pl-64');
+            wrapper.classList.add('lg:pl-20');
           } else {
-            wrapper.classList.remove('md:pl-20');
-            wrapper.classList.add('md:pl-64');
+            wrapper.classList.remove('lg:pl-20');
+            wrapper.classList.add('lg:pl-64');
           }
         });
       }
