@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '../../config/site';
 import { CartBadge } from './CartBadge';
+import { FavoritesBadge } from './FavoritesBadge';
 import { ShareButton } from './ShareButton';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -19,7 +20,7 @@ const { activePath = '/' } = Astro.props;
     style="display: none;"
     class="w-full bg-[#141416] text-[#FAF9F6] border-b border-[#dc143c]/40 text-center py-1.5 px-4 font-mono text-[11px] uppercase tracking-wider relative z-50 flex items-center justify-center gap-3 transition-colors"
   >
-    <span class="w-1.5 h-1.5 rounded-full bg-[#dc143c] animate-pulse shrink-0"></span>
+    <span class="w-1.5 h-1.5 rounded-none bg-[#dc143c] animate-pulse shrink-0"></span>
     <a id="top-promo-banner-link" href="#catalogo" class="hover:text-[#dc143c] transition-colors truncate">
       <span id="top-promo-banner-text">NUEVO DROP 2026 // ENVÍOS A TODA BOLIVIA</span>
     </a>
@@ -27,7 +28,7 @@ const { activePath = '/' } = Astro.props;
   <div class="h-16 w-full max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-between">
     
     <!-- Logotipo Oficial Suelto & Limpio (Sin cajas ni marcos que lo encierren) -->
-    <a href="/" class="flex items-center gap-3 group">
+    <a href="/" data-astro-reload class="flex items-center gap-3 group">
       <img
         src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
         alt="Zairen Lab Logo Oficial"
@@ -56,12 +57,12 @@ const { activePath = '/' } = Astro.props;
         rel="noopener noreferrer"
         class="navbar-link text-xs font-mono uppercase tracking-widest text-[#8F8F8C] hover:text-[#FAF9F6] transition-colors flex items-center gap-1.5"
       >
-        <span class="w-1.5 h-1.5 bg-emerald-400"></span>
+        <span class="w-1.5 h-1.5 rounded-none bg-emerald-400"></span>
         <span>Contacto</span>
       </a>
     </nav>
 
-    <!-- Acciones Derecha (Tema, Compartir, Carrito, Menú Hamburguesa Móvil) -->
+    <!-- Acciones Derecha (Tema, Compartir, Favoritos, Carrito, Menú Hamburguesa Móvil) -->
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- Selector Modo Claro / Modo Oscuro -->
       <ThemeToggle client:load />
@@ -72,6 +73,9 @@ const { activePath = '/' } = Astro.props;
         className="w-9 h-9 bg-[#141416] hover:bg-[#201f1f] text-[#FAF9F6] border border-[#2A2A2A] rounded-none"
       />
 
+      <!-- Acceso Rápido a Favoritos -->
+      <FavoritesBadge client:load />
+
       <!-- Carrito Drawer Toggle -->
       <CartBadge client:load />
 
@@ -81,7 +85,7 @@ const { activePath = '/' } = Astro.props;
         id="mobile-menu-toggle-btn"
         aria-label="Menú de Navegación"
         aria-expanded="false"
-        class="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 bg-[#141416] border border-[#2A2A2A] text-[#FAF9F6] hover:text-[#dc143c] transition-colors cursor-pointer"
+        class="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 bg-[#141416] border border-[#2A2A2A] text-[#FAF9F6] hover:text-[#dc143c] transition-colors cursor-pointer rounded-none"
       >
         <span class="w-4 h-0.5 bg-current transition-transform duration-200" id="bar-1"></span>
         <span class="w-4 h-0.5 bg-current transition-opacity duration-200" id="bar-2"></span>
@@ -116,7 +120,7 @@ const { activePath = '/' } = Astro.props;
         class="mobile-nav-link py-2 px-3 flex items-center justify-between border-l-2 border-transparent text-[#8F8F8C] hover:text-[#FAF9F6] hover:bg-[#141416]"
       >
         <span class="flex items-center gap-2">
-          <span class="w-2 h-2 bg-emerald-400"></span>
+          <span class="w-2 h-2 rounded-none bg-emerald-400"></span>
           <span>Contacto WhatsApp</span>
         </span>
         <span class="text-[#8F8F8C]">↗</span>

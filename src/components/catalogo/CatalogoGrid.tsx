@@ -1,4 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useStore } from '@nanostores/react';
+import { $favorites } from '../../stores/favoritesStore';
+import { Ruler, Heart } from 'lucide-react';
 import { TarjetaPolera, type TarjetaPoleraProps } from './TarjetaPolera';
 import { GuiaTallasModal } from './GuiaTallasModal';
 import { ColeccionCombobox } from './ColeccionCombobox';
@@ -12,6 +15,7 @@ interface CatalogoGridProps {
 export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps) {
   const [selectedCollection, setSelectedCollection] = useState<string>('todas');
   const [commercialFilter, setCommercialFilter] = useState<string>('todos');
+  const favorites = useStore($favorites);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'recientes' | 'precio-asc' | 'precio-desc' | 'nombre-asc' | 'nombre-desc' | 'disponibles'>('recientes');
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
@@ -20,6 +24,19 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const [isGuiaOpen, setIsGuiaOpen] = useState<boolean>(false);
   const [selectedProductForModal, setSelectedProductForModal] = useState<TarjetaPoleraProps | null>(null);
   const originCardElementRef = useRef<HTMLElement | null>(null);
+
+  // Sincronizar filtro de favoritos vía evento o URL
+  useEffect(() => {
+    const handleFav = () => setCommercialFilter('favoritos');
+    window.addEventListener('zairen-filter-favorites', handleFav);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('filtro') === 'favoritos') {
+        setCommercialFilter('favoritos');
+      }
+    }
+    return () => window.removeEventListener('zairen-filter-favorites', handleFav);
+  }, []);
 
   // Abrir modal e interceptar URL con pushState
   const handleOpenProductModal = (product: TarjetaPoleraProps, targetEl?: HTMLElement) => {
@@ -177,7 +194,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         }
 
         // Filtro por estado comercial
-        if (commercialFilter !== 'todos') {
+        if (commercialFilter === 'favoritos') {
+          const isFav = favorites.includes(p.id) || (!!p.slug && favorites.includes(p.slug));
+          if (!isFav) return false;
+        } else if (commercialFilter !== 'todos') {
           if (commercialFilter === 'ofertas') {
             if (p.estadoComercial !== 'oferta' && p.estadoComercial !== 'promocion') return false;
           } else if (p.estadoComercial !== commercialFilter) {
@@ -401,7 +421,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             title="Ver medidas en centímetros de prendas"
             className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
           >
-            <span className="material-symbols-outlined text-[16px] text-[#dc143c]">straighten</span>
+            <Ruler className="w-4 h-4 text-[#dc143c]" />
             <span className="hidden sm:inline">Guía de Tallas</span>
             <span className="sm:hidden">Tallas</span>
           </button>
@@ -461,6 +481,20 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             }`}
           >
             Todos ({commercialCounts.todos})
+          </button>
+
+          {/* Filtro Favoritos */}
+          <button
+            type="button"
+            onClick={() => setCommercialFilter('favoritos')}
+            className={`px-3 py-1 rounded-none text-[11px] font-mono uppercase tracking-wider font-bold transition-all cursor-pointer border whitespace-nowrap flex items-center gap-1.5 ${
+              commercialFilter === 'favoritos'
+                ? 'bg-[#dc143c] text-white border-[#dc143c] shadow-[0_0_10px_rgba(220,20,60,0.5)]'
+                : 'bg-[#141416] text-[#b3b3b3] hover:text-[#dc143c] border-[#2A2A2A]'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${commercialFilter === 'favoritos' || favorites.length > 0 ? 'fill-current text-[#dc143c]' : ''} ${commercialFilter === 'favoritos' ? 'text-white fill-white' : ''}`} />
+            <span>Favoritos ({favorites.length})</span>
           </button>
 
           {/* Filtro Pre-Order (Solo si hay prendas en preventa) */}

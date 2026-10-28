@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useStore } from '@nanostores/react';
 import { toast } from 'sonner';
 import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
+import { $favorites, toggleFavorite } from '../../stores/favoritesStore';
+import { Heart, Zap, MessageCircle, AtSign } from 'lucide-react';
 import { getOptimizedImageUrl, getResponsiveSrcSet } from '../../lib/cloudinary';
 import { formatCurrency } from '../../config/site';
 import {
@@ -74,6 +77,9 @@ export function TarjetaPolera({
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [priorityChannel, setPriorityChannel] = useState<ContactChannel | null>(null);
+
+  const favorites = useStore($favorites);
+  const isFav = favorites.includes(id) || (!!slug && favorites.includes(slug));
 
   useEffect(() => {
     const syncChannel = () => {
@@ -257,6 +263,25 @@ export function TarjetaPolera({
             </>
           )}
         </div>
+
+        {/* Botón de Favorito Ortogonal Zen */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(id, slug, nombre);
+          }}
+          aria-label={isFav ? `Quitar ${nombre} de favoritos` : `Guardar ${nombre} en favoritos`}
+          title={isFav ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-none border flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm ${
+            isFav
+              ? 'bg-[#dc143c] border-[#dc143c] text-white shadow-[0_0_12px_rgba(220,20,60,0.6)]'
+              : 'bg-[#141416]/80 hover:bg-[#141416] text-[#ac8888] hover:text-white border-white/20 hover:border-[#dc143c]'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isFav ? 'fill-current text-white' : ''}`} />
+        </button>
       </a>
 
       {/* Ficha Inferior con Información de Prenda */}
@@ -306,7 +331,7 @@ export function TarjetaPolera({
           {/* Micro-aviso de últimas unidades por talla seleccionada */}
           {!isSoldOut && selectedTallaStock > 0 && selectedTallaStock <= 2 && (
             <span className="text-[9px] font-mono text-amber-400 font-bold flex items-center gap-1">
-              <span className="material-symbols-outlined text-[12px] text-amber-400">bolt</span>
+              <Zap className="w-3 h-3 text-amber-400" />
               <span>Últimas {selectedTallaStock} uds ({selectedTalla})</span>
             </span>
           )}
@@ -335,11 +360,13 @@ export function TarjetaPolera({
                 onClick={(e) => e.stopPropagation()}
                 title={`Consultar por ${priorityChannel.name}`}
                 aria-label={`Consultar ${nombre} por ${priorityChannel.name}`}
-                className="w-9 h-9 shrink-0 flex items-center justify-center font-bold transition-all border bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-[#dc143c] border-[#201f1f] hover:border-[#dc143c] cursor-pointer active:scale-95 mr-1.5"
+                className="w-9 h-9 shrink-0 flex items-center justify-center font-bold transition-all border bg-[#141416] hover:bg-[#201f1f] text-[#ac8888] hover:text-[#dc143c] border-[#201f1f] hover:border-[#dc143c] cursor-pointer active:scale-95 mr-1.5 rounded-none"
               >
-                <span className="material-symbols-outlined text-[17px]">
-                  {priorityChannel.type === 'whatsapp' ? 'chat' : 'alternate_email'}
-                </span>
+                {priorityChannel.type === 'whatsapp' ? (
+                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                ) : (
+                  <AtSign className="w-4 h-4 text-[#ac8888]" />
+                )}
               </a>
             )}
             <button
