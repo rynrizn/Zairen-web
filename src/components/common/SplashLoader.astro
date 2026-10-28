@@ -4,7 +4,8 @@ import { siteConfig } from '../../config/site';
 
 <div
   id="splash-loader"
-  class="fixed inset-0 z-50 bg-[#0A0A0A] text-[#FAF9F6] flex flex-col items-center justify-center p-6 transition-opacity duration-500 pointer-events-auto"
+  class="fixed inset-0 z-50 bg-[#0A0A0A] text-[#FAF9F6] flex flex-col items-center justify-center p-6 transition-opacity duration-300 pointer-events-none opacity-0"
+  style="display: none;"
 >
   <!-- Halo sutil de fondo -->
   <div class="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center overflow-hidden">
@@ -34,15 +35,17 @@ import { siteConfig } from '../../config/site';
   </div>
 </div>
 
-<!-- Script Inline de Ocultación Inmediata para Evitar FOUC o Bloqueo en 0% -->
-<script is:inline>
+<!-- Script Inline Inmediato con data-astro-rerun: Solo muestra si es primera visita -->
+<script is:inline data-astro-rerun>
   (function () {
     try {
-      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('zairen_splash_seen')) {
+      if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+        var seen = sessionStorage.getItem('zairen_splash_seen');
         var el = document.getElementById('splash-loader');
-        if (el) {
-          el.style.display = 'none';
-          el.style.pointerEvents = 'none';
+        if (!seen && el) {
+          el.style.display = 'flex';
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
         }
       }
     } catch (e) {}
@@ -57,7 +60,7 @@ import { siteConfig } from '../../config/site';
     loader.style.pointerEvents = 'none';
     setTimeout(() => {
       loader.style.display = 'none';
-    }, 400);
+    }, 300);
     try {
       sessionStorage.setItem('zairen_splash_seen', 'true');
     } catch (e) {}
@@ -72,14 +75,15 @@ import { siteConfig } from '../../config/site';
 
     if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('zairen_splash_seen')) {
       loader.style.display = 'none';
+      loader.style.opacity = '0';
       loader.style.pointerEvents = 'none';
       return;
     }
 
-    let p = 25;
+    let p = 30;
     if (bar && percent) {
-      bar.style.width = '25%';
-      percent.textContent = '25%';
+      bar.style.width = '30%';
+      percent.textContent = '30%';
 
       const interval = setInterval(() => {
         p += Math.floor(Math.random() * 25) + 25;
@@ -88,18 +92,18 @@ import { siteConfig } from '../../config/site';
           bar.style.width = '100%';
           percent.textContent = '100%';
           clearInterval(interval);
-          setTimeout(dismissLoader, 200);
+          setTimeout(dismissLoader, 150);
         } else {
           bar.style.width = `${p}%`;
           percent.textContent = `${p}%`;
         }
-      }, 100);
+      }, 80);
 
-      // Timeout de seguridad absoluta: nunca dejar la pantalla bloqueada más de 1.2s
+      // Timeout de seguridad absoluta: nunca bloquear más de 900ms
       setTimeout(() => {
         clearInterval(interval);
         dismissLoader();
-      }, 1200);
+      }, 900);
     } else {
       dismissLoader();
     }
@@ -108,4 +112,12 @@ import { siteConfig } from '../../config/site';
   // Ejecución inicial y en transiciones de página
   runSplashLogic();
   document.addEventListener('astro:page-load', runSplashLogic);
+  document.addEventListener('astro:before-swap', () => {
+    const loader = document.getElementById('splash-loader');
+    if (loader) {
+      loader.style.display = 'none';
+      loader.style.opacity = '0';
+      loader.style.pointerEvents = 'none';
+    }
+  });
 </script>
