@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
         catalogo_version: nuevaVersion,
         updated_at: new Date().toISOString(),
       })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // match all rows
+      .eq('id', 1);
 
     if (updErr) {
       // Si la columna aún no existía en la BD remota, retornar éxito para no bloquear la interfaz

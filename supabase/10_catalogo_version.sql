@@ -25,7 +25,8 @@ BEGIN
 
     UPDATE public.configuracion
     SET catalogo_version = v_nueva_version,
-        updated_at = NOW();
+        updated_at = NOW()
+    WHERE id = 1 OR id IS NOT NULL;
 
     RETURN jsonb_build_object(
         'success', true,
@@ -45,7 +46,8 @@ AS $$
 BEGIN
     UPDATE public.configuracion
     SET catalogo_version = (EXTRACT(EPOCH FROM clock_timestamp()) * 1000)::BIGINT,
-        updated_at = NOW();
+        updated_at = NOW()
+    WHERE id = 1 OR id IS NOT NULL;
     RETURN NULL;
 END;
 $$;
