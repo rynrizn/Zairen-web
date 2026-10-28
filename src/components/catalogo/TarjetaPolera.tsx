@@ -78,8 +78,13 @@ export function TarjetaPolera({
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [priorityChannel, setPriorityChannel] = useState<ContactChannel | null>(null);
 
+  const [mounted, setMounted] = useState<boolean>(false);
   const favorites = useStore($favorites);
-  const isFav = favorites.includes(id) || (!!slug && favorites.includes(slug));
+  const isFav = mounted && (favorites.includes(id) || (!!slug && favorites.includes(slug)));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const syncChannel = () => {
