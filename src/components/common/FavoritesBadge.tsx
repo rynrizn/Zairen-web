@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { $favorites } from '../../stores/favoritesStore';
 import { Heart } from 'lucide-react';
 
 export function FavoritesBadge() {
+  const [mounted, setMounted] = useState<boolean>(false);
   const favorites = useStore($favorites);
-  const count = favorites.length;
+  const count = mounted ? favorites.length : 0;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,11 +37,11 @@ export function FavoritesBadge() {
     >
       <Heart
         className={`w-4 h-4 transition-colors ${
-          count > 0 ? 'text-[#dc143c] fill-[#dc143c]' : 'text-[#FAF9F6] group-hover:text-[#dc143c]'
+          mounted && count > 0 ? 'text-[#dc143c] fill-[#dc143c]' : 'text-[#FAF9F6] group-hover:text-[#dc143c]'
         }`}
       />
 
-      {count > 0 && (
+      {mounted && count > 0 && (
         <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-4 h-4 px-1 text-[10px] font-mono font-bold text-white bg-[#dc143c] rounded-none shadow-[0_0_10px_rgba(220,20,60,0.8)] border border-[#141416]">
           {count}
         </span>
