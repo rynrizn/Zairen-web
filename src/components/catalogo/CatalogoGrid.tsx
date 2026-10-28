@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useStore } from '@nanostores/react';
 import { $favorites } from '../../stores/favoritesStore';
-import { Ruler, Heart } from 'lucide-react';
+import { Ruler, Heart, X } from 'lucide-react';
 import { TarjetaPolera, type TarjetaPoleraProps } from './TarjetaPolera';
 import { GuiaTallasModal } from './GuiaTallasModal';
 import { ColeccionCombobox } from './ColeccionCombobox';
@@ -387,9 +387,10 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#ac8888] hover:text-white cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#ac8888] hover:text-white cursor-pointer flex items-center justify-center"
+                aria-label="Limpiar búsqueda"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>

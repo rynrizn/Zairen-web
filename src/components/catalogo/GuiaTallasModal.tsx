@@ -1,6 +1,7 @@
 import React from 'react';
 import { ModalPortal } from '../ui/ModalPortal';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
+import { X } from 'lucide-react';
 
 interface GuiaTallasModalProps {
   isOpen: boolean;
@@ -42,8 +43,9 @@ export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
             onClick={onClose}
             className="w-8 h-8 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-white flex items-center justify-center text-xs font-mono transition-colors cursor-pointer"
             title="Cerrar modal"
+            aria-label="Cerrar modal"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -73,16 +75,6 @@ export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
               ))}
             </tbody>
           </table>
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2 bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase font-bold transition-colors cursor-pointer"
-          >
-            Cerrar
-          </button>
         </div>
       </div>
     </div>
