@@ -35,23 +35,58 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // Si no se especifica, por defecto busca en 'zairen/'
     const prefix = prefixParam === 'all' || prefixParam === '' ? '' : (prefixParam ?? 'zairen/');
 
-    // 3. Obtener variables de entorno (Cloudflare Worker runtime o Node)
+    // 3. Obtener variables de entorno (Cloudflare Worker runtime, import.meta.env o Node)
     const cfEnv = (locals as any)?.runtime?.env || {};
+
+    // Soporte para URL completa estándar de Cloudinary: cloudinary://<key>:<secret>@<cloud_name>
+    const cldUrl =
+      cfEnv.CLOUDINARY_URL ||
+      cfEnv.PUBLIC_CLOUDINARY_URL ||
+      import.meta.env.CLOUDINARY_URL ||
+      import.meta.env.PUBLIC_CLOUDINARY_URL ||
+      process?.env?.CLOUDINARY_URL;
+
+    let parsedApiKey = '';
+    let parsedApiSecret = '';
+    let parsedCloudName = '';
+
+    if (cldUrl && typeof cldUrl === 'string') {
+      const match = cldUrl.match(/cloudinary:\/\/([^:]+):([^@]+)@(.+)/);
+      if (match) {
+        parsedApiKey = match[1];
+        parsedApiSecret = match[2];
+        parsedCloudName = match[3];
+      }
+    }
+
     const cloudName =
+      parsedCloudName ||
       cfEnv.CLOUDINARY_CLOUD_NAME ||
+      cfEnv.PUBLIC_CLOUDINARY_CLOUD_NAME ||
       import.meta.env.CLOUDINARY_CLOUD_NAME ||
       import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME ||
       process?.env?.CLOUDINARY_CLOUD_NAME ||
       'ds4qnoypm';
 
+    // Soporte flexible para nombres directos o con prefijo PUBLIC_
     const apiKey =
+      parsedApiKey ||
       cfEnv.CLOUDINARY_API_KEY ||
+      cfEnv.PUBLIC_CLOUDINARY_API_KEY ||
+      cfEnv.CLOUDINARY_KEY ||
+      cfEnv.PUBLIC_CLOUDINARY_KEY ||
       import.meta.env.CLOUDINARY_API_KEY ||
+      import.meta.env.PUBLIC_CLOUDINARY_API_KEY ||
       process?.env?.CLOUDINARY_API_KEY;
 
     const apiSecret =
+      parsedApiSecret ||
       cfEnv.CLOUDINARY_API_SECRET ||
+      cfEnv.PUBLIC_CLOUDINARY_API_SECRET ||
+      cfEnv.CLOUDINARY_SECRET ||
+      cfEnv.PUBLIC_CLOUDINARY_SECRET ||
       import.meta.env.CLOUDINARY_API_SECRET ||
+      import.meta.env.PUBLIC_CLOUDINARY_API_SECRET ||
       process?.env?.CLOUDINARY_API_SECRET;
 
     // 4. Si faltan credenciales secretas de Cloudinary, consultar imágenes de la BD como contingencia
