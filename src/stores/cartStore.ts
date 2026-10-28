@@ -226,20 +226,13 @@ export function isFreeShippingEligible(items: CartItem[]): boolean {
   return false;
 }
 
-export function getCartShippingCost(items: CartItem[]): number {
-  if (items.length === 0) return 0;
-  if (isFreeShippingEligible(items)) return 0;
-  if (typeof window !== 'undefined') {
-    const customCost = localStorage.getItem('zairen_shipping_cost');
-    if (customCost !== null && !isNaN(Number(customCost))) {
-      return Number(customCost);
-    }
-  }
-  return siteConfig.shipping.expressShippingCost;
+export function getCartShippingCost(_items: CartItem[]): number {
+  // En Zairen Lab no se aplica costo de envío predeterminado: es 'A coordinar precio'
+  return 0;
 }
 
 export function getCartTotal(items: CartItem[]): number {
-  return getCartSubtotal(items) + getCartShippingCost(items);
+  return getCartSubtotal(items);
 }
 
 export function getCartTotalItems(items: CartItem[]): number {
