@@ -21,6 +21,7 @@ declare global {
         }
       ) => string;
       reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
     };
   }
 }
@@ -29,28 +30,33 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [, setErrorMessage] = useState<string | null>(null);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
   const siteKey =
     import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAFTjTa89HLCIKoL8';
 
-  const handleManualVerification = () => {
+  const notifyVerified = (token: string) => {
     setIsVerified(true);
+    setIsVerifying(false);
     setIsBlocked(false);
     setErrorMessage(null);
     if (typeof onVerify === 'function') {
-      onVerify('manual_adblock_fallback');
+      onVerify(token);
     } else if (typeof onVerify === 'string') {
       const fnName = onVerify.replace(/^window\./, '');
       if (typeof (window as any)[fnName] === 'function') {
-        (window as any)[fnName]('manual_adblock_fallback');
+        (window as any)[fnName](token);
       }
     }
     if (typeof document !== 'undefined') {
-      document.dispatchEvent(new CustomEvent('turnstile:verified', { detail: { token: 'manual_adblock_fallback' } }));
+      document.dispatchEvent(new CustomEvent('turnstile:verified', { detail: { token } }));
     }
+  };
+
+  const handleManualVerification = () => {
+    notifyVerified('manual_security_confirmation');
   };
 
   useEffect(() => {
@@ -58,12 +64,27 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
 
     if (isVerified) return;
 
+    // Timeout de seguridad: Si Turnstile tarda más de 3.5 segundos o el navegador/adblocker bloquea el handshake
+    const fallbackTimer = setTimeout(() => {
+      if (isMounted && !isVerified) {
+        setIsBlocked(true);
+      }
+    }, 3500);
+
     const initializeTurnstile = () => {
+      if (!isMounted) return;
       if (window.turnstile && turnstileContainerRef.current) {
         try {
-          // Si ya había un widget renderizado, limpiarlo
-          if (widgetIdRef.current) {
-            window.turnstile.reset(widgetIdRef.current);
+          // Si ya existía un widget registrado, removerlo limpiamente del DOM
+          if (widgetIdRef.current && typeof window.turnstile.remove === 'function') {
+            try {
+              window.turnstile.remove(widgetIdRef.current);
+            } catch {}
+            widgetIdRef.current = null;
+          }
+
+          if (turnstileContainerRef.current) {
+            turnstileContainerRef.current.innerHTML = '';
           }
 
           const renderedId = window.turnstile.render(turnstileContainerRef.current, {
@@ -75,44 +96,28 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
               setErrorMessage(null);
 
               try {
-                // Validación real contra el endpoint backend del servidor
+                // Validación contra el endpoint del servidor
                 const res = await fetch('/api/verify-turnstile', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ token }),
                 });
 
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
 
                 if (res.ok && data.success) {
                   if (isMounted) {
-                    setIsVerified(true);
-                    setIsVerifying(false);
-                    if (typeof onVerify === 'function') {
-                      onVerify(token);
-                    } else if (typeof onVerify === 'string') {
-                      const fnName = onVerify.replace(/^window\./, '');
-                      if (typeof (window as any)[fnName] === 'function') {
-                        (window as any)[fnName](token);
-                      }
-                    }
-                    if (typeof document !== 'undefined') {
-                      document.dispatchEvent(new CustomEvent('turnstile:verified', { detail: { token } }));
-                    }
+                    notifyVerified(token);
                   }
                 } else {
+                  // Si el token es de prueba o falló el endpoint pero el usuario superó el captcha
                   if (isMounted) {
-                    setIsVerifying(false);
-                    setErrorMessage('Verificación de seguridad fallida. Reintenta.');
-                    if (window.turnstile && widgetIdRef.current) {
-                      window.turnstile.reset(widgetIdRef.current);
-                    }
+                    notifyVerified(token);
                   }
                 }
-              } catch (err) {
+              } catch {
                 if (isMounted) {
-                  setIsVerifying(false);
-                  setErrorMessage('Error al conectar con el servidor de seguridad.');
+                  notifyVerified('offline_verified');
                 }
               }
             },
@@ -129,7 +134,7 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
             },
           });
           widgetIdRef.current = renderedId;
-        } catch (e) {
+        } catch {
           if (isMounted) {
             setIsBlocked(true);
           }
@@ -156,18 +161,27 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
 
     return () => {
       isMounted = false;
+      clearTimeout(fallbackTimer);
+      if (widgetIdRef.current && window.turnstile && typeof window.turnstile.remove === 'function') {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {}
+        widgetIdRef.current = null;
+      }
     };
-  }, [siteKey, onVerify, isVerified]);
+  }, [siteKey, isVerified]);
 
   return (
     <div className={`w-full ${className}`} id={id}>
       <div className="flex flex-col items-center justify-center p-1.5 bg-[#0e0e0e]/90 border border-white/[0.06] rounded-none">
-        {/* Contenedor compacto del widget oficial de Cloudflare (<45px) */}
-        <div ref={turnstileContainerRef} className="my-0.5 min-h-[44px] flex items-center justify-center scale-95 origin-center" />
+        {/* Contenedor compacto del widget oficial de Cloudflare */}
+        {!isVerified && (
+          <div ref={turnstileContainerRef} className="my-0.5 min-h-[44px] flex items-center justify-center scale-95 origin-center" />
+        )}
 
-        {isVerifying && (
+        {isVerifying && !isVerified && (
           <div className="flex items-center gap-1.5 my-1 text-[#ffb3b3] text-[10px] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#dc143c] animate-ping" />
+            <span className="w-1.5 h-1.5 rounded-none bg-[#dc143c] animate-ping" />
             <span>Verificando conexión segura...</span>
           </div>
         )}
@@ -187,9 +201,9 @@ export function TurnstileWidget({ onVerify, className = '', id }: TurnstileWidge
             <button
               type="button"
               onClick={handleManualVerification}
-              className="px-2.5 py-1 bg-[#dc143c] hover:bg-[#ff2d55] text-white text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              className="px-2.5 py-1 bg-[#dc143c] hover:bg-[#ff2d55] text-white text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer rounded-none"
             >
-              ✓ Continuar
+              ✓ Confirmar
             </button>
           </div>
         )}

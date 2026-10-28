@@ -271,20 +271,14 @@ export function DetalleProducto({
     <div className="detail-bento-container">
       {/* Botón Volver Atrás & Breadcrumb Zen */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof window !== 'undefined' && window.history.length > 1) {
-              window.history.back();
-            } else {
-              window.location.href = '/';
-            }
-          }}
-          className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#FAF9F6] bg-[#141416] hover:bg-[#dc143c] hover:text-white border border-[#201f1f] hover:border-[#dc143c] transition-all cursor-pointer group shadow-sm"
+        <a
+          href="/"
+          data-astro-reload
+          className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#FAF9F6] bg-[#141416] hover:bg-[#dc143c] hover:text-white border border-[#201f1f] hover:border-[#dc143c] transition-all cursor-pointer group shadow-sm rounded-none"
         >
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
           <span>Volver al Catálogo</span>
-        </button>
+        </a>
 
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-mono text-[#ac8888]">
           <a href="/" className="hover:text-white transition-colors">Catálogo</a>

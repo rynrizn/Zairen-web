@@ -119,15 +119,29 @@ export function CarritoDrawer() {
         ? `${combinedNotes ? `${combinedNotes} • ` : ''}[Orden #${validateData.orderNumber}]`
         : combinedNotes;
 
-      // Generar URL y abrir WhatsApp
+      // Generar URL y redirigir asegurando que no se bloquee el popup
       const whatsappUrl = generateWhatsAppOrderUrl(cart, orderNote, requiresDelivery);
-      window.open(whatsappUrl, '_blank');
-      toast.success('Pedido registrado como PENDIENTE. Abriendo WhatsApp...');
+      clearCart();
+      closeDrawer();
+      setClientNotes('');
+      toast.success('Pedido registrado. Redirigiendo...');
+
+      const newTab = window.open(whatsappUrl, '_blank');
+      if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+        window.location.href = whatsappUrl;
+      }
     } catch (e: any) {
       toast.dismiss(toastLoading);
       const whatsappUrl = generateWhatsAppOrderUrl(cart, combinedNotes, requiresDelivery);
-      window.open(whatsappUrl, '_blank');
-      toast.info('Abriendo WhatsApp...');
+      clearCart();
+      closeDrawer();
+      setClientNotes('');
+      toast.info('Redirigiendo...');
+
+      const newTab = window.open(whatsappUrl, '_blank');
+      if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+        window.location.href = whatsappUrl;
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -312,7 +326,7 @@ export function CarritoDrawer() {
               {requiresDelivery ? (
                 <div className="mt-2.5 pt-2 border-t border-white/[0.06] animate-in fade-in duration-200">
                   <p className="text-[10px] font-mono text-[#ac8888] mb-1.5">
-                    * El costo de entrega se coordinará directamente contigo vía WhatsApp.
+                    * El costo de entrega se coordinará directamente al confirmar tu pedido.
                   </p>
                   <label htmlFor="order-notes" className="block text-[10px] font-mono text-[#FAF9F6] uppercase tracking-wider mb-1">
                     Dirección o Referencia de Entrega:
@@ -343,7 +357,7 @@ export function CarritoDrawer() {
               {requiresDelivery && (
                 <div className="flex justify-between text-[#ac8888]">
                   <span>Envío</span>
-                  <span className="text-[#FAF9F6]">A coordinar por WhatsApp</span>
+                  <span className="text-[#FAF9F6]">A coordinar precio</span>
                 </div>
               )}
               <div className="flex justify-between text-[#FAF9F6] font-bold text-sm pt-1 border-t border-[#201f1f]">
@@ -389,7 +403,7 @@ export function CarritoDrawer() {
                 </>
               ) : (
                 <>
-                  <span>Completar Pedido vía WhatsApp</span>
+                  <span>Realizar Pedido</span>
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}
