@@ -1,5 +1,5 @@
 # ZAIREN LAB // DOCUMENTACIÓN INTEGRAL DEL PROYECTO
-> **Versión del Sistema:** v2.8 Core (Producción)  
+> **Versión del Sistema:** v4.0 Core (Producción)  
 > **Fecha de Actualización:** Octubre 2026  
 > **Objetivo de este Documento:** Servir como especificación técnica completa y autónoma para que cualquier IA o desarrollador entienda en su totalidad qué hace la web, qué tecnologías utiliza, cómo está estructurada y qué reglas de negocio rigen su funcionamiento, **sin necesidad de inspeccionar el código fuente**.
 
