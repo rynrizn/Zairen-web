@@ -57,7 +57,11 @@ export function MediaLibraryModal({
     try {
       // 1. Obtener JWT de Supabase para autorización del servidor
       const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData?.session?.access_token;
+      let accessToken = sessionData?.session?.access_token;
+      if (!accessToken && typeof document !== 'undefined') {
+        const match = document.cookie.match(/sb-access-token=([^;]+)/);
+        if (match) accessToken = decodeURIComponent(match[1].trim());
+      }
 
       const params = new URLSearchParams({ limit: '30' });
       if (cursor) {

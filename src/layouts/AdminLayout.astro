@@ -47,6 +47,21 @@ const finalTitle = formatPageTitle(title);
         document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
       }
+
+      // Recuperación automática ante chunks obsoletos de Vite tras nuevos despliegues
+      window.addEventListener('vite:preloadError', () => {
+        const reloadKey = 'zairen_admin_chunk_reload_attempt';
+        const hasReloaded = sessionStorage.getItem(reloadKey);
+        if (!hasReloaded) {
+          sessionStorage.setItem(reloadKey, 'true');
+          window.location.reload();
+        }
+      });
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          sessionStorage.removeItem('zairen_admin_chunk_reload_attempt');
+        }, 3000);
+      });
     </script>
   </head>
   <body class="bg-[#0A0A0A] text-[#FAF9F6] antialiased min-h-screen flex flex-col font-body relative overflow-x-hidden w-full max-w-full">

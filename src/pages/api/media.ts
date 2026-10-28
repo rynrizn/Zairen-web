@@ -5,16 +5,25 @@ import { getServerSupabase } from '../../lib/supabase';
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
-    // 1. Validar sesión del administrador mediante JWT en Authorization
+    // 1. Validar sesión del administrador mediante JWT en Authorization o cookie sb-access-token
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    let token = '';
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    } else {
+      const cookieHeader = request.headers.get('cookie') || '';
+      const match = cookieHeader.match(/sb-access-token=([^;]+)/);
+      if (match) {
+        token = decodeURIComponent(match[1].trim());
+      }
+    }
+
+    if (!token) {
       return new Response(
         JSON.stringify({ success: false, error: 'Acceso no autorizado: Token requerido' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
     const serverSupabase = getServerSupabase(token);
     const { data: authData, error: authError } = await serverSupabase.auth.getUser(token);
 
