@@ -223,17 +223,6 @@ const redirectUrl = Astro.url.searchParams.get('redirect') || '/admin';
     isTurnstileVerified = true;
     submitBtn.disabled = false;
   });
-  // Fallback de seguridad ante fallas de hidratacion o adblockers
-  setTimeout(() => {
-    if (!isTurnstileVerified) {
-      const turnstileContainer = document.getElementById('login-turnstile');
-      if (turnstileContainer && (!window.turnstile || turnstileContainer.children.length === 0)) {
-        console.warn('[Login] Turnstile widget tardó en responder. Habilitando verificación accesible.');
-        isTurnstileVerified = true;
-        if (submitBtn) submitBtn.disabled = false;
-      }
-    }
-  }, 4500);
 
 
   form?.addEventListener('submit', async (e) => {
