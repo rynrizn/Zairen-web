@@ -142,51 +142,101 @@ export const GET: APIRoute = async ({ request, locals }) => {
         ? btoa(`${apiKey}:${apiSecret}`)
         : Buffer.from(`${apiKey}:${apiSecret}`).toString('base64');
 
-    const queryParams = new URLSearchParams({
-      max_results: String(limit),
-      type: 'upload',
-    });
-    if (nextCursor) {
-      queryParams.set('next_cursor', nextCursor);
-    }
-    if (prefix) {
-      queryParams.set('prefix', prefix);
-    }
+    let cldResources: any[] = [];
+    let nextCursorReturned: string | null = null;
 
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image?${queryParams.toString()}`;
+    if (prefixParam === 'all') {
+      // 5.1 Búsqueda general en toda la cuenta de Cloudinary
+      const queryParams = new URLSearchParams({
+        max_results: String(limit),
+        type: 'upload',
+      });
+      if (nextCursor) queryParams.set('next_cursor', nextCursor);
 
-    const cldResponse = await fetch(cloudinaryUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${basicCredentials}`,
-        Accept: 'application/json',
-      },
-    });
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image?${queryParams.toString()}`;
+      const cldResponse = await fetch(cloudinaryUrl, {
+        headers: {
+          Authorization: `Basic ${basicCredentials}`,
+          Accept: 'application/json',
+        },
+      });
 
-    if (!cldResponse.ok) {
-      const errJson = await cldResponse.json().catch(() => ({}));
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: errJson?.error?.message || `Error ${cldResponse.status} de Cloudinary Admin API`,
-          diag: {
-            cloudNameConfigured: Boolean(cloudName),
-            apiKeyConfigured: Boolean(apiKey),
-            apiSecretConfigured: Boolean(apiSecret),
-            cldStatus: cldResponse.status,
-          },
-        }),
-        {
-          status: cldResponse.status,
+      if (cldResponse.ok) {
+        const cldData = await cldResponse.json();
+        cldResources = cldData.resources || [];
+        nextCursorReturned = cldData.next_cursor || null;
+      }
+    } else {
+      // 5.2 Búsqueda exhaustiva en carpeta de productos (Zairen/products, zairen/products, zairen)
+      let searchOk = false;
+      try {
+        const searchUrl = `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`;
+        const searchExpr = 'folder:"Zairen/products"* OR folder:"zairen/products"* OR folder:"Zairen"* OR folder:"zairen"* OR asset_folder:"Zairen/products"* OR asset_folder:"zairen/products"* OR asset_folder:"Zairen"* OR asset_folder:"zairen"* OR public_id:"Zairen/products"* OR public_id:"zairen"*';
+        const searchResp = await fetch(searchUrl, {
+          method: 'POST',
           headers: {
+            Authorization: `Basic ${basicCredentials}`,
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Accept: 'application/json',
           },
-        }
-      );
-    }
+          body: JSON.stringify({
+            expression: searchExpr,
+            max_results: limit,
+            sort_by: [{ created_at: 'desc' }],
+            ...(nextCursor ? { next_cursor: nextCursor } : {}),
+          }),
+        });
 
-    const cldData = await cldResponse.json();
+        if (searchResp.ok) {
+          const searchData = await searchResp.json();
+          cldResources = searchData.resources || [];
+          nextCursorReturned = searchData.next_cursor || null;
+          searchOk = true;
+        }
+      } catch (searchErr) {
+        console.warn('Search API fallback:', searchErr);
+      }
+
+      // Si Search API no arrojó o no está disponible, consultar endpoints por carpeta y asset_folder en paralelo
+      if (!searchOk || cldResources.length === 0) {
+        const folderCandidates = ['Zairen/products', 'zairen/products', 'Zairen', 'zairen'];
+        const fetchPromises: Promise<any>[] = [];
+
+        for (const f of folderCandidates) {
+          // A) Por prefix en resources/image
+          fetchPromises.push(
+            fetch(`https://api.cloudinary.com/v1_1/${cloudName}/resources/image?type=upload&max_results=50&prefix=${encodeURIComponent(f)}`, {
+              headers: { Authorization: `Basic ${basicCredentials}`, Accept: 'application/json' },
+            }).then(r => r.ok ? r.json() : { resources: [] }).catch(() => ({ resources: [] }))
+          );
+
+          // B) Por Dynamic Asset Folder
+          fetchPromises.push(
+            fetch(`https://api.cloudinary.com/v1_1/${cloudName}/resources/by_asset_folder?asset_folder=${encodeURIComponent(f)}&max_results=50`, {
+              headers: { Authorization: `Basic ${basicCredentials}`, Accept: 'application/json' },
+            }).then(r => r.ok ? r.json() : { resources: [] }).catch(() => ({ resources: [] }))
+          );
+        }
+
+        const results = await Promise.allSettled(fetchPromises);
+        const resourceMap = new Map<string, any>();
+
+        for (const res of results) {
+          if (res.status === 'fulfilled' && res.value?.resources) {
+            for (const item of res.value.resources) {
+              const key = item.public_id || item.secure_url;
+              if (key && !resourceMap.has(key)) {
+                resourceMap.set(key, item);
+              }
+            }
+          }
+        }
+
+        cldResources = Array.from(resourceMap.values()).sort((a, b) => {
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+      }
+    }
 
     // 6. Consultar imágenes en uso en la base de datos para marcar cuáles están activas
     const { data: activeImages } = await serverSupabase
@@ -201,7 +251,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const mappedResources = (cldData.resources || []).map((res: any) => ({
+    const mappedResources = cldResources.map((res: any) => ({
       public_id: res.public_id,
       secure_url: res.secure_url,
       format: res.format,
@@ -216,7 +266,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       JSON.stringify({
         success: true,
         resources: mappedResources,
-        next_cursor: cldData.next_cursor || null,
+        next_cursor: nextCursorReturned,
       }),
       {
         status: 200,

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
+import { ModalPortal } from '../../ui/ModalPortal';
+import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
 import { getOptimizedImageUrl } from '../../../lib/cloudinary';
 
 export interface CloudinaryResource {
@@ -177,16 +179,17 @@ export function MediaLibraryModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
-      onClick={onClose}
-    >
+    <ModalPortal>
       <div
-        className="bg-[#141416] sm:border border-white/[0.12] w-full max-w-4xl h-full sm:h-auto sm:max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl overflow-hidden my-auto"
-        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 overflow-hidden overscroll-contain"
+        onClick={onClose}
       >
+        <div
+          className="bg-[#141416] sm:border border-white/[0.12] w-full max-w-4xl h-full sm:h-auto sm:max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-none shadow-2xl overflow-hidden my-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Cabecera Ortogonal */}
         <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
           <div className="flex items-center gap-2.5">
@@ -259,9 +262,9 @@ export function MediaLibraryModal({
                     ? 'bg-white text-black font-bold'
                     : 'text-[#ac8888] hover:text-white'
                 }`}
-                title="Fotos en carpeta zairen/"
+                title="Fotos de la marca en carpeta Zairen/products"
               >
-                📁 zairen/
+                📁 Zairen/products
               </button>
               <button
                 type="button"
@@ -405,7 +408,7 @@ export function MediaLibraryModal({
                 photo_library
               </span>
               <p className="font-mono text-xs text-[#ac8888]">
-                No se encontraron imágenes {folderScope ? 'en la carpeta zairen/' : 'en Cloudinary'}.
+                No se encontraron imágenes {folderScope ? 'en la carpeta Zairen/products' : 'en Cloudinary'}.
               </p>
               {folderScope === 'zairen/' && (
                 <button
@@ -466,5 +469,6 @@ export function MediaLibraryModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
