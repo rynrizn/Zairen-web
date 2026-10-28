@@ -443,7 +443,7 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
       let savedProductId = product?.id;
       const isUUID = product?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
 
-      if (isUUID) {
+      if (isUUID && savedProductId) {
         const { error: updErr } = await supabase.from('producto').update(productPayload).eq('id', savedProductId);
         if (updErr) throw updErr;
       } else {
@@ -564,12 +564,12 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
   };
 
   return (
-    <div className="bg-[#141416] rounded-none p-3.5 sm:p-6 border border-[#2A2A2A] relative flex flex-col space-y-5 shadow-2xl w-full max-w-full overflow-hidden">
+    <div className="bg-[#141416] rounded-none relative flex flex-col h-full sm:h-auto sm:max-h-[92vh] w-full max-w-full overflow-hidden shadow-2xl border border-[#2A2A2A]">
       {/* Indicador carmesí superior */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c]"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] z-20"></div>
 
-      {/* Header del Formulario */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+      {/* Header del Formulario (Fijo) */}
+      <div className="shrink-0 px-4 sm:px-6 pt-4 pb-3 border-b border-white/[0.08] flex items-center justify-between bg-[#141416] z-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-none bg-[#dc143c]/20 flex items-center justify-center text-[#dc143c]">
             <span className="material-symbols-outlined text-[18px]">edit_document</span>
@@ -599,8 +599,10 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {/* Cuerpo desplazable independiente con overscroll-contain */}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* ======================================================== */}
           {/* COLUMNA IZQUIERDA: Nombre, Fotos y Descripción (7 cols) */}
           {/* ======================================================== */}
@@ -937,9 +939,10 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
             </div>
           </div>
         </div>
+        </div>
 
-        {/* Footer con Acciones Fijo en Móvil */}
-        <div className="sticky bottom-0 z-20 bg-[#141416]/95 backdrop-blur-md -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 pt-3 pb-3 border-t border-white/[0.08] flex items-center justify-between">
+        {/* Footer con Acciones Fijo en Base */}
+        <div className="shrink-0 bg-[#141416]/95 backdrop-blur-md px-4 sm:px-6 py-3 border-t border-white/[0.08] flex items-center justify-between z-10">
           <div className="flex items-center gap-2 text-xs font-mono text-[#ac8888]">
             <span className="w-2 h-2 rounded-none bg-emerald-400"></span>
             <span>SKU: {sku}</span>
@@ -949,13 +952,13 @@ export function ProductoEditor({ product, onSave, onClose }: ProductoEditorProps
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/[0.08]"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-none bg-[#201f1f] hover:bg-[#2a2a2a] text-[#ac8888] hover:text-white font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-white/[0.08]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold transition-all shadow-lg hover:shadow-[#dc143c]/20 cursor-pointer border border-[#dc143c]"
+              className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white font-mono text-xs uppercase tracking-wider font-bold transition-all shadow-lg hover:shadow-[#dc143c]/20 cursor-pointer border border-[#dc143c]"
             >
               {product ? 'Guardar Cambios' : 'Registrar Prenda'}
             </button>

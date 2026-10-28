@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
+import { ModalPortal } from '../../ui/ModalPortal';
+import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
 
 export interface ColeccionItem {
   id: string;
@@ -486,10 +488,11 @@ export function ColeccionesManager() {
 
       {/* Modal Crear / Editar */}
       {isModalOpen && (
+        <ModalPortal>
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden overscroll-contain"
           onClick={() => setIsModalOpen(false)}
         >
           <div
@@ -600,10 +603,12 @@ export function ColeccionesManager() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Modal Confirmación de Eliminación Segura */}
       {deleteModal.isOpen && deleteModal.col && (
+        <ModalPortal>
         <div
           role="dialog"
           aria-modal="true"
@@ -695,6 +700,7 @@ export function ColeccionesManager() {
             )}
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

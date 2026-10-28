@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
 
 interface ColeccionItem {
   id: string;
@@ -23,6 +24,7 @@ export function GestionColeccionesModal({
   onClose,
   onChanged,
 }: GestionColeccionesModalProps) {
+  useBodyScrollLock(isOpen);
   const [colecciones, setColecciones] = useState<ColeccionItem[]>([]);
   const [sinColeccionCount, setSinColeccionCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -128,7 +130,7 @@ export function GestionColeccionesModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-hidden overscroll-contain"
     >
       <div className="relative w-full max-w-2xl bg-[#0e0e10] border border-[#201f1f] shadow-2xl p-6 text-white max-h-[90vh] flex flex-col">
         {/* Acento superior carmesí */}

@@ -4,6 +4,8 @@ import { ProductoEditor, type InventarioItem } from './ProductoEditor';
 import { GestionColeccionesModal } from './GestionColeccionesModal';
 import type { StockBySize } from './MatrizStock';
 import { supabase } from '../../../lib/supabase';
+import { ModalPortal } from '../../ui/ModalPortal';
+import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
 
 export function InventarioManager() {
   const [items, setItems] = useState<InventarioItem[]>([]);
@@ -16,6 +18,8 @@ export function InventarioManager() {
   const [selectedColeccion, setSelectedColeccion] = useState<string>('Todas');
   const [selectedEstado, setSelectedEstado] = useState<'Todos' | 'Disponible' | 'Pocas Uds' | 'Agotado'>('Todos');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  useBodyScrollLock(isEditorOpen || isGestionColeccionesOpen);
 
   const fetchInventory = async () => {
     setIsLoading(true);
@@ -536,40 +540,44 @@ export function InventarioManager() {
       </div>
 
       {/* 4. Modal Flotante de Edición / Creación de Producto (Portal UI) */}
-      <GestionColeccionesModal
-        isOpen={isGestionColeccionesOpen}
-        onClose={() => setIsGestionColeccionesOpen(false)}
-        onChanged={fetchInventory}
-      />
+      <ModalPortal>
+        <GestionColeccionesModal
+          isOpen={isGestionColeccionesOpen}
+          onClose={() => setIsGestionColeccionesOpen(false)}
+          onChanged={fetchInventory}
+        />
+      </ModalPortal>
 
       {isEditorOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
-          onClick={() => {
-            setIsEditorOpen(false);
-            setSelectedItem(null);
-          }}
-        >
+        <ModalPortal>
           <div
-            className="w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-[#141416] sm:border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto flex flex-col"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden overscroll-contain animate-in fade-in duration-150"
+            onClick={() => {
+              setIsEditorOpen(false);
+              setSelectedItem(null);
+            }}
           >
-            <ProductoEditor
-              product={selectedItem}
-              onSave={(item) => {
-                handleSaveProduct(item);
-                setIsEditorOpen(false);
-                setSelectedItem(null);
-              }}
-              onClose={() => {
-                setIsEditorOpen(false);
-                setSelectedItem(null);
-              }}
-            />
+            <div
+              className="w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[92vh] overflow-hidden bg-[#141416] sm:border border-[#2A2A2A] rounded-none shadow-[0_24px_70px_rgba(0,0,0,0.95)] my-auto flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ProductoEditor
+                product={selectedItem}
+                onSave={(item) => {
+                  handleSaveProduct(item);
+                  setIsEditorOpen(false);
+                  setSelectedItem(null);
+                }}
+                onClose={() => {
+                  setIsEditorOpen(false);
+                  setSelectedItem(null);
+                }}
+              />
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

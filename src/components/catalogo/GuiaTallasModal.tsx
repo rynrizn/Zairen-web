@@ -1,4 +1,6 @@
 import React from 'react';
+import { ModalPortal } from '../ui/ModalPortal';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface GuiaTallasModalProps {
   isOpen: boolean;
@@ -6,6 +8,7 @@ interface GuiaTallasModalProps {
 }
 
 export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
+  useBodyScrollLock(isOpen);
   if (!isOpen) return null;
 
   const sizeChart = [
@@ -16,10 +19,11 @@ export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
   ];
 
   return (
+    <ModalPortal>
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[110] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-[110] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden overscroll-contain"
       onClick={onClose}
     >
       <div
@@ -82,5 +86,6 @@ export function GuiaTallasModal({ isOpen, onClose }: GuiaTallasModalProps) {
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
