@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '@nanostores/react';
 import {
   $cart,
@@ -8,39 +8,27 @@ import {
   updateQuantity,
   clearCart,
   getCartSubtotal,
-  getCartShippingCost,
-  getCartTotal,
-  isFreeShippingEligible,
   validarYLimpiarCarrito,
 } from '../../stores/cartStore';
-import { siteConfig, formatCurrency } from '../../config/site';
+import { formatCurrency } from '../../config/site';
 import { generateWhatsAppOrderUrl } from '../../utils/whatsapp';
-import { supabase } from '../../lib/supabase';
 import { TurnstileWidget } from '../common/TurnstileWidget';
 import { toast } from 'sonner';
+import { ShoppingBag, X, Plus, Minus, ArrowRight, Truck } from 'lucide-react';
 
 export function CarritoDrawer() {
   const cart = useStore($cart);
   const isOpen = useStore($isDrawerOpen);
+  const [requiresDelivery, setRequiresDelivery] = useState<boolean>(false);
   const [clientNotes, setClientNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [turnstileVerified, setTurnstileVerified] = useState<boolean>(false);
+  const [, setTurnstileVerified] = useState<boolean>(false);
   const [honeypotValue, setHoneypotValue] = useState<string>('');
-  const [mostrarPromoEnvio, setMostrarPromoEnvio] = useState<boolean>(false);
   const [, setCurrencyTick] = useState<number>(0);
-  const lastOrderAttemptRef = React.useRef<number>(0);
+  const lastOrderAttemptRef = useRef<number>(0);
 
-  // Leer preferencia de promoción opcional (desactivada por defecto)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('zairen_cart_promo_enabled');
-      setMostrarPromoEnvio(saved === 'true');
-
-      const handleStorageChange = () => {
-        const updated = localStorage.getItem('zairen_cart_promo_enabled');
-        setMostrarPromoEnvio(updated === 'true');
-        setCurrencyTick((t) => t + 1);
-      };
       const handleCurrencyChange = () => {
         setCurrencyTick((t) => t + 1);
       };
@@ -49,11 +37,9 @@ export function CarritoDrawer() {
         setTurnstileVerified(true);
       };
 
-      window.addEventListener('storage', handleStorageChange);
       window.addEventListener('zairen-currency-changed', handleCurrencyChange);
       document.addEventListener('turnstile:verified', handleTurnstileVerified);
       return () => {
-        window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('zairen-currency-changed', handleCurrencyChange);
         document.removeEventListener('turnstile:verified', handleTurnstileVerified);
       };
@@ -74,16 +60,7 @@ export function CarritoDrawer() {
   }, []);
 
   const subtotal = getCartSubtotal(cart);
-  const shipping = getCartShippingCost(cart);
-  const total = getCartTotal(cart);
-  const isFree = isFreeShippingEligible(cart);
-  const amountToFreeShipping = Math.max(0, siteConfig.shipping.freeShippingThreshold - subtotal);
-
-  // Progreso hacia el envío gratis (0 a 100%)
-  const freeShippingProgress = Math.min(
-    100,
-    Math.round((subtotal / siteConfig.shipping.freeShippingThreshold) * 100)
-  );
+  const total = subtotal;
 
   const handleCheckoutWhatsApp = async () => {
     if (cart.length === 0) return;
@@ -105,6 +82,10 @@ export function CarritoDrawer() {
     setIsSubmitting(true);
     const toastLoading = toast.loading('Revalidando stock disponible y preparando orden...');
 
+    const combinedNotes = requiresDelivery
+      ? `[Requiere Envío a Domicilio] ${clientNotes}`.trim()
+      : clientNotes.trim();
+
     try {
       const validateRes = await fetch('/api/checkout-validate', {
         method: 'POST',
@@ -112,9 +93,9 @@ export function CarritoDrawer() {
         body: JSON.stringify({
           items: cart,
           subtotal,
-          shipping,
+          shipping: 0,
           total,
-          notes: clientNotes,
+          notes: combinedNotes,
         }),
       });
 
@@ -122,7 +103,6 @@ export function CarritoDrawer() {
 
       if (!validateRes.ok || !validateData.success) {
         toast.dismiss(toastLoading);
-        // Depurar items eliminados o no disponibles de inmediato
         await validarYLimpiarCarrito();
         if (validateData.error === 'STOCK_INSUFICIENTE') {
           toast.error(validateData.message || 'Una de las prendas seleccionadas se ha agotado.', {
@@ -136,16 +116,16 @@ export function CarritoDrawer() {
 
       toast.dismiss(toastLoading);
       const orderNote = validateData.orderNumber
-        ? `${clientNotes ? `${clientNotes} • ` : ''}[Orden #${validateData.orderNumber}]`
-        : clientNotes;
+        ? `${combinedNotes ? `${combinedNotes} • ` : ''}[Orden #${validateData.orderNumber}]`
+        : combinedNotes;
 
       // Generar URL y abrir WhatsApp
-      const whatsappUrl = generateWhatsAppOrderUrl(cart, orderNote);
+      const whatsappUrl = generateWhatsAppOrderUrl(cart, orderNote, requiresDelivery);
       window.open(whatsappUrl, '_blank');
       toast.success('Pedido registrado como PENDIENTE. Abriendo WhatsApp...');
     } catch (e: any) {
       toast.dismiss(toastLoading);
-      const whatsappUrl = generateWhatsAppOrderUrl(cart, clientNotes);
+      const whatsappUrl = generateWhatsAppOrderUrl(cart, combinedNotes, requiresDelivery);
       window.open(whatsappUrl, '_blank');
       toast.info('Abriendo WhatsApp...');
     } finally {
@@ -185,7 +165,7 @@ export function CarritoDrawer() {
         {/* Cabecera del Drawer */}
         <div className="flex items-center justify-between p-4 border-b border-[#201f1f] bg-[#141416]">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#dc143c]" />
+            <span className="w-2 h-2 rounded-none bg-[#dc143c]" />
             <h2 className="font-display text-base font-bold uppercase tracking-tight text-[#FAF9F6]">
               Bolsa de Compras
             </h2>
@@ -200,47 +180,16 @@ export function CarritoDrawer() {
             aria-label="Cerrar bolsa"
             className="w-8 h-8 rounded-none flex items-center justify-center text-[#ac8888] hover:text-[#FAF9F6] hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-[#201f1f]"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
-
-        {/* Barra de Progreso de Envío Gratis Opcional (Controlada desde Admin) */}
-        {mostrarPromoEnvio && (
-          <div className="p-3 bg-[#141416]/50 border-b border-[#201f1f] text-xs font-mono">
-            {isFree ? (
-              <p className="text-[#a7f3d0] font-bold flex items-center gap-1.5">
-                <span>✓</span> ¡Calificas para ENVÍO GRATIS a toda Bolivia!
-              </p>
-            ) : (
-              <div>
-                <p className="text-[#ac8888] mb-1.5">
-                  Agrega{' '}
-                  <span className="text-[#FAF9F6] font-bold">
-                    {formatCurrency(amountToFreeShipping)}
-                  </span>{' '}
-                  más para envío gratuito
-                </p>
-                <div className="w-full h-1 bg-[#201f1f] overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#dc143c] to-[#ff4d6d] transition-all duration-300"
-                    style={{ width: `${freeShippingProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Lista de Items */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
               <div className="w-16 h-16 border border-dashed border-[#201f1f] flex items-center justify-center text-[#ac8888]">
-                <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                  <path d="M3 6h18" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
+                <ShoppingBag className="w-7 h-7" />
               </div>
               <div>
                 <p className="font-display text-sm font-bold uppercase text-[#FAF9F6] tracking-tight">
@@ -253,7 +202,7 @@ export function CarritoDrawer() {
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="mt-2 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#0A0A0A] bg-[#FAF9F6] hover:bg-[#dc143c] hover:text-white transition-colors cursor-pointer"
+                className="mt-2 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#0A0A0A] bg-[#FAF9F6] hover:bg-[#dc143c] hover:text-white transition-colors cursor-pointer rounded-none"
               >
                 Ver Catálogo
               </button>
@@ -268,7 +217,7 @@ export function CarritoDrawer() {
                 <img
                   src={item.imagen}
                   alt={item.nombre}
-                  className="w-20 h-20 object-cover bg-[#0A0A0A] border border-[#201f1f] shrink-0"
+                  className="w-20 h-20 object-contain bg-[#0A0A0A] border border-[#201f1f] shrink-0"
                 />
 
                 {/* Detalles de la prenda */}
@@ -281,15 +230,16 @@ export function CarritoDrawer() {
                       <button
                         type="button"
                         onClick={() => removeItem(item.id, item.talla)}
-                        className="text-[#ac8888] hover:text-[#dc143c] text-xs p-0.5 cursor-pointer"
+                        className="text-[#ac8888] hover:text-[#dc143c] p-1 cursor-pointer"
                         title="Eliminar de la bolsa"
+                        aria-label="Eliminar"
                       >
-                        ✕
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#201f1f] text-[#FAF9F6] font-bold">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#201f1f] text-[#FAF9F6] font-bold rounded-none">
                         TALLA: {item.talla}
                       </span>
                       {item.sku && (
@@ -301,14 +251,14 @@ export function CarritoDrawer() {
                   </div>
 
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#201f1f]/60">
-                    {/* Control de Cantidad */}
+                    {/* Control de Cantidad Ortogonal */}
                     <div className="flex items-center border border-[#201f1f] bg-[#0A0A0A]">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad - 1)}
-                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform"
+                        className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform rounded-none"
                       >
-                        -
+                        <Minus className="w-3 h-3" />
                       </button>
                       <span className="w-8 text-center text-xs font-mono font-bold text-[#FAF9F6]">
                         {item.cantidad}
@@ -317,13 +267,13 @@ export function CarritoDrawer() {
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad + 1)}
                         disabled={item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible}
-                        className={`w-6 h-6 flex items-center justify-center text-xs ${
+                        className={`w-6 h-6 flex items-center justify-center text-xs rounded-none ${
                           item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible
                             ? 'text-white/20 cursor-not-allowed'
                             : 'text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform'
                         }`}
                       >
-                        +
+                        <Plus className="w-3 h-3" />
                       </button>
                     </div>
 
@@ -343,34 +293,61 @@ export function CarritoDrawer() {
         {/* Pie de Pedido y Checkout */}
         {cart.length > 0 && (
           <div className="p-4 bg-[#141416] border-t border-[#201f1f] space-y-3">
-            {/* Notas del Cliente para el Pedido */}
-            <div>
-              <label htmlFor="order-notes" className="block text-[10px] font-mono text-[#ac8888] uppercase tracking-wider mb-1">
-                Instrucciones o Referencia de Entrega (Opcional):
+            {/* Opción de Envío a Domicilio */}
+            <div className="bg-[#0A0A0A] p-3 border border-[#201f1f]">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={requiresDelivery}
+                  onChange={(e) => setRequiresDelivery(e.target.checked)}
+                  className="w-4 h-4 rounded-none bg-[#141416] border border-[#201f1f] text-[#dc143c] focus:ring-0 focus:outline-none accent-[#dc143c] cursor-pointer"
+                />
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#FAF9F6]">
+                  <Truck className="w-3.5 h-3.5 text-[#dc143c]" />
+                  <span>¿Deseas envío a domicilio?</span>
+                </div>
               </label>
-              <textarea
-                id="order-notes"
-                value={clientNotes}
-                onChange={(e) => setClientNotes(e.target.value)}
-                placeholder="Ej: Enviar a nombre de Juan Pérez, zona central..."
-                rows={2}
-                maxLength={200}
-                className="w-full bg-[#0A0A0A] border border-[#201f1f] text-xs font-body text-[#FAF9F6] p-2 focus:border-[#dc143c] focus:outline-none resize-none"
-              />
+
+              {/* Si marca envío, se despliega el cuadro de referencia */}
+              {requiresDelivery ? (
+                <div className="mt-2.5 pt-2 border-t border-white/[0.06] animate-in fade-in duration-200">
+                  <p className="text-[10px] font-mono text-[#ac8888] mb-1.5">
+                    * El costo de entrega se coordinará directamente contigo vía WhatsApp.
+                  </p>
+                  <label htmlFor="order-notes" className="block text-[10px] font-mono text-[#FAF9F6] uppercase tracking-wider mb-1">
+                    Dirección o Referencia de Entrega:
+                  </label>
+                  <textarea
+                    id="order-notes"
+                    value={clientNotes}
+                    onChange={(e) => setClientNotes(e.target.value)}
+                    placeholder="Ej: Zona Central, Calle Sucre #123, entre Bolívar y Colón..."
+                    rows={2}
+                    maxLength={200}
+                    className="w-full bg-[#141416] border border-[#201f1f] text-xs font-body text-[#FAF9F6] p-2 focus:border-[#dc143c] focus:outline-none resize-none rounded-none"
+                  />
+                </div>
+              ) : (
+                <p className="text-[10px] font-mono text-[#8F8F8C] mt-1 pl-6">
+                  Recojo directo sin costo de envío.
+                </p>
+              )}
             </div>
 
             {/* Desglose Económico */}
             <div className="space-y-1.5 pt-2 border-t border-[#201f1f] text-xs font-mono">
               <div className="flex justify-between text-[#ac8888]">
-                <span>Subtotal</span>
+                <span>Prendas ({cart.reduce((sum, item) => sum + item.cantidad, 0)})</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-[#ac8888]">
-                <span>Envío (Nacional)</span>
-                <span>{isFree ? 'GRATIS' : formatCurrency(shipping)}</span>
-              </div>
+              {requiresDelivery && (
+                <div className="flex justify-between text-[#ac8888]">
+                  <span>Envío</span>
+                  <span className="text-[#FAF9F6]">A coordinar por WhatsApp</span>
+                </div>
+              )}
               <div className="flex justify-between text-[#FAF9F6] font-bold text-sm pt-1 border-t border-[#201f1f]">
-                <span>TOTAL APROX.</span>
+                <span>TOTAL PRENDAS</span>
                 <span className="text-[#dc143c]">{formatCurrency(total)}</span>
               </div>
             </div>
@@ -399,7 +376,7 @@ export function CarritoDrawer() {
               type="button"
               onClick={handleCheckoutWhatsApp}
               disabled={isSubmitting}
-              className={`w-full py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg ${
+              className={`w-full py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg rounded-none ${
                 isSubmitting
                   ? 'bg-[#1c1b1b] text-[#8F8F8C] cursor-not-allowed border border-[#201f1f]'
                   : 'bg-[#dc143c] hover:bg-[#b01030] text-white border border-[#dc143c]'
@@ -407,13 +384,13 @@ export function CarritoDrawer() {
             >
               {isSubmitting ? (
                 <>
-                  <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-none animate-spin" />
                   <span>Revalidando existencias...</span>
                 </>
               ) : (
                 <>
                   <span>Completar Pedido vía WhatsApp</span>
-                  <span>→</span>
+                  <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}
             </button>
