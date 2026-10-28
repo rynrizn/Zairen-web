@@ -22,7 +22,7 @@ export function CarritoDrawer() {
   const [requiresDelivery, setRequiresDelivery] = useState<boolean>(false);
   const [clientNotes, setClientNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [, setTurnstileVerified] = useState<boolean>(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [honeypotValue, setHoneypotValue] = useState<string>('');
   const [, setCurrencyTick] = useState<number>(0);
   const lastOrderAttemptRef = useRef<number>(0);
@@ -33,8 +33,9 @@ export function CarritoDrawer() {
         setCurrencyTick((t) => t + 1);
       };
 
-      const handleTurnstileVerified = () => {
-        setTurnstileVerified(true);
+      const handleTurnstileVerified = (e: any) => {
+        const token = e.detail?.token || 'verified';
+        setTurnstileToken(token);
       };
 
       window.addEventListener('zairen-currency-changed', handleCurrencyChange);
@@ -63,7 +64,7 @@ export function CarritoDrawer() {
   const total = subtotal;
 
   const handleCheckoutWhatsApp = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || isSubmitting) return;
 
     // 1. Detección de Bot mediante Honeypot
     if (honeypotValue.trim() !== '') {
@@ -71,20 +72,32 @@ export function CarritoDrawer() {
       return;
     }
 
-    // 2. Limitador de Frecuencia (Rate Limit: 15s)
+    // 2. Comprobación de Turnstile
+    if (!turnstileToken) {
+      toast.warning('Por favor espera un momento mientras se verifica la conexión segura.');
+      return;
+    }
+
+    // 3. Limitador de Frecuencia (Rate Limit: 10s)
     const now = Date.now();
-    if (now - lastOrderAttemptRef.current < 15000) {
-      toast.warning('Por favor espera 15 segundos antes de generar otro pedido.');
+    if (now - lastOrderAttemptRef.current < 10000) {
+      toast.warning('Por favor espera unos segundos antes de generar otro pedido.');
       return;
     }
     lastOrderAttemptRef.current = now;
 
     setIsSubmitting(true);
-    const toastLoading = toast.loading('Revalidando stock disponible y preparando orden...');
+    const toastLoading = toast.loading('Revalidando stock disponible y registrando orden...');
 
     const combinedNotes = requiresDelivery
       ? `[Requiere Envío a Domicilio] ${clientNotes}`.trim()
       : clientNotes.trim();
+
+    // En navegadores de escritorio abrimos la pestaña síncronamente dentro del clic para evitar popup blocker
+    const isMobile =
+      typeof navigator !== 'undefined' &&
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const desktopTab = !isMobile && typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
 
     try {
       const validateRes = await fetch('/api/checkout-validate', {
@@ -96,12 +109,18 @@ export function CarritoDrawer() {
           shipping: 0,
           total,
           notes: combinedNotes,
+          turnstileToken,
         }),
       });
 
       const validateData = await validateRes.json().catch(() => ({}));
 
       if (!validateRes.ok || !validateData.success) {
+        if (desktopTab) {
+          try {
+            desktopTab.close();
+          } catch {}
+        }
         toast.dismiss(toastLoading);
         await validarYLimpiarCarrito();
         if (validateData.error === 'STOCK_INSUFICIENTE') {
@@ -109,7 +128,7 @@ export function CarritoDrawer() {
             duration: 8000,
           });
         } else {
-          toast.error(validateData.error || 'No se pudo validar el inventario en el servidor.');
+          toast.error(validateData.message || validateData.error || 'No se pudo validar el inventario en el servidor.');
         }
         return;
       }
@@ -119,29 +138,30 @@ export function CarritoDrawer() {
         ? `${combinedNotes ? `${combinedNotes} • ` : ''}[Orden #${validateData.orderNumber}]`
         : combinedNotes;
 
-      // Generar URL y redirigir asegurando que no se bloquee el popup
+      // Generar URL y redirigir
       const whatsappUrl = generateWhatsAppOrderUrl(cart, orderNote, requiresDelivery);
+
+      if (isMobile) {
+        window.location.href = whatsappUrl;
+      } else if (desktopTab) {
+        desktopTab.location.href = whatsappUrl;
+      } else {
+        window.location.href = whatsappUrl;
+      }
+
+      // Vaciar carrito SOLAMENTE tras confirmación exitosa de guardado en servidor
       clearCart();
       closeDrawer();
       setClientNotes('');
-      toast.success('Pedido registrado. Redirigiendo...');
-
-      const newTab = window.open(whatsappUrl, '_blank');
-      if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
-        window.location.href = whatsappUrl;
-      }
+      toast.success('Pedido registrado como PENDIENTE. Redirigiendo a WhatsApp...');
     } catch (e: any) {
-      toast.dismiss(toastLoading);
-      const whatsappUrl = generateWhatsAppOrderUrl(cart, combinedNotes, requiresDelivery);
-      clearCart();
-      closeDrawer();
-      setClientNotes('');
-      toast.info('Redirigiendo...');
-
-      const newTab = window.open(whatsappUrl, '_blank');
-      if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
-        window.location.href = whatsappUrl;
+      if (desktopTab) {
+        try {
+          desktopTab.close();
+        } catch {}
       }
+      toast.dismiss(toastLoading);
+      toast.error('Error de red al registrar el pedido. Tu bolsa de compras se conserva para reintentar.');
     } finally {
       setIsSubmitting(false);
     }
@@ -366,9 +386,9 @@ export function CarritoDrawer() {
               </div>
             </div>
 
-            {/* Cloudflare Turnstile Invisible / Interactivo para Protección de Pedidos */}
+            {/* Cloudflare Turnstile */}
             <div className="pt-1">
-              <TurnstileWidget action="checkout_order" />
+              <TurnstileWidget onVerify={(t) => setTurnstileToken(t)} action="checkout_order" />
             </div>
 
             {/* Honeypot Anti-Bot (Oculto) */}
@@ -389,17 +409,22 @@ export function CarritoDrawer() {
             <button
               type="button"
               onClick={handleCheckoutWhatsApp}
-              disabled={isSubmitting}
-              className={`w-full py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg rounded-none ${
-                isSubmitting
+              disabled={isSubmitting || !turnstileToken}
+              className={`w-full py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-lg rounded-none ${
+                isSubmitting || !turnstileToken
                   ? 'bg-[#1c1b1b] text-[#8F8F8C] cursor-not-allowed border border-[#201f1f]'
-                  : 'bg-[#dc143c] hover:bg-[#b01030] text-white border border-[#dc143c]'
+                  : 'bg-[#dc143c] hover:bg-[#b01030] text-white border border-[#dc143c] cursor-pointer'
               }`}
             >
               {isSubmitting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-none animate-spin" />
                   <span>Revalidando existencias...</span>
+                </>
+              ) : !turnstileToken ? (
+                <>
+                  <span className="w-2 h-2 rounded-none bg-amber-400 animate-pulse" />
+                  <span>Verificando conexión segura...</span>
                 </>
               ) : (
                 <>
