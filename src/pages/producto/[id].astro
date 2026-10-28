@@ -113,10 +113,39 @@ if (dbProd) {
     ? Object.values(stockPorTalla).reduce((a, b) => a + b, 0)
     : Number(dbProd.stock_disponible || 0);
 
+  const rawDbImages: string[] = [];
+  if (prodId) {
+    try {
+      const { data: dbImgs } = await supabase
+        .from('imagen')
+        .select('url_imagen')
+        .eq('producto_id', prodId)
+        .order('orden', { ascending: true });
+
+      if (dbImgs && dbImgs.length > 0) {
+        dbImgs.forEach((img: any) => {
+          if (img.url_imagen && typeof img.url_imagen === 'string' && img.url_imagen.trim().length > 0) {
+            rawDbImages.push(img.url_imagen.trim());
+          }
+        });
+      }
+    } catch (e) {}
+  }
+
   const fallbackLogo = 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp';
-  const imgPortada = (typeof dbProd.imagen_portada === 'string' && dbProd.imagen_portada.trim().length > 0)
-    ? dbProd.imagen_portada
-    : fallbackLogo;
+  const candidateImages = [
+    ...rawDbImages,
+    dbProd.imagen_portada,
+    dbProd.imagen_dorsal,
+  ].filter((url): url is string => typeof url === 'string' && url.trim().length > 0);
+
+  const realImages = candidateImages.filter((url) => !url.includes('zairen_logo_oficial_nehjev'));
+  productImages = realImages.length > 0
+    ? Array.from(new Set(realImages))
+    : (candidateImages.length > 0 ? Array.from(new Set(candidateImages)) : [fallbackLogo]);
+
+  const imgPortada = productImages[0];
+  const imgDorsal = productImages[1] || undefined;
 
   const rawPrecio = Number(dbProd.precio_venta);
   const precioFinal = !isNaN(rawPrecio) && rawPrecio >= 0 ? rawPrecio : 0;
@@ -131,36 +160,13 @@ if (dbProd) {
     tipo: 'Polera',
     descripcion: dbProd.descripcion || '',
     imagen: imgPortada,
-    imagenDorsal: dbProd.imagen_dorsal || undefined,
+    imagenDorsal: imgDorsal,
     tallas: tallasFinal,
     stockPorTalla: Object.keys(stockPorTalla).length > 0 ? stockPorTalla : undefined,
     stockDisponible: Math.max(Number(dbProd.stock_disponible || 0), stockCalculado),
     esPrioritario: Boolean(dbProd.es_prioritario),
     estadoComercial: dbProd.estado_comercial || 'disponible',
   };
-
-  productImages = [product.imagen];
-  if (product.imagenDorsal && typeof product.imagenDorsal === 'string' && product.imagenDorsal.trim().length > 0) {
-    productImages.push(product.imagenDorsal);
-  }
-
-  if (prodId) {
-    try {
-      const { data: dbImgs } = await supabase
-        .from('imagen')
-        .select('url_imagen')
-        .eq('producto_id', prodId)
-        .order('orden', { ascending: true });
-
-      if (dbImgs && dbImgs.length > 0) {
-        const additional = dbImgs.map((img) => img.url_imagen).filter(Boolean);
-        const combined = Array.from(new Set([product.imagen, product.imagenDorsal, ...additional].filter(Boolean))) as string[];
-        if (combined.length > 0) {
-          productImages = combined;
-        }
-      }
-    } catch (e) {}
-  }
 }
 ---
 

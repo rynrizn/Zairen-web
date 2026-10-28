@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { addItem } from '../../stores/cartStore';
 import { MorphIcon } from '../ui/MorphIcon';
+import { Maximize2, MessageCircle, ArrowRight } from 'lucide-react';
 import { siteConfig, formatCurrency } from '../../config/site';
 import { getOptimizedImageUrl } from '../../lib/cloudinary';
 import { ShareProductModal } from './ShareProductModal';
@@ -21,6 +22,9 @@ export interface DetalleProductoProps {
   seccion?: string;
   tipo?: string;
   descripcion?: string;
+  subtitulo?: string;
+  imagen?: string;
+  imagenDorsal?: string;
   imagenes?: string[];
   tallas?: string[];
   stockDisponible?: number;
@@ -39,6 +43,9 @@ export function DetalleProducto({
   seccion,
   tipo = 'Polera',
   descripcion = '',
+  subtitulo = '',
+  imagen,
+  imagenDorsal,
   imagenes = [],
   tallas = ['S', 'M', 'L', 'XL'],
   stockDisponible = 0,
@@ -108,11 +115,17 @@ export function DetalleProducto({
     );
   }
 
-  // Sanitización de imágenes: filtrar strings no vacíos y asegurar al menos 1
-  const rawImages = Array.isArray(imagenes)
-    ? imagenes.filter((img): img is string => typeof img === 'string' && img.trim().length > 0)
-    : [];
-  const safeImages = rawImages.length > 0 ? rawImages : [FALLBACK_IMAGE];
+  // Consolidación de imágenes del producto evitando que el logo fallback desplace fotos reales
+  const candidateImages = [
+    ...(Array.isArray(imagenes) ? imagenes : []),
+    imagen,
+    imagenDorsal,
+  ].filter((img): img is string => typeof img === 'string' && img.trim().length > 0);
+
+  const realImages = candidateImages.filter((img) => !img.includes('zairen_logo_oficial_nehjev'));
+  const safeImages = realImages.length > 0
+    ? Array.from(new Set(realImages))
+    : (candidateImages.length > 0 ? Array.from(new Set(candidateImages)) : [FALLBACK_IMAGE]);
 
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const currentImage = safeImages[Math.min(activeImageIndex, safeImages.length - 1)] || safeImages[0];
@@ -288,7 +301,7 @@ export function DetalleProducto({
               key={activeImageIndex}
               src={getOptimizedImageUrl(currentImage, 1000, 1250)}
               alt={`${safeNombre} - Vista ${activeImageIndex + 1}`}
-              className="w-full h-full object-contain sm:object-cover bento-image-active transition-transform duration-500 ease-out hover:scale-[1.03]"
+              className="w-full h-full object-contain bento-image-active transition-transform duration-500 ease-out hover:scale-[1.03]"
             />
 
             {/* Badge de Estado con Color Dinámico */}
@@ -305,13 +318,11 @@ export function DetalleProducto({
             <button
               type="button"
               onClick={() => setIsFullscreen(true)}
-              aria-label="Ver en pantalla completa"
-              title="Ver en pantalla completa"
-              className="bento-fullscreen-btn"
+              aria-label="Ver en pantalla completa (Zoom)"
+              title="Ver en pantalla completa (Zoom)"
+              className="bento-fullscreen-btn z-30"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <Maximize2 className="w-4 h-4 text-white" />
             </button>
 
             {/* Flechas Ortogonales Zen Minimalistas (si hay > 1 imagen) */}
@@ -418,7 +429,9 @@ export function DetalleProducto({
           <p className="bento-desc">
             {descripcion && descripcion.trim() !== ''
               ? descripcion
-              : 'Prenda experimental Zairen Lab. Algodón de alta densidad con estructura definida y corte arquitectónico oversized.'}
+              : subtitulo && subtitulo.trim() !== ''
+              ? subtitulo
+              : '100% Algodón Calidad Premium'}
           </p>
         </div>
 
