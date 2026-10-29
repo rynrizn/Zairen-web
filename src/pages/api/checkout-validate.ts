@@ -1,33 +1,75 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase, getServiceSupabase } from '../../lib/supabase';
+import { getServiceSupabase } from '../../lib/supabase';
+
+// Rate limiter en memoria para limitar peticiones excesivas por IP
+const ipRequestHistory = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minuto
+const MAX_REQUESTS_PER_WINDOW = 6;
+
+function checkRateLimit(ip: string): boolean {
+  if (!ip) return false;
+  const now = Date.now();
+  const timestamps = ipRequestHistory.get(ip) || [];
+  const validTimestamps = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (validTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    ipRequestHistory.set(ip, validTimestamps);
+    return true; // Bloqueado por exceso
+  }
+  validTimestamps.push(now);
+  ipRequestHistory.set(ip, validTimestamps);
+  return false;
+}
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    const clientIp =
+      request.headers.get('CF-Connecting-IP') ||
+      request.headers.get('x-forwarded-for') ||
+      '';
+
+    // 1. Control de frecuencia (Rate Limiting anti-spam)
+    if (clientIp && checkRateLimit(clientIp)) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: 'Has alcanzado el límite de consultas por minuto. Por favor aguarda un momento.',
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await request.json();
     const { items, clientName, clientPhone, subtotal, shipping, total, notes, turnstileToken } = body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return new Response(
-        JSON.stringify({ success: false, error: 'La bolsa de compras está vacía' }),
+        JSON.stringify({ success: false, error: 'La lista de consulta está vacía' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // 1. Verificación obligatoria de Turnstile en el servidor
+    // 2. Verificación obligatoria de Turnstile en el servidor
     const secretKey =
       import.meta.env.CLOUDFLARE_TURNSTILE_SECRET_KEY ||
       (process?.env?.CLOUDFLARE_TURNSTILE_SECRET_KEY as string) ||
       '0x4AAAAAAFTjTWCuvZjnjse0P6u8J_3x900';
 
-    if (turnstileToken && turnstileToken !== 'bypass_dev' && turnstileToken !== 'manual_security_confirmation' && turnstileToken !== 'offline_verified') {
-      try {
-        const clientIp =
-          request.headers.get('CF-Connecting-IP') ||
-          request.headers.get('x-forwarded-for') ||
-          '';
+    if (!turnstileToken) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'TOKEN_TURNSTILE_FALTANTE',
+          message: 'La verificación de seguridad es obligatoria para enviar la consulta.',
+        }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
+    if (turnstileToken !== 'bypass_dev' || process.env.NODE_ENV === 'production') {
+      try {
         const formData = new URLSearchParams();
         formData.append('secret', secretKey);
         formData.append('response', turnstileToken);
@@ -57,22 +99,12 @@ export const POST: APIRoute = async ({ request }) => {
           );
         }
       } catch (err: any) {
-        console.warn('[Checkout Turnstile] Advertencia de verificación en servidor:', err);
+        console.warn('[Consulta Turnstile] Advertencia de verificación en servidor:', err);
       }
     }
 
-    // Usar cliente privilegiado con Service Role para saltar restricciones RLS de anon
+    // 3. Resolver prendas sin descontar stock ni bloquear por inventario
     const db = getServiceSupabase();
-
-    // 2. Revalidar existencia del producto y disponibilidad de stock en el servidor
-    const conflicts: Array<{
-      id: string;
-      nombre: string;
-      talla: string;
-      disponible: number;
-      solicitado: number;
-    }> = [];
-
     const resolvedItems: any[] = [];
 
     for (const item of items) {
@@ -82,93 +114,33 @@ export const POST: APIRoute = async ({ request }) => {
         ? await query.eq('id', item.id).maybeSingle()
         : await query.eq('slug', item.id).maybeSingle();
 
-      // Si el producto fue eliminado, archivado o no está publicado
-      if (!prodData || !prodData.activo || !prodData.publicado) {
-        conflicts.push({
-          id: item.id,
-          nombre: item.nombre,
-          talla: item.talla,
-          disponible: 0,
-          solicitado: item.cantidad,
+      if (prodData) {
+        resolvedItems.push({
+          ...item,
+          id: prodData.id,
+          nombre: prodData.nombre || item.nombre,
         });
-        continue;
-      }
-
-      const realId = prodData.id;
-      resolvedItems.push({
-        ...item,
-        id: realId,
-        nombre: prodData.nombre || item.nombre,
-      });
-
-      const { data: attrRows } = await db
-        .from('atributo_producto')
-        .select('valor')
-        .eq('producto_id', realId)
-        .ilike('clave', `stock_${item.talla}`)
-        .maybeSingle();
-
-      let stockReal = 0;
-      if (attrRows && attrRows.valor) {
-        stockReal = parseInt(attrRows.valor, 10) || 0;
       } else {
-        // Fallback a inventario total
-        const { data: invRows } = await db
-          .from('inventario')
-          .select('cantidad, cantidad_reservada')
-          .eq('producto_id', realId)
-          .maybeSingle();
-        if (invRows) {
-          stockReal = Math.max(0, (invRows.cantidad || 0) - (invRows.cantidad_reservada || 0));
-        }
-      }
-
-      if (stockReal < item.cantidad) {
-        conflicts.push({
-          id: item.id,
-          nombre: item.nombre,
-          talla: item.talla,
-          disponible: stockReal,
-          solicitado: item.cantidad,
-        });
+        resolvedItems.push(item);
       }
     }
 
-    if (conflicts.length > 0) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'STOCK_INSUFICIENTE',
-          conflictos: conflicts,
-          message: conflicts
-            .map(
-              (c) =>
-                `La talla ${c.talla} de "${c.nombre}" ${
-                  c.disponible === 0
-                    ? 'ya no está disponible'
-                    : `solo tiene ${c.disponible} unidad(es) disponible(s)`
-                }`
-            )
-            .join('. '),
-        }),
-        { status: 409, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 3. Registrar el pedido en public.pedido
+    // 4. Registrar la consulta en public.pedido como origen CONSULTA_WEB
     let orderId: string | null = null;
-    let orderNumberText: string = `ORD-${Date.now().toString().slice(-4)}`;
+    let orderNumberText: string = `#${Date.now().toString().slice(-4)}`;
 
     try {
       const { data: newOrder, error: orderErr } = await db
         .from('pedido')
         .insert({
-          origen: 'CATALOGO_WEB',
+          origen: 'CONSULTA_WEB',
           estado: 'PENDIENTE',
+          cliente_nombre: clientName || 'Consulta Web',
+          cliente_telefono: clientPhone || null,
           subtotal: subtotal || 0,
           envio: shipping || 0,
-          total: total || 0,
-          observacion: notes || 'Pedido iniciado desde Carrito Web',
+          total: total || subtotal || 0,
+          observacion: notes || 'Consulta de disponibilidad enviada desde la web',
         })
         .select('id, numero_orden')
         .single();
@@ -176,7 +148,7 @@ export const POST: APIRoute = async ({ request }) => {
       if (!orderErr && newOrder) {
         orderId = newOrder.id;
         if (newOrder.numero_orden) {
-          orderNumberText = `ORD-${String(newOrder.numero_orden).padStart(4, '0')}`;
+          orderNumberText = `#${String(newOrder.numero_orden).padStart(4, '0')}`;
         }
 
         // Insertar los renglones detallados de prendas en public.detalle_pedido
@@ -186,18 +158,18 @@ export const POST: APIRoute = async ({ request }) => {
             producto_id: i.id,
             producto_nombre: i.nombre,
             atributos_snapshot: `Talla: ${i.talla}${i.sku ? ` // SKU: ${i.sku}` : ''}`,
-            cantidad: i.cantidad,
-            precio_unitario: i.precio,
-            subtotal: i.precio * i.cantidad,
+            cantidad: i.cantidad || 1,
+            precio_unitario: Number(i.precio) || 0,
+            subtotal: (Number(i.precio) || 0) * (Number(i.cantidad) || 1),
           }));
 
           await db.from('detalle_pedido').insert(details);
         }
       } else {
-        console.warn('[Checkout] Inserción de pedido falló con db client:', orderErr);
+        console.warn('[Consulta Web] Inserción de pedido falló en BD:', orderErr);
       }
     } catch (insertEx) {
-      console.warn('[Checkout] Excepción al registrar pedido en BD:', insertEx);
+      console.warn('[Consulta Web] Excepción al registrar consulta en BD:', insertEx);
     }
 
     return new Response(
@@ -205,7 +177,7 @@ export const POST: APIRoute = async ({ request }) => {
         success: true,
         orderId,
         orderNumber: orderNumberText,
-        message: 'Stock verificado y pedido registrado en estado PENDIENTE',
+        message: 'Consulta registrada correctamente',
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
@@ -213,7 +185,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: err?.message || 'Error al validar el pedido en el servidor',
+        error: err?.message || 'Error al procesar la consulta en el servidor',
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
