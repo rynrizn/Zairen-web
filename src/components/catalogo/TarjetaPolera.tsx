@@ -73,6 +73,20 @@ export function TarjetaPolera({
     : stockDisponible;
   const isSoldOut = totalStockAvailable <= 0 || estadoComercial === 'agotado';
 
+  // Consolidar todas las imágenes disponibles de la prenda
+  const candidateImages = [
+    ...(Array.isArray(imagenes) ? imagenes : []),
+    imagen,
+    imagenDorsal,
+  ].filter((img): img is string => typeof img === 'string' && img.trim().length > 0);
+  const realImages = candidateImages.filter((img) => !img.includes('zairen_logo_oficial_nehjev'));
+  const allImages = realImages.length > 0
+    ? Array.from(new Set(realImages))
+    : (candidateImages.length > 0 ? Array.from(new Set(candidateImages)) : [imagen]);
+
+  const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
+  const activeImage = allImages[Math.min(activeImgIndex, allImages.length - 1)] || allImages[0];
+
   // Seleccionar por defecto la primera talla con stock disponible
   const firstAvailableTalla = tallas.find((t) => getStockForTalla(t) > 0) || tallas[0] || 'M';
   const [selectedTalla, setSelectedTalla] = useState<string>(firstAvailableTalla);
@@ -168,9 +182,9 @@ export function TarjetaPolera({
           idColeccion,
           subtitulo,
           descripcion,
-          imagen,
-          imagenDorsal,
-          imagenes,
+          imagen: allImages[0] || imagen,
+          imagenDorsal: allImages[1] || imagenDorsal,
+          imagenes: allImages,
           tallas,
           stockDisponible,
           stockPorTalla,
@@ -196,36 +210,84 @@ export function TarjetaPolera({
     >
       {/* Micro-línea de acento carmesí Zen en la base al hacer hover */}
       <div className="absolute bottom-0 left-0 h-[2.5px] w-0 bg-gradient-to-r from-[#dc143c] via-[#ff2d55] to-[#dc143c] group-hover:w-full transition-all duration-500 ease-out pointer-events-none z-20" />
-      {/* Contenedor Fotográfico Orthogonal 4:5 */}
-      <a href={productUrl} onClick={handleCardClick} data-astro-prefetch="hover" className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden block">
-        {/* Imagen Frontal Optimizada */}
-        <img
-          src={getOptimizedImageUrl(imagen, 600, 750)}
-          srcSet={getResponsiveSrcSet(imagen)}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          alt={nombre}
-          width={400}
-          height={500}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding={priority ? 'sync' : 'async'}
-          {...(priority ? { fetchPriority: 'high' } : {})}
-          style={{ viewTransitionName: `prod-img-${id}` }}
-          className="w-full h-full object-cover filter contrast-[1.03] group-hover:scale-105 transition-transform duration-700 ease-out"
-        />
 
-        {/* Revelación Dorsal en Hover */}
-        {imagenDorsal && (
+      {/* Contenedor Fotográfico Orthogonal 4:5 con ajuste neutral para no recortar mangas */}
+      <div className="relative w-full aspect-[4/5] bg-[#0E0F11] overflow-hidden group/img">
+        <a
+          href={productUrl}
+          onClick={handleCardClick}
+          data-astro-prefetch="hover"
+          className="w-full h-full flex items-center justify-center p-2.5"
+        >
+          {/* Imagen Activa con object-contain para no recortar mangas ni laterales */}
           <img
-            src={getOptimizedImageUrl(imagenDorsal, 600, 750)}
-            srcSet={getResponsiveSrcSet(imagenDorsal)}
+            key={activeImgIndex}
+            src={getOptimizedImageUrl(activeImage, 600, 750)}
+            srcSet={getResponsiveSrcSet(activeImage)}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            alt={`${nombre} dorsal`}
+            alt={`${nombre} - Imagen ${activeImgIndex + 1}`}
             width={400}
             height={500}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"
+            loading={priority ? 'eager' : 'lazy'}
+            decoding={priority ? 'sync' : 'async'}
+            {...(priority ? { fetchPriority: 'high' } : {})}
+            style={{ viewTransitionName: `prod-img-${id}` }}
+            className="w-full h-full object-contain filter contrast-[1.03] transition-transform duration-500 ease-out group-hover/img:scale-105"
           />
+        </a>
+
+        {/* Controles de cambio de imagen directa en la tarjeta (si hay más de 1 imagen) */}
+        {allImages.length > 1 && (
+          <>
+            {/* Flecha Izquierda */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveImgIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+              }}
+              aria-label="Ver imagen anterior"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/75 hover:bg-[#dc143c] text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-20 cursor-pointer rounded-none border border-white/10"
+            >
+              <span className="text-xs">‹</span>
+            </button>
+
+            {/* Flecha Derecha */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveImgIndex((prev) => (prev + 1) % allImages.length);
+              }}
+              aria-label="Ver imagen siguiente"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/75 hover:bg-[#dc143c] text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 z-20 cursor-pointer rounded-none border border-white/10"
+            >
+              <span className="text-xs">›</span>
+            </button>
+
+            {/* Indicadores de mini-puntos en la base de la foto */}
+            <div className="absolute bottom-2 inset-x-0 flex items-center justify-center gap-1.5 z-20 pointer-events-auto">
+              {allImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveImgIndex(idx);
+                  }}
+                  aria-label={`Ver foto ${idx + 1}`}
+                  className={`h-1 transition-all cursor-pointer rounded-none ${
+                    activeImgIndex === idx
+                      ? 'w-4 bg-[#dc143c]'
+                      : 'w-1.5 bg-white/40 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {/* Badges de Disponibilidad y Estado Comercial (Cuadrados / Ortogonales) */}
