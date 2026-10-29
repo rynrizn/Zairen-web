@@ -323,13 +323,16 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       {/* ========================================================== */}
       {/* 1. HERO ZEN OFICIAL ABIERTO Y TIPOGRAFÍA BILINGÜE         */}
       {/* ========================================================== */}
-      <div className="relative flex flex-col justify-center mb-8 py-4 overflow-hidden">
-        {/* Isotipo Hexagonal Watermark (Entero, sin cortes, con opacidad visible del 48%) */}
-        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-48 select-none h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 filter contrast-110 drop-shadow-[0_0_24px_rgba(220,20,60,0.4)]">
+      <div className="relative flex flex-col justify-center mb-8 py-6 sm:py-8">
+        {/* Halo de Brillo Radial Difuso Completo (Sin cortes de overflow) */}
+        <div className="absolute right-0 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 w-48 sm:w-60 md:w-72 h-48 sm:h-60 md:h-72 bg-[radial-gradient(ellipse_at_center,_rgba(220,20,60,0.25)_0%,_rgba(220,20,60,0.08)_45%,_transparent_75%)] pointer-events-none z-0 blur-xl select-none" />
+
+        {/* Isotipo Hexagonal Watermark (Entero, sin cortes, con opacidad visible y resplandor carmesí completo) */}
+        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-55 select-none h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 filter contrast-110 drop-shadow-[0_0_28px_rgba(220,20,60,0.5)]">
           <img
             src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
             alt="Zairen Lab Isotipo Hexagonal"
-            className="w-full h-full object-contain p-1"
+            className="w-full h-full object-contain"
           />
         </div>
 

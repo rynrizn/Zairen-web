@@ -17,8 +17,11 @@ export function ModalDetalleProducto({
   originRef,
 }: ModalDetalleProductoProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const touchStartY = useRef<number>(0);
+  const touchStartX = useRef<number>(0);
+  const isDraggingAllowed = useRef<boolean>(false);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
   const [dragOffset, setDragOffset] = useState<number>(0);
@@ -95,21 +98,42 @@ export function ModalDetalleProducto({
     };
   }, [isOpen, handleAnimatedClose]);
 
-  // Gestos táctiles en móvil (Bottom Sheet deslizar hacia abajo para cerrar)
+  // Gestos táctiles en móvil calibrados: Solo arrastra si el contenido está en el tope absoluto
+  // y requiere un tirón firme deliberado (> 140px) para no cerrarse por accidente.
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+    const isAtTop = contentScrollRef.current ? contentScrollRef.current.scrollTop <= 0 : true;
+    isDraggingAllowed.current = isAtTop;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingAllowed.current) return;
+
+    // Si el usuario navegó dentro del contenido, no arrastrar el modal
+    if (contentScrollRef.current && contentScrollRef.current.scrollTop > 0) {
+      isDraggingAllowed.current = false;
+      setDragOffset(0);
+      return;
+    }
+
     const currentY = e.touches[0].clientY;
-    const diff = currentY - touchStartY.current;
-    if (diff > 0) {
-      setDragOffset(diff * 0.7);
+    const currentX = e.touches[0].clientX;
+    const diffY = currentY - touchStartY.current;
+    const diffX = Math.abs(currentX - touchStartX.current);
+
+    // Solo activar si el gesto vertical descendente es claro
+    if (diffY > 12 && diffY > diffX * 1.2) {
+      // Resistencia progresiva suave
+      const damped = Math.pow(diffY, 0.82) * 1.8;
+      setDragOffset(Math.min(damped, 260));
     }
   };
 
   const handleTouchEnd = () => {
-    if (dragOffset > 80) {
+    isDraggingAllowed.current = false;
+    // Umbral calibrado a 140px para descartar roces o deslizamientos leves
+    if (dragOffset > 140) {
       handleAnimatedClose();
     } else {
       setDragOffset(0);
@@ -136,7 +160,7 @@ export function ModalDetalleProducto({
           onTouchEnd={handleTouchEnd}
           style={{
             transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
-            transition: dragOffset > 0 ? 'none' : 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease',
+            transition: dragOffset > 0 ? 'none' : 'transform 260ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease',
           }}
           className={`relative w-full max-w-5xl max-h-[92dvh] sm:max-h-[88dvh] bg-[#0A0A0A] border-t sm:border border-[#201f1f] rounded-none shadow-[0_24px_80px_rgba(0,0,0,0.95)] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-0 ${
             isClosing
@@ -144,11 +168,13 @@ export function ModalDetalleProducto({
               : 'translate-y-0 opacity-100 animate-in slide-in-from-bottom duration-250'
           }`}
         >
-          {/* Tirador táctil en móvil (Bottom Sheet Drag Handle) */}
-          <div className="sm:hidden w-12 h-1 bg-white/20 mx-auto mt-2 mb-1 rounded-none select-none shrink-0" />
+          {/* Zona Superior de Arrastre en móvil (Bottom Sheet Drag Handle) */}
+          <div className="sm:hidden w-full pt-2.5 pb-1 flex justify-center cursor-grab active:cursor-grabbing select-none shrink-0">
+            <span className="w-12 h-1 bg-white/25 rounded-none" />
+          </div>
 
           {/* Cabecera / Barra Superior con Título y Botón Cerrar "X" DENTRO del modal */}
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#201f1f] bg-[#141416]/95 backdrop-blur shrink-0 select-none">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 border-b border-[#201f1f] bg-[#141416]/95 backdrop-blur shrink-0 select-none">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-[#dc143c] animate-pulse"></span>
               <span id="modal-product-title" className="font-mono text-xs text-[#FAF9F6] uppercase font-bold tracking-wider truncate max-w-[240px] sm:max-w-md">
@@ -168,8 +194,11 @@ export function ModalDetalleProducto({
             </button>
           </div>
 
-          {/* Contenido con Scroll Interno Contenido */}
-          <div className="overflow-y-auto p-4 sm:p-6 md:p-8 scrollbar-thin-hover">
+          {/* Contenido con Scroll Interno Contenido y ref para detección de tope */}
+          <div
+            ref={contentScrollRef}
+            className="overflow-y-auto p-4 sm:p-6 md:p-8 scrollbar-thin-hover"
+          >
             <DetalleProducto {...product} isModal={true} />
           </div>
         </div>

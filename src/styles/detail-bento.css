@@ -455,8 +455,22 @@
     gap: 14px;
   }
   .bento-price-block  { flex-direction: row; justify-content: space-between; align-items: baseline; }
-  .bento-actions-btns { flex-direction: column; max-width: 100%; width: 100%; }
-  .bento-btn-wsp, .bento-btn-cart { width: 100%; }
+  .bento-actions-btns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .bento-btn-wsp, .bento-btn-cart {
+    width: 100% !important;
+    height: 48px !important;
+    font-size: 11px !important;
+    padding: 0 8px !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+  }
 }
 
 /* ============================================================ */
