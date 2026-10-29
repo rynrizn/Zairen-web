@@ -350,89 +350,104 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       {/* ========================================================== */}
       {/* 2. BARRA DE FILTROS, SCROLLBAR FINA Y BUSCADOR             */}
       {/* ========================================================== */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-end justify-between gap-4 mb-6">
-        {/* Selector de Colección Accesible en Combobox (Fase 6) */}
-        <div className="flex-shrink-0">
-          <ColeccionCombobox
-            collections={collectionsWithCount}
-            selectedSlug={selectedCollection}
-            totalCount={initialProducts.length}
-            onSelect={handleCollectionSelect}
-          />
-        </div>
-
-        {/* Buscador y Selector de Orden Ampliado */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
-          {/* Campo de Búsqueda Ortogonal */}
-          <div className="relative flex-1 sm:w-64">
-            <label htmlFor="catalogo-search-input" className="sr-only">
-              Buscar prenda o SKU
-            </label>
-            <input
-              id="catalogo-search-input"
-              name="search"
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar prenda o SKU..."
-              className="w-full bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2 text-xs font-mono text-[#e5e2e1] placeholder:text-[#ac8888] focus:outline-none transition-colors"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#ac8888] hover:text-white cursor-pointer flex items-center justify-center"
-                aria-label="Limpiar búsqueda"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Selector de Orden Ampliado (Precios, Recientes, Alfabético, Disponibles) */}
-          <label htmlFor="catalogo-sort-select" className="sr-only">
-            Ordenar catálogo por
+      <div className="flex flex-col gap-3.5 mb-6">
+        {/* Fila del Buscador: Ancho completo con altura táctil ergonómica de 44px */}
+        <div className="relative w-full">
+          <label htmlFor="catalogo-search-input" className="sr-only">
+            Buscar prenda o colección
           </label>
-          <select
-            id="catalogo-sort-select"
-            name="sortBy"
-            aria-label="Ordenar catálogo por"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-[#141416] border border-[#201f1f] text-[#e5e2e1] text-xs font-mono rounded-none px-3 py-2 focus:outline-none focus:border-[#dc143c] cursor-pointer"
-          >
-            <option value="recientes">Más Recientes</option>
-            <option value="disponibles">Disponibles Primero</option>
-            <option value="precio-asc">Precio: Menor a Mayor</option>
-            <option value="precio-desc">Precio: Mayor a Menor</option>
-            <option value="nombre-asc">Nombre: A - Z</option>
-            <option value="nombre-desc">Nombre: Z - A</option>
-          </select>
-
-          {/* Botón Guía de Tallas */}
-          <button
-            type="button"
-            onClick={() => setIsGuiaOpen(true)}
-            title="Ver medidas en centímetros de prendas"
-            className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-          >
-            <Ruler className="w-4 h-4 text-[#dc143c]" />
-            <span className="hidden sm:inline">Guía de Tallas</span>
-            <span className="sm:hidden">Tallas</span>
-          </button>
-
-          {/* Toggle de Densidad Móvil (1 o 2 columnas) */}
-          <div className="flex sm:hidden items-center bg-[#141416] border border-[#201f1f] p-0.5 shrink-0">
+          <input
+            id="catalogo-search-input"
+            name="search"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar prenda o colección..."
+            className="w-full h-11 bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2.5 pr-11 text-xs md:text-sm font-mono text-[#e5e2e1] placeholder:text-[#ac8888] focus:outline-none transition-colors"
+          />
+          {searchQuery && (
             <button
               type="button"
-              onClick={() => setMobileDensity('compact')}
-              title="2 Columnas compactas"
-              className={`px-2 py-1 text-[10px] font-mono uppercase cursor-pointer ${
-                mobileDensity === 'compact' ? 'bg-[#dc143c] text-white font-bold' : 'text-[#ac8888]'
-              }`}
+              onClick={() => setSearchQuery('')}
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 text-xs text-[#ac8888] hover:text-white cursor-pointer flex items-center justify-center transition-colors"
+              aria-label="Limpiar búsqueda"
             >
-              2 Col
+              <X className="w-4 h-4" />
             </button>
+          )}
+        </div>
+
+        {/* Fila de Controles: Colección Combobox + Orden + Guía de Tallas + Densidad */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Selector de Colección Accesible en Combobox */}
+          <div className="flex-1 sm:flex-initial">
+            <ColeccionCombobox
+              collections={collectionsWithCount}
+              selectedSlug={selectedCollection}
+              totalCount={initialProducts.length}
+              onSelect={handleCollectionSelect}
+            />
+          </div>
+
+          {/* Selector de Orden, Tallas y Densidad */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+            <label htmlFor="catalogo-sort-select" className="sr-only">
+              Ordenar catálogo por
+            </label>
+            <select
+              id="catalogo-sort-select"
+              name="sortBy"
+              aria-label="Ordenar catálogo por"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="h-10 sm:h-9 bg-[#141416] border border-[#201f1f] text-[#e5e2e1] text-xs font-mono rounded-none px-3 py-2 focus:outline-none focus:border-[#dc143c] cursor-pointer flex-1 sm:flex-initial"
+            >
+              <option value="recientes">Más Recientes</option>
+              <option value="disponibles">Disponibles Primero</option>
+              <option value="precio-asc">Precio: Menor a Mayor</option>
+              <option value="precio-desc">Precio: Mayor a Menor</option>
+              <option value="nombre-asc">Nombre: A - Z</option>
+              <option value="nombre-desc">Nombre: Z - A</option>
+            </select>
+
+            {/* Botón Guía de Tallas */}
+            <button
+              type="button"
+              onClick={() => setIsGuiaOpen(true)}
+              title="Ver medidas en centímetros de prendas"
+              className="h-10 sm:h-9 px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            >
+              <Ruler className="w-4 h-4 text-[#dc143c]" />
+              <span className="hidden sm:inline">Guía de Tallas</span>
+              <span className="sm:hidden">Tallas</span>
+            </button>
+
+            {/* Toggle de Densidad Móvil (1 o 2 columnas) */}
+            <div className="flex sm:hidden items-center bg-[#141416] border border-[#201f1f] p-0.5 shrink-0 h-10">
+              <button
+                type="button"
+                onClick={() => setMobileDensity('compact')}
+                title="2 Columnas compactas"
+                className={`h-full px-2.5 text-[10px] font-mono uppercase cursor-pointer flex items-center justify-center ${
+                  mobileDensity === 'compact' ? 'bg-[#dc143c] text-white font-bold' : 'text-[#ac8888]'
+                }`}
+              >
+                2 Col
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileDensity('large')}
+                title="1 Columna grande"
+                className={`h-full px-2.5 text-[10px] font-mono uppercase cursor-pointer flex items-center justify-center ${
+                  mobileDensity === 'large' ? 'bg-[#dc143c] text-white font-bold' : 'text-[#ac8888]'
+                }`}
+              >
+                1 Col
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
             <button
               type="button"
               onClick={() => setMobileDensity('large')}
