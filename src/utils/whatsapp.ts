@@ -3,6 +3,26 @@ import type { CartItem } from '../stores/cartStore';
 import { getCartSubtotal } from '../stores/cartStore';
 
 /**
+ * Genera el enlace directo a WhatsApp para la consulta individual de una prenda
+ * Tono sobrio, estético y sin emojis de acuerdo al manual de marca de Zairen Lab.
+ * Formato unificado para tarjeta del catálogo y ficha de detalle de producto.
+ */
+export function generateWhatsAppProductUrl(params: {
+  nombre: string;
+  talla?: string;
+  url: string;
+}): string {
+  const { nombre, talla, url } = params;
+  let message = `Hola Zairen Lab, me interesa consultar sobre *${nombre}*`;
+  if (talla && talla.trim()) {
+    message += ` (Talla: *${talla.trim()}*)`;
+  }
+  message += `.\nEnlace: ${url}\n¿Está disponible?`;
+
+  return `https://wa.me/${siteConfig.whatsapp.number}?text=${encodeURIComponent(message)}`;
+}
+
+/**
  * Genera el enlace directo a WhatsApp con el mensaje estructurado de confirmación de pedido
  * Tono sobrio, estético y sin emojis de acuerdo al manual de marca de Zairen Lab.
  */
@@ -29,7 +49,7 @@ export function generateWhatsAppOrderUrl(
   const itemsList = items
     .map(
       (item) =>
-        `— *${item.nombre}*\n   Talla: *${item.talla}*${item.sku ? ` | SKU: \`${item.sku}\`` : ''} | Cant: ${item.cantidad} | Bs ${(item.precio * item.cantidad).toFixed(2)}`
+        `— *${item.nombre}*\n   Talla: *${item.talla}* | Cant: ${item.cantidad} | Bs ${(item.precio * item.cantidad).toFixed(2)}`
     )
     .join('\n\n');
 

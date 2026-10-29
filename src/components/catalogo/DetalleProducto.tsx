@@ -15,6 +15,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { siteConfig, formatCurrency } from '../../config/site';
+import { generateWhatsAppProductUrl } from '../../utils/whatsapp';
 import { getOptimizedImageUrl } from '../../lib/cloudinary';
 import { ShareProductModal } from './ShareProductModal';
 import {
@@ -248,10 +249,13 @@ export function DetalleProducto({
 
   const handleDirectWhatsApp = () => {
     if (isSoldOut) return;
-    const text = encodeURIComponent(
-      `Hola Zairen Lab, me interesa adquirir: ${safeNombre} en talla ${selectedTalla}. ¿Está disponible?`
-    );
-    window.open(`https://wa.me/${siteConfig.whatsapp.number}?text=${text}`, '_blank');
+    const url = typeof window !== 'undefined' ? window.location.href : `/producto/${safeSlug}`;
+    const whatsappUrl = generateWhatsAppProductUrl({
+      nombre: safeNombre,
+      talla: selectedTalla,
+      url,
+    });
+    window.open(whatsappUrl, '_blank');
   };
 
   const PlusIcon = ({ className }: { className?: string }) => (

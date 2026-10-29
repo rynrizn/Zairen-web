@@ -7,6 +7,7 @@ import { $favorites, toggleFavorite } from '../../stores/favoritesStore';
 import { Heart, MessageCircle, AtSign } from 'lucide-react';
 import { getOptimizedImageUrl, getResponsiveSrcSet } from '../../lib/cloudinary';
 import { formatCurrency } from '../../config/site';
+import { generateWhatsAppProductUrl } from '../../utils/whatsapp';
 import {
   getFirstActiveChannel,
   buildChannelActionUrl,
@@ -341,12 +342,20 @@ export function TarjetaPolera({
 
             <div className="flex items-center gap-1.5">{priorityChannel && (
               <a
-                href={buildChannelActionUrl(priorityChannel, {
-                  nombre,
-                  precio,
-                  moneda: 'Bs',
-                  url: typeof window !== 'undefined' ? `${window.location.origin}${productUrl}` : productUrl,
-                })}
+                href={
+                  priorityChannel.type === 'whatsapp'
+                    ? generateWhatsAppProductUrl({
+                        nombre,
+                        talla: selectedTalla,
+                        url: typeof window !== 'undefined' ? `${window.location.origin}${productUrl}` : productUrl,
+                      })
+                    : buildChannelActionUrl(priorityChannel, {
+                        nombre,
+                        precio,
+                        moneda: 'Bs',
+                        url: typeof window !== 'undefined' ? `${window.location.origin}${productUrl}` : productUrl,
+                      })
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
