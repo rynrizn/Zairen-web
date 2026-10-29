@@ -23,10 +23,11 @@ export function generateWhatsAppProductUrl(params: {
 }
 
 /**
- * Genera el enlace directo a WhatsApp con el mensaje estructurado de confirmación de pedido
+ * Genera el enlace directo a WhatsApp con el mensaje estructurado de consulta de disponibilidad.
+ * Muestra el nombre de la prenda en lugar del SKU, talla y cantidad, sin enlaces individuales.
  * Tono sobrio, estético y sin emojis de acuerdo al manual de marca de Zairen Lab.
  */
-export function generateWhatsAppOrderUrl(
+export function generateWhatsAppInquiryUrl(
   items: CartItem[],
   clientNotes?: string,
   requiresDelivery: boolean = false
@@ -35,12 +36,12 @@ export function generateWhatsAppOrderUrl(
 
   const subtotal = getCartSubtotal(items);
 
-  // Extraer número de orden para trazabilidad en panel administrativo
-  const orderMatch = clientNotes?.match(/\[Orden\s+(#[A-Z0-9_-]+)\]/i);
+  // Extraer número de consulta para trazabilidad en panel administrativo
+  const orderMatch = clientNotes?.match(/\[(?:Consulta|Orden)\s+(#[A-Z0-9_-]+)\]/i);
   const orderTag = orderMatch ? ` // ${orderMatch[1]}` : '';
   const cleanNotes = clientNotes
     ? clientNotes
-        .replace(/\[Orden\s+#[A-Z0-9_-]+\]/gi, '')
+        .replace(/\[(?:Consulta|Orden)\s+#[A-Z0-9_-]+\]/gi, '')
         .trim()
         .replace(/^•\s*|\s*•$/g, '')
         .trim()
@@ -49,30 +50,34 @@ export function generateWhatsAppOrderUrl(
   const itemsList = items
     .map(
       (item) =>
-        `— *${item.nombre}*\n   Talla: *${item.talla}* | Cant: ${item.cantidad} | Bs ${(item.precio * item.cantidad).toFixed(2)}`
+        `• *${item.nombre}* (Talla: *${item.talla}*) x ${item.cantidad} — Bs ${(item.precio * item.cantidad).toFixed(2)}`
     )
-    .join('\n\n');
+    .join('\n');
 
-  let message = `*NUEVO PEDIDO${orderTag} // ${siteConfig.name}*\n`;
+  let message = `*CONSULTA DE DISPONIBILIDAD${orderTag} // ${siteConfig.name}*\n`;
   message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-  message += `*DETALLE DE PRENDAS:*\n${itemsList}\n\n`;
+  message += `¡Hola Zairen Lab! Quiero consultar la disponibilidad de las siguientes prendas:\n\n`;
+  message += `${itemsList}\n\n`;
   message += `━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `*Subtotal Prendas:* Bs ${subtotal.toFixed(2)}\n`;
+  message += `*Total estimado:* Bs ${subtotal.toFixed(2)}\n`;
 
   if (requiresDelivery) {
-    message += `*Envío:* A coordinar precio\n`;
-    message += `*TOTAL PRENDAS: Bs ${subtotal.toFixed(2)}*\n\n`;
+    message += `*Entrega:* A coordinar envío a domicilio\n`;
   } else {
     message += `*Modalidad:* Recojo / Sin envío\n`;
-    message += `*TOTAL: Bs ${subtotal.toFixed(2)}*\n\n`;
   }
 
   if (cleanNotes && cleanNotes !== '') {
-    message += `*Detalles / Referencia:* ${cleanNotes}\n\n`;
+    message += `*Detalles / Referencia:* ${cleanNotes}\n`;
   }
 
-  message += `Por favor indíquenme disponibilidad y datos para el pago (QR Simple / Transferencia).`;
+  message += `\n¿Tienen stock disponible de estas prendas para coordinar la entrega? ¡Muchas gracias!`;
 
   const encodedMessage = encodeURIComponent(message);
   return `https://wa.me/${siteConfig.whatsapp.number}?text=${encodedMessage}`;
 }
+
+/**
+ * Alias de compatibilidad hacia generateWhatsAppInquiryUrl
+ */
+export const generateWhatsAppOrderUrl = generateWhatsAppInquiryUrl;
