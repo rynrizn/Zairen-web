@@ -150,6 +150,13 @@ if (dbProd) {
   const rawPrecio = Number(dbProd.precio_venta);
   const precioFinal = !isNaN(rawPrecio) && rawPrecio >= 0 ? rawPrecio : 0;
 
+  // Sanitización para el público: transmitir solo disponibilidad binaria (1 disponible, 0 agotado)
+  const disponibilidadPorTalla: Record<string, number> = {};
+  Object.entries(stockPorTalla).forEach(([t, qty]) => {
+    disponibilidadPorTalla[t] = qty > 0 ? 1 : 0;
+  });
+  const stockDisponibleBinario = Math.max(Number(dbProd.stock_disponible || 0), stockCalculado) > 0 ? 1 : 0;
+
   product = {
     id: prodId || '',
     slug: dbProd.slug || id,
@@ -162,8 +169,8 @@ if (dbProd) {
     imagen: imgPortada,
     imagenDorsal: imgDorsal,
     tallas: tallasFinal,
-    stockPorTalla: Object.keys(stockPorTalla).length > 0 ? stockPorTalla : undefined,
-    stockDisponible: Math.max(Number(dbProd.stock_disponible || 0), stockCalculado),
+    stockPorTalla: Object.keys(disponibilidadPorTalla).length > 0 ? disponibilidadPorTalla : undefined,
+    stockDisponible: stockDisponibleBinario,
     esPrioritario: Boolean(dbProd.es_prioritario),
     estadoComercial: dbProd.estado_comercial || 'disponible',
   };

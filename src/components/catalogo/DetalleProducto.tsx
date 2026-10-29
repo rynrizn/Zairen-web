@@ -13,7 +13,6 @@ import {
   Ban,
   Headphones,
   ExternalLink,
-  Zap,
 } from 'lucide-react';
 import { siteConfig, formatCurrency } from '../../config/site';
 import { getOptimizedImageUrl } from '../../lib/cloudinary';
@@ -411,12 +410,6 @@ export function DetalleProducto({
 
           <div className="bento-footer-row">
             <span className="bento-id">ID: {safeSlug}</span>
-            {stockDisponible > 0 && stockDisponible <= 4 && (
-              <span className="text-[11px] font-mono text-amber-400 font-bold uppercase animate-pulse">
-                <Zap className="w-3.5 h-3.5 text-amber-400 inline align-middle mr-1" />
-                Solo {stockDisponible} uds disponibles
-              </span>
-            )}
           </div>
         </div>
 
@@ -450,7 +443,7 @@ export function DetalleProducto({
                   type="button"
                   onClick={() => !isTallaAgotada && setSelectedTalla(talla)}
                   disabled={isTallaAgotada}
-                  title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla} (${stockThisTalla} disponibles)`}
+                  title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla}`}
                   className={`talla-btn ${
                     isTallaAgotada
                       ? 'talla-disabled line-through opacity-30 cursor-not-allowed pointer-events-none'

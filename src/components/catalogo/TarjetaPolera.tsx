@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { MorphIcon } from '../ui/MorphIcon';
 import { addItem } from '../../stores/cartStore';
 import { $favorites, toggleFavorite } from '../../stores/favoritesStore';
-import { Heart, Zap, MessageCircle, AtSign } from 'lucide-react';
+import { Heart, MessageCircle, AtSign } from 'lucide-react';
 import { getOptimizedImageUrl, getResponsiveSrcSet } from '../../lib/cloudinary';
 import { formatCurrency } from '../../config/site';
 import {
@@ -107,7 +107,6 @@ export function TarjetaPolera({
       setSelectedTalla(available);
     }
   }, [tallas, stockPorTalla, stockDisponible]);
-  const isLowStock = stockDisponible > 0 && stockDisponible <= 4;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -256,15 +255,11 @@ export function TarjetaPolera({
                   NUEVO
                 </span>
               )}
-              {isLowStock ? (
-                <span className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider font-bold bg-[#78350f]/90 text-[#fbbf24] border border-[#d97706]/40 backdrop-blur-sm animate-pulse">
-                  POCAS UDS // {stockDisponible}
-                </span>
-              ) : (estadoComercial === 'ninguno' || estadoComercial === 'disponible') ? (
+              {(estadoComercial === 'ninguno' || estadoComercial === 'disponible') && (
                 <span className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider font-bold bg-[#141416]/90 text-[#FAF9F6] border border-white/20 backdrop-blur-sm">
                   DISPONIBLE
                 </span>
-              ) : null}
+              )}
             </>
           )}
         </div>
@@ -318,7 +313,7 @@ export function TarjetaPolera({
                   type="button"
                   onClick={() => !isTallaAgotada && setSelectedTalla(talla)}
                   disabled={isTallaAgotada}
-                  title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla} (${stockThisTalla} disponibles)`}
+                  title={isTallaAgotada ? `Talla ${talla} agotada` : `Talla ${talla}`}
                   className={`w-7 h-7 text-xs font-mono font-bold flex items-center justify-center transition-all border ${
                     isTallaAgotada
                       ? 'bg-[#141416]/50 text-[#8F8F8C]/40 border-white/[0.04] line-through cursor-not-allowed opacity-30 pointer-events-none'
@@ -332,14 +327,6 @@ export function TarjetaPolera({
               );
             })}
           </div>
-
-          {/* Micro-aviso de últimas unidades por talla seleccionada */}
-          {!isSoldOut && selectedTallaStock > 0 && selectedTallaStock <= 2 && (
-            <span className="text-[9px] font-mono text-amber-400 font-bold flex items-center gap-1">
-              <Zap className="w-3 h-3 text-amber-400" />
-              <span>Últimas {selectedTallaStock} uds ({selectedTalla})</span>
-            </span>
-          )}
 
           {/* Precio y Botón Agregar Carrito Cuadrado / Ortogonal */}
           <div className="flex items-center justify-between pt-1">

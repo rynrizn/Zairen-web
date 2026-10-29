@@ -18,7 +18,6 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const favorites = useStore($favorites);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'recientes' | 'precio-asc' | 'precio-desc' | 'nombre-asc' | 'nombre-desc' | 'disponibles'>('recientes');
-  const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [mobileDensity, setMobileDensity] = useState<'compact' | 'large'>('compact');
   const [isGuiaOpen, setIsGuiaOpen] = useState<boolean>(false);
@@ -205,11 +204,6 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
           }
         }
 
-        // Filtro por disponibilidad
-        if (onlyAvailable && (p.stockDisponible ?? 0) <= 0) {
-          return false;
-        }
-
         // Búsqueda por texto (nombre, colección, subtítulo, sku)
         if (searchQuery.trim() !== '') {
           const q = searchQuery.toLowerCase().trim();
@@ -234,7 +228,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         if (sortBy === 'nombre-desc') return b.nombre.localeCompare(a.nombre);
         return 0;
       });
-  }, [initialProducts, selectedCollection, commercialFilter, searchQuery, sortBy, onlyAvailable]);
+  }, [initialProducts, selectedCollection, commercialFilter, searchQuery, sortBy]);
 
   // Agrupación por colecciones con prendas agotadas al final de cada sección
   const sections = useMemo(() => {
@@ -558,19 +552,6 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
             </button>
           )}
         </div>
-
-        {/* Checkbox de Disponibilidad Ortogonal */}
-        <label htmlFor="catalogo-solo-stock" className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[#e5e2e1] hover:text-white transition-colors">
-          <input
-            id="catalogo-solo-stock"
-            name="soloStock"
-            type="checkbox"
-            checked={onlyAvailable}
-            onChange={(e) => setOnlyAvailable(e.target.checked)}
-            className="w-4 h-4 rounded-none accent-[#dc143c] cursor-pointer"
-          />
-          <span>Solo en stock</span>
-        </label>
       </div>
 
       {/* ========================================================== */}
