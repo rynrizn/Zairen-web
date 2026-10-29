@@ -46,6 +46,25 @@ if (isSupabaseConfigured) {
       .select('*')
       .limit(100);
 
+    // 3. Obtener todas las imágenes registradas para cada prenda en la galería
+    const { data: dbAllImages } = await supabase
+      .from('imagen')
+      .select('producto_id, url_imagen, orden')
+      .order('orden', { ascending: true });
+
+    const imagesByProd = new Map<string, string[]>();
+    if (dbAllImages && dbAllImages.length > 0) {
+      dbAllImages.forEach((img: any) => {
+        if (img.producto_id && img.url_imagen && typeof img.url_imagen === 'string' && img.url_imagen.trim().length > 0) {
+          const list = imagesByProd.get(img.producto_id) || [];
+          if (!list.includes(img.url_imagen.trim())) {
+            list.push(img.url_imagen.trim());
+            imagesByProd.set(img.producto_id, list);
+          }
+        }
+      });
+    }
+
     if (!pError && dbProducts && dbProducts.length > 0) {
       products = dbProducts.map((p) => {
         const stockPorTalla: Record<string, number> = {};
@@ -75,6 +94,17 @@ if (isSupabaseConfigured) {
         });
         const stockDisponibleBinario = Math.max(Number(p.stock_disponible || 0), stockCalculado) > 0 ? 1 : 0;
 
+        // Consolidación completa de imágenes para permitir ver todas las prendas
+        const rawImgs = imagesByProd.get(p.id_producto) || [];
+        const candidateImgs = [
+          ...rawImgs,
+          p.imagen_portada,
+          p.imagen_dorsal,
+        ].filter((u): u is string => typeof u === 'string' && u.trim().length > 0 && !u.includes('zairen_logo_oficial_nehjev'));
+        const finalImages = candidateImgs.length > 0
+          ? Array.from(new Set(candidateImgs))
+          : [p.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp'];
+
         return {
           id: p.id_producto,
           slug: p.slug,
@@ -85,9 +115,9 @@ if (isSupabaseConfigured) {
           idColeccion: p.id_coleccion,
           descripcion: p.descripcion || '',
           subtitulo: p.descripcion || '100% Algodón Calidad Premium',
-          imagen: p.imagen_portada || 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp',
-          imagenDorsal: p.imagen_dorsal,
-          imagenes: [p.imagen_portada, p.imagen_dorsal].filter(Boolean),
+          imagen: finalImages[0],
+          imagenDorsal: finalImages[1] || p.imagen_dorsal,
+          imagenes: finalImages,
           tallas: tallasFinal,
           stockPorTalla: Object.keys(disponibilidadPorTalla).length > 0 ? disponibilidadPorTalla : undefined,
           stockDisponible: stockDisponibleBinario,
