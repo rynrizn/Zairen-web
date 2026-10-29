@@ -321,29 +321,32 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   return (
     <section id="catalogo" className="w-full max-w-[1440px] mx-auto px-4 md:px-12 py-16 scroll-mt-20">
       {/* ========================================================== */}
-      {/* 1. ENCABEZADO ZEN CON LOGO WATERMARK DERECHO DETRÁS DEL TEXTO */}
+      {/* 1. HERO ZEN OFICIAL CON GRADIENTE SUTIL Y TIPOGRAFÍA BILINGÜE */}
       {/* ========================================================== */}
-      <div className="relative flex flex-col justify-center min-h-[130px] md:min-h-[150px] mb-10 pb-4 border-b border-[#dc143c]/30">
-        {/* Logotipo Oficial Watermark Suelto Sin Letras (Entero y completo, puntas superior e inferior visibles) */}
-        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-25 select-none h-28 w-28 md:h-36 md:w-36 filter drop-shadow-[0_0_24px_rgba(220,20,60,0.45)]">
+      <div className="relative flex flex-col justify-center min-h-[140px] md:min-h-[160px] mb-8 p-6 md:p-8 bg-gradient-to-r from-[#dc143c]/[0.05] via-[#dc143c]/[0.02] to-transparent border border-white/[0.04] rounded-none overflow-hidden">
+        {/* Isotipo Hexagonal Watermark (Entero, sin cortes, sutil en fondo derecho) */}
+        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-20 select-none h-28 w-28 sm:h-36 sm:w-36 md:h-44 md:w-44 filter drop-shadow-[0_0_24px_rgba(220,20,60,0.35)]">
           <img
             src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
-            alt="Zairen Lab Isotipo Oficial"
+            alt="Zairen Lab Isotipo Hexagonal"
             className="w-full h-full object-contain p-1"
           />
         </div>
 
-        {/* Texto de Cabecera al Frente */}
-        <div className="relative z-10">
+        {/* Tipografía de Cabecera al Frente */}
+        <div className="relative z-10 space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-[#dc143c]"></span>
-            <span className="text-xs font-mono text-[#ffb3b3] uppercase tracking-widest font-bold">
-              01 // CATÁLOGO OFICIAL
+            <span className="w-2 h-2 rounded-none bg-[#dc143c]"></span>
+            <span className="text-[11px] font-mono text-[#ffb3b3] uppercase tracking-widest font-bold">
+              CATÁLOGO OFICIAL
             </span>
           </div>
-          <h2 className="text-2xl md:text-4xl font-bold font-display uppercase tracking-tight text-[#e5e2e1] mt-1">
-            ARCHIVE & DROPS // 2026
-          </h2>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-display tracking-tight text-[#FAF9F6] uppercase">
+            ZAIREN <span className="text-[#dc143c] font-normal tracking-wider font-['Noto_Sans_JP',sans-serif]">ザイレン</span>
+          </h1>
+          <p className="text-xs sm:text-sm font-mono text-[#ac8888] tracking-wider pt-1">
+            Evolving Without Losing Identity
+          </p>
         </div>
       </div>
 
