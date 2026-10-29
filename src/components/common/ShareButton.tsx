@@ -16,6 +16,8 @@ export function ShareButton({ className = '', showText = false }: ShareButtonPro
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Compartir tienda oficial y ver código QR"
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
         title="Compartir y ver QR"
         className={`relative flex items-center justify-center rounded-none transition-all cursor-pointer ${className}`}
       >
