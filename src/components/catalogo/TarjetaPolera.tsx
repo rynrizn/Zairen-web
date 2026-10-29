@@ -345,7 +345,7 @@ export function TarjetaPolera({
         >
           <Heart className={`w-4 h-4 ${isFav ? 'fill-current text-white' : ''}`} />
         </button>
-      </a>
+      </div>
 
       {/* Ficha Inferior con Información de Prenda */}
       <div className="flex flex-col flex-1 justify-between gap-3 pt-3 px-1">
