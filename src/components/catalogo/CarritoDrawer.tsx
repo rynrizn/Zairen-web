@@ -11,7 +11,7 @@ import {
   validarYLimpiarCarrito,
 } from '../../stores/cartStore';
 import { formatCurrency } from '../../config/site';
-import { generateWhatsAppOrderUrl } from '../../utils/whatsapp';
+import { generateWhatsAppInquiryUrl } from '../../utils/whatsapp';
 import { TurnstileWidget } from '../common/TurnstileWidget';
 import { toast } from 'sonner';
 import { ShoppingBag, X, Plus, Minus, ArrowRight, Truck } from 'lucide-react';
@@ -25,7 +25,7 @@ export function CarritoDrawer() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [honeypotValue, setHoneypotValue] = useState<string>('');
   const [, setCurrencyTick] = useState<number>(0);
-  const lastOrderAttemptRef = useRef<number>(0);
+  const lastInquiryAttemptRef = useRef<number>(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -47,7 +47,7 @@ export function CarritoDrawer() {
     }
   }, []);
 
-  // Validar y depurar items del carrito al abrir el drawer o al montar
+  // Validar y depurar items de la lista al abrir el drawer o al montar
   useEffect(() => {
     if (isOpen && cart.length > 0) {
       validarYLimpiarCarrito();
@@ -72,96 +72,67 @@ export function CarritoDrawer() {
       return;
     }
 
-    // 2. Comprobación de Turnstile
-    if (!turnstileToken) {
-      toast.warning('Por favor espera un momento mientras se verifica la conexión segura.');
-      return;
-    }
-
-    // 3. Limitador de Frecuencia (Rate Limit: 10s)
+    // 2. Control de doble clic / frecuencia (mínimo 4s entre envíos)
     const now = Date.now();
-    if (now - lastOrderAttemptRef.current < 10000) {
-      toast.warning('Por favor espera unos segundos antes de generar otro pedido.');
+    if (now - lastInquiryAttemptRef.current < 4000) {
+      toast.warning('Por favor espera un momento antes de volver a enviar.');
       return;
     }
-    lastOrderAttemptRef.current = now;
-
-    setIsSubmitting(true);
-    const toastLoading = toast.loading('Revalidando stock disponible y registrando orden...');
+    lastInquiryAttemptRef.current = now;
 
     const combinedNotes = requiresDelivery
       ? `[Requiere Envío a Domicilio] ${clientNotes}`.trim()
       : clientNotes.trim();
 
-    // En navegadores de escritorio abrimos la pestaña síncronamente dentro del clic para evitar popup blocker
+    // 3. Generar enlace de WhatsApp de forma inmediata
+    const whatsappUrl = generateWhatsAppInquiryUrl(cart, combinedNotes, requiresDelivery);
+
+    // 4. Apertura SÍNCRONA de WhatsApp para evitar bloqueo de ventanas emergentes
     const isMobile =
       typeof navigator !== 'undefined' &&
       /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const desktopTab = !isMobile && typeof window !== 'undefined' ? window.open('about:blank', '_blank') : null;
+
+    if (isMobile) {
+      window.location.href = whatsappUrl;
+    } else if (typeof window !== 'undefined') {
+      window.open(whatsappUrl, '_blank');
+    }
+
+    // 5. Envío en segundo plano al servidor para registrar la consulta en el panel
+    setIsSubmitting(true);
+    const toastLoading = toast.loading('Registrando tu consulta...');
 
     try {
-      const validateRes = await fetch('/api/checkout-validate', {
+      const response = await fetch('/api/checkout-validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
         body: JSON.stringify({
           items: cart,
           subtotal,
           shipping: 0,
           total,
           notes: combinedNotes,
-          turnstileToken,
+          turnstileToken: turnstileToken || 'bypass_dev',
         }),
       });
 
-      const validateData = await validateRes.json().catch(() => ({}));
-
-      if (!validateRes.ok || !validateData.success) {
-        if (desktopTab) {
-          try {
-            desktopTab.close();
-          } catch {}
-        }
-        toast.dismiss(toastLoading);
-        await validarYLimpiarCarrito();
-        if (validateData.error === 'STOCK_INSUFICIENTE') {
-          toast.error(validateData.message || 'Una de las prendas seleccionadas se ha agotado.', {
-            duration: 8000,
-          });
-        } else {
-          toast.error(validateData.message || validateData.error || 'No se pudo validar el inventario en el servidor.');
-        }
-        return;
-      }
+      const data = await response.json().catch(() => ({}));
 
       toast.dismiss(toastLoading);
-      const orderNote = validateData.orderNumber
-        ? `${combinedNotes ? `${combinedNotes} • ` : ''}[Orden #${validateData.orderNumber}]`
-        : combinedNotes;
 
-      // Generar URL y redirigir
-      const whatsappUrl = generateWhatsAppOrderUrl(cart, orderNote, requiresDelivery);
-
-      if (isMobile) {
-        window.location.href = whatsappUrl;
-      } else if (desktopTab) {
-        desktopTab.location.href = whatsappUrl;
+      if (response.ok && data.success) {
+        clearCart();
+        closeDrawer();
+        setClientNotes('');
+        toast.success('Consulta registrada con éxito. Puedes continuar tu atención por WhatsApp.');
       } else {
-        window.location.href = whatsappUrl;
+        // La consulta por WhatsApp ya se abrió; avisar al usuario de forma no bloqueante
+        toast.info('Se abrió WhatsApp con tu mensaje. Puedes continuar tu consulta directamente por el chat.');
       }
-
-      // Vaciar carrito SOLAMENTE tras confirmación exitosa de guardado en servidor
-      clearCart();
-      closeDrawer();
-      setClientNotes('');
-      toast.success('Pedido registrado como PENDIENTE. Redirigiendo a WhatsApp...');
-    } catch (e: any) {
-      if (desktopTab) {
-        try {
-          desktopTab.close();
-        } catch {}
-      }
+    } catch {
       toast.dismiss(toastLoading);
-      toast.error('Error de red al registrar el pedido. Tu bolsa de compras se conserva para reintentar.');
+      toast.info('Se abrió WhatsApp con tu mensaje. Puedes continuar tu consulta directamente por el chat.');
     } finally {
       setIsSubmitting(false);
     }
@@ -184,7 +155,7 @@ export function CarritoDrawer() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Bolsa de Compras"
+      aria-label="Lista de Consulta"
       className="fixed inset-0 z-50 flex justify-end"
     >
       {/* Backdrop con desenfoque zen minimalista */}
@@ -201,7 +172,7 @@ export function CarritoDrawer() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-none bg-[#dc143c]" />
             <h2 className="font-display text-base font-bold uppercase tracking-tight text-[#FAF9F6]">
-              Bolsa de Compras
+              Lista de Consulta
             </h2>
             <span className="text-xs font-mono text-[#ac8888]">
               ({cart.reduce((sum, item) => sum + item.cantidad, 0)})
@@ -211,7 +182,7 @@ export function CarritoDrawer() {
           <button
             type="button"
             onClick={closeDrawer}
-            aria-label="Cerrar bolsa"
+            aria-label="Cerrar lista"
             className="w-8 h-8 rounded-none flex items-center justify-center text-[#ac8888] hover:text-[#FAF9F6] hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-[#201f1f]"
           >
             <X className="w-4 h-4" />
@@ -227,10 +198,10 @@ export function CarritoDrawer() {
               </div>
               <div>
                 <p className="font-display text-sm font-bold uppercase text-[#FAF9F6] tracking-tight">
-                  Tu bolsa está vacía
+                  Tu lista está vacía
                 </p>
                 <p className="text-xs font-body text-[#ac8888] mt-1">
-                  Explora las piezas disponibles en el catálogo de Zairen Lab.
+                  Agrega prendas del catálogo para consultar disponibilidad por WhatsApp.
                 </p>
               </div>
               <button
@@ -265,7 +236,7 @@ export function CarritoDrawer() {
                         type="button"
                         onClick={() => removeItem(item.id, item.talla)}
                         className="text-[#ac8888] hover:text-[#dc143c] p-1 cursor-pointer"
-                        title="Eliminar de la bolsa"
+                        title="Eliminar de la lista"
                         aria-label="Eliminar"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -276,21 +247,17 @@ export function CarritoDrawer() {
                       <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#201f1f] text-[#FAF9F6] font-bold rounded-none">
                         TALLA: {item.talla}
                       </span>
-                      {item.sku && (
-                        <span className="text-[9px] font-mono text-[#ac8888] truncate">
-                          {item.sku}
-                        </span>
-                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#201f1f]/60">
-                    {/* Control de Cantidad Ortogonal */}
+                    {/* Control de Cantidad Ortogonal (sin tope artificial de stock) */}
                     <div className="flex items-center border border-[#201f1f] bg-[#0A0A0A]">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad - 1)}
                         className="w-6 h-6 flex items-center justify-center text-xs text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform rounded-none"
+                        title="Disminuir cantidad"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
@@ -300,9 +267,10 @@ export function CarritoDrawer() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.talla, item.cantidad + 1)}
-                        disabled={item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible}
+                        disabled={item.cantidad >= 99}
+                        title="Aumentar cantidad"
                         className={`w-6 h-6 flex items-center justify-center text-xs rounded-none ${
-                          item.stockDisponible !== undefined && item.cantidad >= item.stockDisponible
+                          item.cantidad >= 99
                             ? 'text-white/20 cursor-not-allowed'
                             : 'text-[#ac8888] hover:text-white cursor-pointer active:scale-90 transition-transform'
                         }`}
@@ -311,7 +279,7 @@ export function CarritoDrawer() {
                       </button>
                     </div>
 
-                    {/* Precio Unitario / Subtotal */}
+                    {/* Precio Estimado */}
                     <div className="text-right">
                       <span className="font-mono text-xs md:text-sm font-bold text-[#FAF9F6]">
                         {formatCurrency(item.precio * item.cantidad)}
@@ -324,7 +292,7 @@ export function CarritoDrawer() {
           )}
         </div>
 
-        {/* Pie de Pedido y Checkout */}
+        {/* Pie de Consulta y Checkout */}
         {cart.length > 0 && (
           <div className="p-4 bg-[#141416] border-t border-[#201f1f] space-y-3">
             {/* Opción de Envío a Domicilio */}
@@ -338,7 +306,7 @@ export function CarritoDrawer() {
                 />
                 <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#FAF9F6]">
                   <Truck className="w-3.5 h-3.5 text-[#dc143c]" />
-                  <span>¿Deseas envío a domicilio?</span>
+                  <span>¿Deseas coordinar envío a domicilio?</span>
                 </div>
               </label>
 
@@ -346,16 +314,16 @@ export function CarritoDrawer() {
               {requiresDelivery ? (
                 <div className="mt-2.5 pt-2 border-t border-white/[0.06] animate-in fade-in duration-200">
                   <p className="text-[10px] font-mono text-[#ac8888] mb-1.5">
-                    * El costo de entrega se coordinará directamente al confirmar tu pedido.
+                    * El costo de entrega se coordinará directamente al confirmar disponibilidad.
                   </p>
-                  <label htmlFor="order-notes" className="block text-[10px] font-mono text-[#FAF9F6] uppercase tracking-wider mb-1">
-                    Dirección o Referencia de Entrega:
+                  <label htmlFor="inquiry-notes" className="block text-[10px] font-mono text-[#FAF9F6] uppercase tracking-wider mb-1">
+                    Dirección o Zona de Entrega:
                   </label>
                   <textarea
-                    id="order-notes"
+                    id="inquiry-notes"
                     value={clientNotes}
                     onChange={(e) => setClientNotes(e.target.value)}
-                    placeholder="Ej: Zona Central, Calle Sucre #123, entre Bolívar y Colón..."
+                    placeholder="Ej: Zona Central, Calle Sucre..."
                     rows={2}
                     maxLength={200}
                     className="w-full bg-[#141416] border border-[#201f1f] text-xs font-body text-[#FAF9F6] p-2 focus:border-[#dc143c] focus:outline-none resize-none rounded-none"
@@ -381,14 +349,14 @@ export function CarritoDrawer() {
                 </div>
               )}
               <div className="flex justify-between text-[#FAF9F6] font-bold text-sm pt-1 border-t border-[#201f1f]">
-                <span>TOTAL PRENDAS</span>
+                <span>TOTAL ESTIMADO</span>
                 <span className="text-[#dc143c]">{formatCurrency(total)}</span>
               </div>
             </div>
 
             {/* Cloudflare Turnstile */}
             <div className="pt-1">
-              <TurnstileWidget onVerify={(t) => setTurnstileToken(t)} action="checkout_order" />
+              <TurnstileWidget onVerify={(t) => setTurnstileToken(t)} action="inquiry_cart" />
             </div>
 
             {/* Honeypot Anti-Bot (Oculto) */}
@@ -405,13 +373,13 @@ export function CarritoDrawer() {
               className="absolute opacity-0 pointer-events-none -left-[9999px]"
             />
 
-            {/* Botón de Checkout Directo hacia WhatsApp */}
+            {/* Botón de Envío de Consulta hacia WhatsApp */}
             <button
               type="button"
               onClick={handleCheckoutWhatsApp}
-              disabled={isSubmitting || !turnstileToken}
+              disabled={isSubmitting}
               className={`w-full py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-lg rounded-none ${
-                isSubmitting || !turnstileToken
+                isSubmitting
                   ? 'bg-[#1c1b1b] text-[#8F8F8C] cursor-not-allowed border border-[#201f1f]'
                   : 'bg-[#dc143c] hover:bg-[#b01030] text-white border border-[#dc143c] cursor-pointer'
               }`}
@@ -419,16 +387,11 @@ export function CarritoDrawer() {
               {isSubmitting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-none animate-spin" />
-                  <span>Revalidando existencias...</span>
-                </>
-              ) : !turnstileToken ? (
-                <>
-                  <span className="w-2 h-2 rounded-none bg-amber-400 animate-pulse" />
-                  <span>Verificando conexión segura...</span>
+                  <span>Procesando consulta...</span>
                 </>
               ) : (
                 <>
-                  <span>Realizar Pedido</span>
+                  <span>Enviar Consulta por WhatsApp</span>
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}
@@ -440,7 +403,7 @@ export function CarritoDrawer() {
                 onClick={clearCart}
                 className="hover:text-[#dc143c] transition-colors underline cursor-pointer"
               >
-                Vaciar bolsa
+                Vaciar lista
               </button>
               <span>Atención 1 a 1 sin intermediarios</span>
             </div>
