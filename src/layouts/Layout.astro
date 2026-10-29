@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { siteConfig } from '../config/site';
 import { formatPageTitle } from '../lib/formatTitle';
 import { Toaster } from '../components/ui/Toaster';
+import { ScrollToTop } from '../components/common/ScrollToTop';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props {
@@ -136,6 +137,9 @@ const imageUrl = image.startsWith('http') ? image : new URL(image, siteConfig.ur
     <Toaster client:load />
 
     <slot />
+
+    <!-- Botón Volver Arriba Ortogonal Zen -->
+    <ScrollToTop client:idle />
   </body>
 </html>
 
