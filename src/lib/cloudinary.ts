@@ -13,7 +13,8 @@ const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'zairen-lab';
 export function getOptimizedImageUrl(
   publicIdOrUrl: string,
   width: number = 600,
-  height?: number
+  height?: number,
+  crop: string = 'c_limit'
 ): string {
   if (!publicIdOrUrl) return '';
 
@@ -22,8 +23,8 @@ export function getOptimizedImageUrl(
     // Si ya es de Cloudinary, le inyectamos transformaciones
     if (publicIdOrUrl.includes('res.cloudinary.com')) {
       const transform = height 
-        ? `f_auto,q_auto,w_${width},h_${height},c_fill` 
-        : `f_auto,q_auto,w_${width}`;
+        ? `f_auto,q_auto,w_${width},h_${height},${crop}` 
+        : `f_auto,q_auto,w_${width},${crop}`;
       return publicIdOrUrl.replace('/upload/', `/upload/${transform}/`);
     }
     return publicIdOrUrl;
@@ -31,8 +32,8 @@ export function getOptimizedImageUrl(
 
   // Si es un public_id de Cloudinary
   const transform = height 
-    ? `f_auto,q_auto,w_${width},h_${height},c_fill` 
-    : `f_auto,q_auto,w_${width}`;
+    ? `f_auto,q_auto,w_${width},h_${height},${crop}` 
+    : `f_auto,q_auto,w_${width},${crop}`;
 
   return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${publicIdOrUrl}.webp`;
 }

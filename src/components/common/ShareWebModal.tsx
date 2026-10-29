@@ -13,10 +13,10 @@ interface ShareWebModalProps {
 export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
   const [copied, setCopied] = useState<boolean>(false);
   const [shareUrl, setShareUrl] = useState<string>(siteConfig.cloudflareDomain || siteConfig.url);
-  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(true);
+  const [dragOffset, setDragOffset] = useState<number>(0);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const touchStartY = useRef<number>(0);
@@ -29,30 +29,28 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
     }
   }, []);
 
-  // Generar código QR en Canvas local con alta fidelidad
+  // Generar código QR en memoria inmediatamente al abrirse
   useEffect(() => {
-    if (!isOpen || !canvasRef.current) return;
+    if (!isOpen) return;
 
     setIsGenerating(true);
-    QRCode.toCanvas(
-      canvasRef.current,
-      shareUrl,
-      {
-        width: 240,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
-        errorCorrectionLevel: 'M',
+    QRCode.toDataURL(shareUrl, {
+      width: 480,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF',
       },
-      (err) => {
+      errorCorrectionLevel: 'M',
+    })
+      .then((url) => {
+        setQrCodeDataUrl(url);
         setIsGenerating(false);
-        if (err) {
-          console.error('[QR] Error al generar canvas local:', err);
-        }
-      }
-    );
+      })
+      .catch((err) => {
+        console.error('[QR] Error al generar código QR en memoria:', err);
+        setIsGenerating(false);
+      });
   }, [isOpen, shareUrl]);
 
   // Accesibilidad: Trampa de foco, Tecla ESC, Bloqueo de Scroll y Restauración de foco
@@ -197,9 +195,10 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
         className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       >
+        {/* Contenedor de la Tarjeta del Modal con 'relative' estricto para anclar la 'X' dentro del cuadro */}
         <div
           ref={modalRef}
-          className="w-full sm:max-w-md max-h-[90dvh] overflow-y-auto bg-[#0A0A0A] border-t sm:border border-[#201f1f] rounded-none p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.95)] flex flex-col items-center text-center space-y-4 animate-in slide-in-from-bottom duration-300 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6"
+          className="relative w-full sm:max-w-md max-h-[90dvh] overflow-y-auto bg-[#0A0A0A] border-t sm:border border-[#201f1f] rounded-none p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.95)] flex flex-col items-center text-center space-y-4 animate-in slide-in-from-bottom duration-300 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6"
           style={{
             transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
             transition: dragOffset > 0 ? 'none' : 'transform 200ms ease-out',
@@ -212,19 +211,19 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
           {/* Barra de Arrastre Móvil (Bottom-Sheet Drag Handle) */}
           <div className="sm:hidden w-12 h-1 bg-white/20 mx-auto -mt-1 mb-1 rounded-none select-none" />
 
-          {/* Botón Cerrar Ortogonal */}
+          {/* Botón Cerrar Ortogonal DENTRO del cuadro en la esquina superior derecha */}
           <button
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="absolute top-4 right-4 w-8 h-8 rounded-none bg-[#141416] hover:bg-[#dc143c] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer z-10 border border-[#201f1f]"
+            className="absolute top-3.5 right-3.5 w-8 h-8 rounded-none bg-[#141416] hover:bg-[#dc143c] text-[#ac8888] hover:text-white flex items-center justify-center transition-colors cursor-pointer z-20 border border-[#201f1f] shadow-md"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* Encabezado */}
-          <div className="space-y-1 pt-1">
+          <div className="space-y-1 pt-1 pr-6">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-none bg-[#dc143c]/15 text-[#ffb3b3] border border-[#dc143c]/30 text-[10px] font-mono uppercase tracking-widest font-bold">
               <span className="w-1.5 h-1.5 rounded-none bg-[#dc143c] animate-pulse" />
               COMPARTIR TIENDA OFICIAL
@@ -237,14 +236,20 @@ export function ShareWebModal({ isOpen, onClose }: ShareWebModalProps) {
             </p>
           </div>
 
-          {/* Contenedor Código QR en Canvas Local (Sin dependencias externas) */}
+          {/* Contenedor Código QR Local (Generación instantánea DataURL en memoria) */}
           <div className="relative p-3 rounded-none bg-white border border-[#201f1f] shadow-inner shrink-0 flex items-center justify-center min-w-[240px] min-h-[240px]">
-            {isGenerating && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-10">
+            {isGenerating || !qrCodeDataUrl ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/95 z-10">
                 <span className="w-5 h-5 border-2 border-black/20 border-t-black rounded-none animate-spin" />
               </div>
+            ) : (
+              <img
+                src={qrCodeDataUrl}
+                alt="Código QR de la tienda oficial"
+                className="w-56 h-56 sm:w-52 sm:h-52 object-contain block filter contrast-105"
+                loading="eager"
+              />
             )}
-            <canvas ref={canvasRef} className="w-56 h-56 sm:w-52 sm:h-52 block" />
           </div>
 
           <div className="text-[10px] font-mono text-[#ac8888] tracking-wider uppercase -mt-2">

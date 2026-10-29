@@ -43,6 +43,7 @@ export interface DetalleProductoProps {
   stockDisponible?: number;
   stockPorTalla?: Record<string, number>;
   estadoComercial?: 'preventa' | 'promocion' | 'oferta' | 'nuevo' | 'disponible' | 'agotado' | 'ninguno';
+  isModal?: boolean;
 }
 
 const FALLBACK_IMAGE = 'https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp';
@@ -64,6 +65,7 @@ export function DetalleProducto({
   stockDisponible = 0,
   stockPorTalla,
   estadoComercial = 'disponible',
+  isModal = false,
 }: DetalleProductoProps) {
   // 1. Normalización y blindaje de datos nulos
   const safeId = id || slug || '';
@@ -273,24 +275,26 @@ export function DetalleProducto({
 
   return (
     <div className="detail-bento-container">
-      {/* Botón Volver Atrás & Breadcrumb Zen */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <a
-          href="/"
-          className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#FAF9F6] bg-[#141416] hover:bg-[#dc143c] hover:text-white border border-[#201f1f] hover:border-[#dc143c] transition-all cursor-pointer group shadow-sm rounded-none"
-        >
-          <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
-          <span>Volver al Catálogo</span>
-        </a>
+      {/* Botón Volver Atrás & Breadcrumb Zen (Solo si no está dentro de un modal) */}
+      {!isModal && (
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <a
+            href="/"
+            className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-[#FAF9F6] bg-[#141416] hover:bg-[#dc143c] hover:text-white border border-[#201f1f] hover:border-[#dc143c] transition-all cursor-pointer group shadow-sm rounded-none"
+          >
+            <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
+            <span>Volver al Catálogo</span>
+          </a>
 
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-mono text-[#ac8888]">
-          <a href="/" className="hover:text-white transition-colors">Catálogo</a>
-          <span>/</span>
-          <span className="text-[#dc143c] font-bold uppercase">{seccionTexto}</span>
-          <span>/</span>
-          <span className="text-white truncate max-w-[180px] sm:max-w-none">{safeNombre}</span>
-        </nav>
-      </div>
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-mono text-[#ac8888]">
+            <a href="/" className="hover:text-white transition-colors">Catálogo</a>
+            <span>/</span>
+            <span className="text-[#dc143c] font-bold uppercase">{seccionTexto}</span>
+            <span>/</span>
+            <span className="text-white truncate max-w-[180px] sm:max-w-none">{safeNombre}</span>
+          </nav>
+        </div>
+      )}
 
       {/* ======================================================== */}
       {/* BENTO GRID PRINCIPAL // DISEÑO CATALOGO V0               */}
@@ -305,7 +309,7 @@ export function DetalleProducto({
               key={activeImageIndex}
               src={getOptimizedImageUrl(currentImage, 1000, 1250)}
               alt={`${safeNombre} - Vista ${activeImageIndex + 1}`}
-              className="w-full h-full object-contain bento-image-active transition-transform duration-500 ease-out hover:scale-[1.03]"
+              className="w-full h-full object-contain p-2.5 sm:p-4 bento-image-active transition-transform duration-500 ease-out hover:scale-[1.03]"
             />
 
             {/* Badge de Estado con Color Dinámico */}

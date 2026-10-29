@@ -321,11 +321,11 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   return (
     <section id="catalogo" className="w-full max-w-[1440px] mx-auto px-4 md:px-12 py-16 scroll-mt-20">
       {/* ========================================================== */}
-      {/* 1. HERO ZEN OFICIAL CON GRADIENTE SUTIL Y TIPOGRAFÍA BILINGÜE */}
+      {/* 1. HERO ZEN OFICIAL ABIERTO Y TIPOGRAFÍA BILINGÜE         */}
       {/* ========================================================== */}
-      <div className="relative flex flex-col justify-center min-h-[140px] md:min-h-[160px] mb-8 p-6 md:p-8 bg-gradient-to-r from-[#dc143c]/[0.05] via-[#dc143c]/[0.02] to-transparent border border-white/[0.04] rounded-none overflow-hidden">
-        {/* Isotipo Hexagonal Watermark (Entero, sin cortes, sutil en fondo derecho) */}
-        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-20 select-none h-28 w-28 sm:h-36 sm:w-36 md:h-44 md:w-44 filter drop-shadow-[0_0_24px_rgba(220,20,60,0.35)]">
+      <div className="relative flex flex-col justify-center mb-8 py-4 overflow-hidden">
+        {/* Isotipo Hexagonal Watermark (Entero, sin cortes, con opacidad visible del 48%) */}
+        <div className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-48 select-none h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 filter contrast-110 drop-shadow-[0_0_24px_rgba(220,20,60,0.4)]">
           <img
             src="https://res.cloudinary.com/ds4qnoypm/image/upload/v1791690155/zairen_logo_oficial_nehjev.webp"
             alt="Zairen Lab Isotipo Hexagonal"
