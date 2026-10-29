@@ -58,6 +58,7 @@
     color: var(--color-on-surface);
     font-family: var(--font-body);
     scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
   }
   
   body {
