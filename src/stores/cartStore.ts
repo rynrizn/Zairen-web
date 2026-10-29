@@ -60,25 +60,21 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Añade una prenda al carrito considerando la combinación ID + TALLA
+ * Añade una prenda a la lista de consulta considerando la combinación ID + TALLA.
+ * En modo consulta no se limita por stock ni se descuenta inventario.
  */
 export function addItem(item: Omit<CartItem, 'cantidad'>) {
-  const maxStock = item.stockDisponible !== undefined ? item.stockDisponible : Infinity;
-  if (maxStock <= 0) {
-    return; // Rechazar firmemente cualquier intento de añadir items con stock agotado
-  }
-
   const current = $cart.get();
   const existing = current.find((i) => i.id === item.id && i.talla === item.talla);
 
   if (existing) {
-    if (existing.cantidad >= maxStock) {
-      return; // No permitir sobrepasar el stock real
+    if (existing.cantidad >= 99) {
+      return;
     }
     $cart.set(
       current.map((i) =>
         i.id === item.id && i.talla === item.talla
-          ? { ...i, cantidad: i.cantidad + 1, stockDisponible: item.stockDisponible ?? i.stockDisponible }
+          ? { ...i, cantidad: i.cantidad + 1 }
           : i
       )
     );
@@ -95,7 +91,7 @@ export function removeItem(id: string, talla: string) {
 }
 
 /**
- * Actualiza la cantidad de un item con validación de mínimo 1
+ * Actualiza la cantidad de un item con validación de mínimo 1 y tope razonable de 99
  */
 export function updateQuantity(id: string, talla: string, cantidad: number) {
   if (cantidad <= 0) {
@@ -105,8 +101,7 @@ export function updateQuantity(id: string, talla: string, cantidad: number) {
   $cart.set(
     $cart.get().map((i) => {
       if (i.id === id && i.talla === talla) {
-        const max = i.stockDisponible ?? Infinity;
-        return { ...i, cantidad: Math.min(cantidad, max) };
+        return { ...i, cantidad: Math.min(cantidad, 99) };
       }
       return i;
     })
@@ -196,8 +191,8 @@ export async function validarYLimpiarCarrito(): Promise<{ retirados: string[] }>
       const nombresUnicos = Array.from(new Set(retirados));
       const msg =
         nombresUnicos.length === 1
-          ? `"${nombresUnicos[0]}" ya no está disponible y fue retirado de tu bolsa.`
-          : `Se retiraron ${nombresUnicos.length} prendas no disponibles de tu bolsa.`;
+          ? `"${nombresUnicos[0]}" ya no está disponible y fue retirado de tu lista de consulta.`
+          : `Se retiraron ${nombresUnicos.length} prendas no disponibles de tu lista de consulta.`;
       toast.info(msg, { duration: 6000 });
     }
 
