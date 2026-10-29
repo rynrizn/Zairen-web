@@ -33,6 +33,7 @@ export interface Order {
   subtotal: number;
   shipping: number;
   notes?: string;
+  origen?: string;
 }
 
 function mapDbStatusToUi(status: string): OrderStatus {
@@ -180,6 +181,7 @@ export function PedidosTable() {
               subtotal: Number(p.subtotal) || Number(p.total) || 0,
               shipping: Number(p.envio) || 0,
               notes: p.observacion,
+              origen: p.origen || 'CATALOGO_WEB',
             };
           });
 
@@ -203,7 +205,8 @@ export function PedidosTable() {
   const counts = useMemo(() => {
     return {
       Todos: orders.length,
-      Pendientes: orders.filter((o) => o.status === 'Pendiente').length,
+      'Consultas Web': orders.filter((o) => o.origen === 'CONSULTA_WEB').length,
+      Pendientes: orders.filter((o) => o.status === 'Pendiente' && o.origen !== 'CONSULTA_WEB').length,
       Confirmados: orders.filter((o) => o.status === 'Confirmado').length,
       'En Despacho': orders.filter((o) => o.status === 'En Despacho').length,
       Entregados: orders.filter((o) => o.status === 'Entregado').length,
@@ -216,7 +219,8 @@ export function PedidosTable() {
     return orders.filter((order) => {
       const matchesTab =
         activeTab === 'Todos' ||
-        (activeTab === 'Pendientes' && order.status === 'Pendiente') ||
+        (activeTab === 'Consultas Web' && order.origen === 'CONSULTA_WEB') ||
+        (activeTab === 'Pendientes' && order.status === 'Pendiente' && order.origen !== 'CONSULTA_WEB') ||
         (activeTab === 'Confirmados' && order.status === 'Confirmado') ||
         (activeTab === 'En Despacho' && order.status === 'En Despacho') ||
         (activeTab === 'Entregados' && order.status === 'Entregado') ||
@@ -240,10 +244,10 @@ export function PedidosTable() {
           .update({ estado: mapUiStatusToDb(newStatus) })
           .eq('id', orderId);
 
-        // Si se cancela la orden, revertir automáticamente el stock de cada prenda
+        // Si se cancela la orden, revertir stock solo si era un pedido que reservó stock (las consultas web no tocan stock)
         if (newStatus === 'Cancelado') {
           const targetOrder = orders.find((o) => o.id === orderId);
-          if (targetOrder && targetOrder.items) {
+          if (targetOrder && targetOrder.origen !== 'CONSULTA_WEB' && targetOrder.items) {
             for (const item of targetOrder.items) {
               const prodId = item.productId;
               const sizeKey = `stock_${item.size}`;
@@ -351,9 +355,12 @@ export function PedidosTable() {
   };
 
   const cleanPhone = selectedOrder ? selectedOrder.clientPhone.replace(/\D/g, '') : '';
+  const isWebInquiry = selectedOrder?.origen === 'CONSULTA_WEB';
   const whatsappUrl = selectedOrder
     ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-        `Hola ${selectedOrder.clientName}, sobre tu pedido ${selectedOrder.orderNumber} en Zairen Lab: te contactamos para coordinar los detalles de despacho.`
+        isWebInquiry
+          ? `Hola ${selectedOrder.clientName}, te escribimos de Zairen Lab respecto a tu consulta ${selectedOrder.orderNumber}: ¿en qué podemos ayudarte?`
+          : `Hola ${selectedOrder.clientName}, sobre tu pedido ${selectedOrder.orderNumber} en Zairen Lab: te contactamos para coordinar los detalles de despacho.`
       )}`
     : '#';
 
@@ -391,7 +398,7 @@ export function PedidosTable() {
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#1c1b1b]/90 backdrop-blur-xl p-4 rounded-none border border-white/[0.08] shadow-xl">
         {/* Pestañas de Estado */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
-          {(['Todos', 'Pendientes', 'Confirmados', 'Entregados', 'Cancelados'] as const).map(
+          {(['Todos', 'Consultas Web', 'Pendientes', 'Confirmados', 'Entregados', 'Cancelados'] as const).map(
             (tab) => {
               const countKey = tab as keyof typeof counts;
               const count = counts[countKey] || 0;
@@ -408,6 +415,9 @@ export function PedidosTable() {
                       : 'bg-[#141416] text-[#ac8888] hover:text-white hover:bg-[#2a2a2a]'
                   }`}
                 >
+                  {tab === 'Consultas Web' && count > 0 && (
+                    <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-ping"></span>
+                  )}
                   {tab === 'Pendientes' && count > 0 && (
                     <span className="w-1.5 h-1.5 rounded-none bg-white animate-ping"></span>
                   )}
@@ -608,11 +618,17 @@ export function PedidosTable() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[10px] text-[#ac8888] tracking-wider uppercase">
-                      INSPECTOR DE ORDEN
+                      {selectedOrder.origen === 'CONSULTA_WEB' ? 'CONSULTA DE DISPONIBILIDAD' : 'INSPECTOR DE ORDEN'}
                     </span>
-                    <span className="px-1.5 py-0.2 bg-[#dc143c] text-white text-[9px] font-mono rounded-none uppercase font-bold">
-                      LIVE
-                    </span>
+                    {selectedOrder.origen === 'CONSULTA_WEB' ? (
+                      <span className="px-1.5 py-0.2 bg-emerald-600 text-white text-[9px] font-mono rounded-none uppercase font-bold">
+                        CONSULTA WEB
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.2 bg-[#dc143c] text-white text-[9px] font-mono rounded-none uppercase font-bold">
+                        LIVE
+                      </span>
+                    )}
                   </div>
                   <h2 className="font-headline text-xl font-bold text-[#e5e2e1] uppercase tracking-tight mt-1">
                     DETALLE {selectedOrder.orderNumber}
