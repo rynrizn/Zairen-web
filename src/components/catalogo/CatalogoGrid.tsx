@@ -445,33 +445,20 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
                 1 Col
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-            <button
-              type="button"
-              onClick={() => setMobileDensity('large')}
-              title="1 Columna grande"
-              className={`px-2 py-1 text-[10px] font-mono uppercase cursor-pointer ${
-                mobileDensity === 'large' ? 'bg-[#dc143c] text-white font-bold' : 'text-[#ac8888]'
-              }`}
-            >
-              1 Col
-            </button>
-          </div>
 
-          {/* Botón Global para Contraer / Expandir Todas las Secciones */}
-          {sections.length > 1 && (
-            <button
-              type="button"
-              onClick={toggleAllSections}
-              title={areAllCollapsed ? 'Expandir todas las secciones' : 'Contraer todas las secciones'}
-              className="px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-            >
-              <span className="text-[#dc143c] font-bold">{areAllCollapsed ? '⊞' : '⊟'}</span>
-              <span className="hidden sm:inline">{areAllCollapsed ? 'Expandir Todo' : 'Contraer Todo'}</span>
-            </button>
-          )}
+            {/* Botón Global para Contraer / Expandir Todas las Secciones */}
+            {sections.length > 1 && (
+              <button
+                type="button"
+                onClick={toggleAllSections}
+                title={areAllCollapsed ? 'Expandir todas las secciones' : 'Contraer todas las secciones'}
+                className="h-10 sm:h-9 px-3 py-2 bg-[#141416] hover:bg-[#201f1f] border border-[#201f1f] hover:border-[#dc143c] text-[#e5e2e1] text-xs font-mono rounded-none flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              >
+                <span className="text-[#dc143c] font-bold">{areAllCollapsed ? '⊞' : '⊟'}</span>
+                <span className="hidden sm:inline">{areAllCollapsed ? 'Expandir Todo' : 'Contraer Todo'}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
