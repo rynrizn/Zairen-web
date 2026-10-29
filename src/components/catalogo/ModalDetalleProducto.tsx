@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { DetalleProducto, type DetalleProductoProps } from './DetalleProducto';
+import { X } from 'lucide-react';
 
 interface ModalDetalleProductoProps {
   isOpen: boolean;
@@ -166,7 +167,7 @@ export function ModalDetalleProducto({
             aria-label="Cerrar ventana de producto"
             className="w-8 h-8 flex items-center justify-center bg-[#1c1b1b] hover:bg-[#dc143c] text-[#ac8888] hover:text-white font-mono text-sm transition-colors border border-white/[0.08] cursor-pointer"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 

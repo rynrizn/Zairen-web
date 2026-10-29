@@ -4,6 +4,7 @@ import { supabase } from '../../../lib/supabase';
 import { ModalPortal } from '../../ui/ModalPortal';
 import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
 import { getOptimizedImageUrl } from '../../../lib/cloudinary';
+import { Folder, Globe, X } from 'lucide-react';
 
 export interface CloudinaryResource {
   public_id: string;
@@ -212,8 +213,9 @@ export function MediaLibraryModal({
             onClick={onClose}
             className="w-8 h-8 rounded-none bg-[#201f1f] hover:bg-[#dc143c] text-[#ac8888] hover:text-white flex items-center justify-center text-xs font-mono transition-colors cursor-pointer"
             title="Cerrar mediateca"
+            aria-label="Cerrar mediateca"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -268,7 +270,10 @@ export function MediaLibraryModal({
                 }`}
                 title="Fotos de la marca en carpeta Zairen/products"
               >
-                📁 Zairen/products
+                <span className="inline-flex items-center gap-1.5">
+                  <Folder className="w-3.5 h-3.5" />
+                  <span>Zairen/products</span>
+                </span>
               </button>
               <button
                 type="button"
@@ -280,7 +285,10 @@ export function MediaLibraryModal({
                 }`}
                 title="Todas las fotos de Cloudinary"
               >
-                🌐 Todo
+                <span className="inline-flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Todo</span>
+                </span>
               </button>
             </div>
 

@@ -5,7 +5,7 @@
  * Este es el archivo donde configuras los datos de tu marca,
  * número de WhatsApp, políticas de envío y redes sociales dinámicas.
  * 
- * 👉 Los valores aquí definidos tienen prioridad y usan variables .env como respaldo.
+ * Los valores aquí definidos tienen prioridad y usan variables .env como respaldo.
  * =====================================================================
  */
 

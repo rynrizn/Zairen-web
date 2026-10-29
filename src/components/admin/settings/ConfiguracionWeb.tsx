@@ -1289,7 +1289,7 @@ export function ConfiguracionWeb() {
                   { label: '● Drop 01 Disponible', val: 'DROP 01 DISPONIBLE' },
                   { label: '● Pre-Order Activo', val: 'PRE-ORDER ACTIVO' },
                   { label: '● Sold Out / Agotado', val: 'SOLD OUT // CERRADO' },
-                  { label: '⏳ Próximo Drop', val: 'PRÓXIMO DROP EN PREPARACIÓN' },
+                  { label: '● Próximo Drop', val: 'PRÓXIMO DROP EN PREPARACIÓN' },
                 ].map((item) => (
                   <button
                     key={item.val}

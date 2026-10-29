@@ -13,6 +13,7 @@ import {
   Ban,
   Headphones,
   ExternalLink,
+  X,
 } from 'lucide-react';
 import { siteConfig, formatCurrency } from '../../config/site';
 import { generateWhatsAppProductUrl } from '../../utils/whatsapp';
@@ -575,7 +576,7 @@ export function DetalleProducto({
             aria-label="Cerrar pantalla completa"
             className="absolute top-6 right-6 w-12 h-12 rounded-none bg-[#1c1b1b] text-white flex items-center justify-center text-xl hover:bg-[#dc143c] transition-colors cursor-pointer border border-white/[0.1]"
           >
-            ✕
+            <X className="w-6 h-6" />
           </button>
           <img
             src={currentImage}
