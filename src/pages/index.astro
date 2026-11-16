@@ -144,9 +144,7 @@ if (isSupabaseConfigured) {
           return (
             (prod as any).idColeccion === col.id ||
             prodColNorm === colNameNorm ||
-            prodSlugNorm === colSlugNorm ||
-            prodColNorm.includes(colNameNorm) ||
-            colNameNorm.includes(prodColNorm)
+            prodSlugNorm === colSlugNorm
           );
         });
       });

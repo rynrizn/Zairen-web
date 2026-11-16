@@ -145,7 +145,7 @@ export function InventarioManager() {
         item.nombre.toLowerCase().includes(search.toLowerCase());
 
       const matchesCol =
-        selectedColeccion === 'Todas' || (selectedColeccion === 'Sin Colección' ? (!item.coleccion || item.coleccion === 'Sin colección') : item.coleccion.includes(selectedColeccion));
+        selectedColeccion === 'Todas' || (selectedColeccion === 'Sin Colección' ? (!item.coleccion || item.coleccion === 'Sin colección') : item.coleccion === selectedColeccion);
 
       const totalItem = Object.values(item.stock).reduce((a, b) => a + b, 0);
       let matchesEstado = true;

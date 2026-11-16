@@ -15,7 +15,7 @@ DROP VIEW IF EXISTS public.vw_catalogo_publico CASCADE;
 -- 1. VISTA: vw_catalogo_publico
 -- Consumo directo por la tienda web pública (Astro SSG / SSR)
 -- ============================================================
-CREATE VIEW public.vw_catalogo_publico AS
+CREATE VIEW public.vw_catalogo_publico WITH (security_invoker = true) AS
 SELECT
     p.id AS id_producto,
     p.nombre,
@@ -71,7 +71,7 @@ GROUP BY p.id, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, 
 -- 2. VISTA: vw_inventario
 -- Panel administrativo para control de existencias en tiempo real
 -- ============================================================
-CREATE VIEW public.vw_inventario AS
+CREATE VIEW public.vw_inventario WITH (security_invoker = true) AS
 SELECT
     p.id AS id_producto,
     p.nombre,
@@ -112,7 +112,7 @@ GROUP BY p.id, p.nombre, p.slug, p.precio_venta, p.stock_minimo, p.activo, p.pub
 -- 3. VISTA: vw_stock_bajo
 -- Alertas críticas automáticas para el Dashboard de Administración
 -- ============================================================
-CREATE VIEW public.vw_stock_bajo AS
+CREATE VIEW public.vw_stock_bajo WITH (security_invoker = true) AS
 SELECT
     p.id AS id_producto,
     p.nombre,
@@ -135,7 +135,7 @@ HAVING COALESCE(SUM(inv.cantidad - inv.cantidad_reservada), 0) <= p.stock_minimo
 -- 4. VISTA: vw_historial_cliente
 -- Directorio de clientes con frecuencia de compra y LTV
 -- ============================================================
-CREATE VIEW public.vw_historial_cliente AS
+CREATE VIEW public.vw_historial_cliente WITH (security_invoker = true) AS
 SELECT
     c.id AS id_cliente,
     c.nombre,
@@ -158,7 +158,7 @@ FROM public.cliente c;
 -- 5. VISTA: vw_reporte_ventas
 -- Consolidado de transacciones comerciales con desglose de items
 -- ============================================================
-CREATE VIEW public.vw_reporte_ventas AS
+CREATE VIEW public.vw_reporte_ventas WITH (security_invoker = true) AS
 SELECT
     v.id AS id_venta,
     v.numero_ticket,

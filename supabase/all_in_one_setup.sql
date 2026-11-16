@@ -362,7 +362,7 @@ DROP TRIGGER IF EXISTS trg_actualizar_estadisticas_cliente ON public.venta;
 CREATE TRIGGER trg_actualizar_estadisticas_cliente AFTER INSERT OR DELETE ON public.venta FOR EACH ROW EXECUTE FUNCTION public.fn_actualizar_estadisticas_cliente();
 
 -- 4. VISTAS
-CREATE OR REPLACE VIEW public.vw_catalogo_publico AS
+CREATE OR REPLACE VIEW public.vw_catalogo_publico WITH (security_invoker = true) AS
 SELECT
     p.id AS id_producto, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, p.destacado, p.es_prioritario, p.estado_comercial,
     c.id AS id_coleccion, c.nombre AS coleccion, c.slug AS coleccion_slug,
@@ -375,7 +375,7 @@ LEFT JOIN public.inventario inv ON inv.producto_id = p.id
 WHERE p.activo = TRUE AND p.publicado = TRUE AND c.activa = TRUE
 GROUP BY p.id, p.nombre, p.slug, p.descripcion, p.precio_venta, p.stock_minimo, p.destacado, p.es_prioritario, p.estado_comercial, c.id, c.nombre, c.slug;
 
-CREATE OR REPLACE VIEW public.vw_inventario AS
+CREATE OR REPLACE VIEW public.vw_inventario WITH (security_invoker = true) AS
 SELECT
     p.id AS id_producto, p.nombre, p.slug, p.precio_venta, p.stock_minimo, p.activo, p.publicado, p.destacado, p.es_prioritario, c.nombre AS coleccion,
     COALESCE((SELECT img.url_imagen FROM public.imagen img WHERE img.producto_id = p.id AND img.es_portada = TRUE LIMIT 1), '') AS imagen_portada,

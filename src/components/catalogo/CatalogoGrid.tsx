@@ -12,6 +12,38 @@ interface CatalogoGridProps {
   collections: Array<{ id: string; nombre: string; slug: string }>;
 }
 
+/**
+ * Coincidencia exacta de colección para evitar colisiones de subcadenas
+ * (ejemplo: 'ESSENTIALS' vs 'ESSENTIALS - DC').
+ */
+function matchesProductCollection(
+  product: TarjetaPoleraProps,
+  col: { id: string; nombre: string; slug: string }
+): boolean {
+  // 1. Coincidencia directa por ID de base de datos
+  if (product.idColeccion && col.id && product.idColeccion === col.id) {
+    return true;
+  }
+  // 2. Coincidencia directa por slug
+  if (
+    product.coleccionSlug &&
+    col.slug &&
+    product.coleccionSlug.toLowerCase() === col.slug.toLowerCase()
+  ) {
+    return true;
+  }
+  // 3. Coincidencia normalizada estricta (slug o nombre idéntico, sin .includes parciales)
+  const normColSlug = (col.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normColName = (col.nombre || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normProdSlug = (product.coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normProdName = (product.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  if (normProdSlug && normColSlug && normProdSlug === normColSlug) return true;
+  if (normProdName && normColName && normProdName === normColName) return true;
+
+  return false;
+}
+
 export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps) {
   const [selectedCollection, setSelectedCollection] = useState<string>('todas');
   const [commercialFilter, setCommercialFilter] = useState<string>('todos');
@@ -150,19 +182,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const collectionsWithCount = useMemo(() => {
     return collections
       .map((col) => {
-        const selNorm = col.slug.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const count = initialProducts.filter((p) => {
-          const prodColNorm = (p.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const prodSlugNorm = ((p as any).coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          return (
-            (p as any).coleccionSlug === col.slug ||
-            prodSlugNorm === selNorm ||
-            prodColNorm === selNorm ||
-            prodColNorm.includes(selNorm) ||
-            selNorm.includes(prodColNorm)
-          );
-        }).length;
-
+        const count = initialProducts.filter((p) => matchesProductCollection(p, col)).length;
         return {
           id: col.id,
           nombre: col.nombre.split('//')[0]?.trim() || col.nombre,
@@ -178,18 +198,24 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
   const filteredProducts = useMemo(() => {
     return initialProducts
       .filter((p) => {
-        // Filtro por colección (normalizado sin conflicto de guiones o espacios)
+        // Filtro por colección (coincidencia exacta por ID, slug o nombre, sin colisión de subcadenas)
         if (selectedCollection !== 'todas') {
-          const selNorm = selectedCollection.toLowerCase().replace(/[^a-z0-9]/g, '');
-          const prodColNorm = (p.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const prodSlugNorm = ((p as any).coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const match =
-            (p as any).coleccionSlug === selectedCollection ||
-            prodSlugNorm === selNorm ||
-            prodColNorm === selNorm ||
-            prodColNorm.includes(selNorm) ||
-            selNorm.includes(prodColNorm);
-          if (!match) return false;
+          const activeCol = collections.find(
+            (c) => c.slug === selectedCollection || c.id === selectedCollection
+          );
+          if (activeCol) {
+            if (!matchesProductCollection(p, activeCol)) return false;
+          } else {
+            const selNorm = selectedCollection.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const prodColNorm = (p.coleccion || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const prodSlugNorm = ((p as any).coleccionSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const match =
+              (p as any).idColeccion === selectedCollection ||
+              (p as any).coleccionSlug === selectedCollection ||
+              prodSlugNorm === selNorm ||
+              prodColNorm === selNorm;
+            if (!match) return false;
+          }
         }
 
         // Filtro por estado comercial
@@ -228,7 +254,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         if (sortBy === 'nombre-desc') return b.nombre.localeCompare(a.nombre);
         return 0;
       });
-  }, [initialProducts, selectedCollection, commercialFilter, searchQuery, sortBy]);
+  }, [initialProducts, selectedCollection, commercialFilter, searchQuery, sortBy, collections]);
 
   // Agrupación por colecciones con prendas agotadas al final de cada sección
   const sections = useMemo(() => {
@@ -243,7 +269,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
 
     // Si se seleccionó una colección específica, mostrar solo esa sección
     if (selectedCollection !== 'todas') {
-      const activeCol = collections.find((c) => c.slug === selectedCollection);
+      const activeCol = collections.find((c) => c.slug === selectedCollection || c.id === selectedCollection);
       const name = activeCol ? (activeCol.nombre.split('//')[0]?.trim() || activeCol.nombre) : selectedCollection;
       return [
         {
@@ -254,18 +280,17 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       ];
     }
 
-    // Modo "todas": agrupar según colecciones definidas
+    // Modo "todas": agrupar según colecciones registradas
     const grouped: Array<{ id: string; name: string; products: TarjetaPoleraProps[] }> = [];
+    // Conjunto para garantizar que ninguna prenda se repita en más de una sección
     const usedProductIds = new Set<string>();
 
     collections.forEach((col) => {
       const colProducts = filteredProducts.filter((p) => {
-        return (
-          p.coleccion.toLowerCase().includes(col.slug.toLowerCase()) ||
-          col.slug.toLowerCase().includes(p.coleccion.toLowerCase()) ||
-          col.nombre.toLowerCase().includes(p.coleccion.toLowerCase())
-        );
+        if (usedProductIds.has(p.id)) return false;
+        return matchesProductCollection(p, col);
       });
+
       if (colProducts.length > 0) {
         colProducts.forEach((p) => usedProductIds.add(p.id));
         grouped.push({
@@ -286,6 +311,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
         byColName.get(colKey)!.push(p);
       });
       byColName.forEach((prods, colName) => {
+        prods.forEach((p) => usedProductIds.add(p.id));
         grouped.push({
           id: colName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           name: colName.toUpperCase(),
