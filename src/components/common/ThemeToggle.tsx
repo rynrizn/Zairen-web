@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export function ThemeToggle({ className = '' }: { className?: string }) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   useEffect(() => {
     const updateTheme = () => {
-      const isLight = document.documentElement.classList.contains('light');
-      setTheme(isLight ? 'light' : 'dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'dark' : 'light');
     };
     updateTheme();
     window.addEventListener('pageshow', updateTheme);
@@ -24,15 +24,18 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     if (typeof window !== 'undefined') {
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
       if (next === 'light') {
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
         localStorage.setItem('zairen_theme', 'light');
+        if (themeMeta) themeMeta.setAttribute('content', '#F6F4EE');
         window.dispatchEvent(new Event('zairen-theme-change'));
       } else {
         document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
         localStorage.setItem('zairen_theme', 'dark');
+        if (themeMeta) themeMeta.setAttribute('content', '#0A0A0A');
         window.dispatchEvent(new Event('zairen-theme-change'));
       }
     }

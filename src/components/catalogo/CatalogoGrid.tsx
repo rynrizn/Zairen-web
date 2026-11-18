@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useStore } from '@nanostores/react';
 import { $favorites } from '../../stores/favoritesStore';
-import { Ruler, Heart, X } from 'lucide-react';
+import { Ruler, Heart, X, Shirt, ArrowUpRight } from 'lucide-react';
+import { siteConfig } from '../../config/site';
 import { TarjetaPolera, type TarjetaPoleraProps } from './TarjetaPolera';
 import { GuiaTallasModal } from './GuiaTallasModal';
 import { ColeccionCombobox } from './ColeccionCombobox';
@@ -383,30 +384,44 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
       {/* 2. BARRA DE FILTROS, SCROLLBAR FINA Y BUSCADOR             */}
       {/* ========================================================== */}
       <div className="flex flex-col gap-3.5 mb-6">
-        {/* Fila del Buscador: Ancho completo con altura táctil ergonómica de 44px */}
-        <div className="relative w-full">
-          <label htmlFor="catalogo-search-input" className="sr-only">
-            Buscar prenda o colección
-          </label>
-          <input
-            id="catalogo-search-input"
-            name="search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar prenda o colección..."
-            className="w-full h-11 bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2.5 pr-11 text-xs md:text-sm font-mono text-[#e5e2e1] placeholder:text-[#ac8888] focus:outline-none transition-colors"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 text-xs text-[#ac8888] hover:text-white cursor-pointer flex items-center justify-center transition-colors"
-              aria-label="Limpiar búsqueda"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+        {/* Fila del Buscador + Botón Personalizar Polera (CustomyTee) */}
+        <div className="flex flex-col sm:flex-row items-stretch gap-2.5 w-full">
+          <div className="relative flex-1 min-w-0">
+            <label htmlFor="catalogo-search-input" className="sr-only">
+              Buscar prenda o colección
+            </label>
+            <input
+              id="catalogo-search-input"
+              name="search"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar prenda o colección..."
+              className="w-full h-11 bg-[#141416] border border-[#201f1f] focus:border-[#dc143c] rounded-none px-4 py-2.5 pr-11 text-xs md:text-sm font-mono text-[#e5e2e1] placeholder:text-[#ac8888] focus:outline-none transition-colors"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 text-xs text-[#ac8888] hover:text-white cursor-pointer flex items-center justify-center transition-colors"
+                aria-label="Limpiar búsqueda"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <a
+            href={siteConfig.customizerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Crea tu propio diseño en una polera con CustomyTee"
+            className="customizer-cta-btn group h-11 px-4 sm:px-5 rounded-none font-mono text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shrink-0 transition-all cursor-pointer"
+          >
+            <Shirt className="w-4 h-4 text-[#dc143c] group-hover:text-white transition-colors shrink-0" />
+            <span className="whitespace-nowrap">Personalizar Polera</span>
+            <ArrowUpRight className="w-3.5 h-3.5 opacity-75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+          </a>
         </div>
 
         {/* Fila de Controles: Colección Combobox + Orden + Guía de Tallas + Densidad */}
@@ -674,7 +689,7 @@ export function CatalogoGrid({ initialProducts, collections }: CatalogoGridProps
               setSelectedCollection('todas');
               setCommercialFilter('todos');
               setSearchQuery('');
-              setOnlyAvailable(false);
+              setSortBy('recientes');
             }}
             className="mt-4 px-5 py-2 rounded-none bg-[#dc143c] hover:bg-[#ff2d55] text-white text-xs font-mono uppercase tracking-wider font-bold cursor-pointer border border-[#dc143c]"
           >

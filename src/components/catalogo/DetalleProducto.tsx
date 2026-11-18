@@ -14,11 +14,14 @@ import {
   Headphones,
   ExternalLink,
   X,
+  Ruler,
 } from 'lucide-react';
 import { siteConfig, formatCurrency } from '../../config/site';
+import { getSizeMeasurements } from '../../config/sizeChart';
 import { generateWhatsAppProductUrl } from '../../utils/whatsapp';
 import { getOptimizedImageUrl } from '../../lib/cloudinary';
 import { ShareProductModal } from './ShareProductModal';
+import { GuiaTallasModal } from './GuiaTallasModal';
 import {
   getActiveChannels,
   buildChannelActionUrl,
@@ -167,6 +170,8 @@ export function DetalleProducto({
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [showSizeGuide, setShowSizeGuide] = useState<boolean>(false);
+  const selectedSizeSpecs = getSizeMeasurements(selectedTalla);
   const favorites = useStore($favorites);
   const isFavorite = favorites.includes(safeId) || (!!safeSlug && favorites.includes(safeSlug));
 
@@ -205,6 +210,7 @@ export function DetalleProducto({
       if (e.key === 'Escape') {
         setIsFullscreen(false);
         setShowShareModal(false);
+        setShowSizeGuide(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -437,8 +443,19 @@ export function DetalleProducto({
         {/* ===== BOX 4: SELECTOR DE TALLAS ===== */}
         <div className="bento-cell bento-sizes">
           <div className="bento-sizes-header">
-            <span className="bento-cell-label" style={{ marginBottom: 0 }}>TALLA</span>
-            <span className="bento-talla-active">{selectedTalla}</span>
+            <div className="flex items-center gap-2">
+              <span className="bento-cell-label" style={{ marginBottom: 0 }}>TALLA</span>
+              <span className="bento-talla-active">{selectedTalla}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSizeGuide(true)}
+              className="bento-size-guide-trigger inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider font-bold border border-white/10 bg-white/5 hover:border-[#dc143c] hover:text-[#dc143c] text-[#e5e2e1] transition-colors cursor-pointer"
+              title="Ver guía completa de medidas en cm"
+            >
+              <Ruler className="w-3 h-3 text-[#dc143c]" />
+              <span>Guía</span>
+            </button>
           </div>
 
           <div className="bento-talla-grid">
@@ -466,6 +483,27 @@ export function DetalleProducto({
               );
             })}
           </div>
+
+          {selectedSizeSpecs && (
+            <div className="bento-size-specs mt-3 pt-3 border-t border-white/[0.08] grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+              <div className="flex items-center justify-between px-2 py-1 bg-white/[0.03] border border-white/[0.06]">
+                <span className="text-[#ac8888]">X Ancho</span>
+                <strong className="text-[#FAF9F6]">{selectedSizeSpecs.ancho}</strong>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 bg-white/[0.03] border border-white/[0.06]">
+                <span className="text-[#ac8888]">Y Largo</span>
+                <strong className="text-[#FAF9F6]">{selectedSizeSpecs.largo}</strong>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 bg-white/[0.03] border border-white/[0.06]">
+                <span className="text-[#ac8888]">T Manga</span>
+                <strong className="text-[#FAF9F6]">{selectedSizeSpecs.anchoManga}</strong>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 bg-white/[0.03] border border-white/[0.06]">
+                <span className="text-[#ac8888]">Θ L. Manga</span>
+                <strong className="text-[#FAF9F6]">{selectedSizeSpecs.largoManga}</strong>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ===== BOX 5: BARRA DE ACCIONES Y PRECIO ===== */}
@@ -599,6 +637,13 @@ export function DetalleProducto({
         imagen={currentImage}
         slug={safeSlug}
         id={safeId}
+      />
+
+      {/* Modal Guía de Tallas con Talla Activa Preseleccionada */}
+      <GuiaTallasModal
+        isOpen={showSizeGuide}
+        onClose={() => setShowSizeGuide(false)}
+        initialSize={selectedTalla}
       />
     </div>
   );

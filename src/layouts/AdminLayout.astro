@@ -15,7 +15,7 @@ const finalTitle = formatPageTitle(title);
 ---
 
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es" class="light">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -38,14 +38,14 @@ const finalTitle = formatPageTitle(title);
         if (typeof localStorage !== 'undefined' && localStorage.getItem('zairen_theme')) {
           return localStorage.getItem('zairen_theme');
         }
-        return 'dark';
+        return 'light';
       })();
-      if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-      } else {
+      if (theme === 'dark') {
         document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
       }
 
       // Recuperación automática ante chunks obsoletos de Vite tras nuevos despliegues

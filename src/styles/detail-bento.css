@@ -529,6 +529,23 @@ html.light .talla-btn.talla-selected {
   color: #FFFFFF !important;
 }
 
+html.light .bento-size-guide-trigger {
+  background: #F0EDE5 !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0A0A0B !important;
+}
+
+html.light .bento-size-guide-trigger:hover {
+  background: #E5E1D7 !important;
+  border-color: #dc143c !important;
+  color: #dc143c !important;
+}
+
+html.light .bento-size-specs > div {
+  background: #F7F5F0 !important;
+  border-color: #DCD9D2 !important;
+}
+
 html.light .bento-price-value {
   color: #0A0A0B !important;
 }

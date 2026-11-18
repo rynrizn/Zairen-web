@@ -27,6 +27,7 @@ export interface SiteConfig {
   description: string;
   url: string;
   cloudflareDomain: string;
+  customizerUrl: string;
   seo: {
     defaultImage: string;
     twitterHandle: string;
@@ -59,8 +60,9 @@ export const siteConfig: SiteConfig = {
   tagline: 'Menos ruido, más identidad',
   origin: '',
   description: 'Indumentaria experimental streetwear fusionando minimalismo japonés, cortes oversized pesados y siluetas de identidad en reposo.',
-  url: import.meta.env.PUBLIC_SITE_URL || 'https://zairenlab.com',
-  cloudflareDomain: import.meta.env.PUBLIC_CLOUDFLARE_DOMAIN || 'https://zairen-web.pages.dev',
+  url: import.meta.env.PUBLIC_SITE_URL || 'https://zairenlab.pages.dev',
+  cloudflareDomain: import.meta.env.PUBLIC_CLOUDFLARE_DOMAIN || 'https://zairenlab.pages.dev',
+  customizerUrl: import.meta.env.PUBLIC_CUSTOMIZER_URL || 'https://customytee.pages.dev',
 
   // SEO & Open Graph
   seo: {

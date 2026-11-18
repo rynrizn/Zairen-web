@@ -325,6 +325,94 @@ html.light a.bg-\[\#FAF9F6\]:hover {
   border-color: #dc143c !important;
 }
 
+/* 15. Botón CTA CustomyTee (Personalizar Polera) junto al Buscador */
+.customizer-cta-btn {
+  background-color: #FAF9F6;
+  color: #0A0A0B;
+  border: 1px solid #FAF9F6;
+}
+.customizer-cta-btn:hover {
+  background-color: #dc143c;
+  color: #FFFFFF;
+  border-color: #dc143c;
+}
+html.light .customizer-cta-btn {
+  background-color: #0A0A0B !important;
+  color: #FAF9F6 !important;
+  border-color: #0A0A0B !important;
+}
+html.light .customizer-cta-btn:hover {
+  background-color: #dc143c !important;
+  color: #FFFFFF !important;
+  border-color: #dc143c !important;
+}
+
+/* 16. Guía de Tallas — Diagrama Técnico SVG & Fila Activa (Oscuro y Claro) */
+.size-guide-shirt-shape {
+  fill: #1b1b1e;
+  stroke: #4a4a50;
+}
+.size-guide-shirt-collar {
+  stroke: #5a5a62;
+}
+.size-guide-line {
+  stroke: #e5e2e1;
+}
+.size-guide-line-outer {
+  stroke: #b5b2ac;
+}
+.size-guide-arrow-fill {
+  fill: #e5e2e1;
+}
+.size-guide-label-accent {
+  fill: #ff4d6d;
+  font-family: "JetBrains Mono", monospace;
+}
+.size-guide-label-main {
+  fill: #FAF9F6;
+  font-family: "JetBrains Mono", monospace;
+}
+.size-guide-label-outer {
+  fill: #d6d3cd;
+  font-family: "JetBrains Mono", monospace;
+}
+
+html.light .size-guide-diagram-box {
+  background-color: #F7F5F0 !important;
+  border-color: #DCD9D2 !important;
+}
+html.light .size-guide-shirt-shape {
+  fill: #141416;
+  stroke: #0A0A0B;
+}
+html.light .size-guide-shirt-collar {
+  stroke: #3f3f46;
+}
+html.light .size-guide-line {
+  stroke: #FAF9F6;
+}
+html.light .size-guide-line-outer {
+  stroke: #27272a;
+}
+html.light .size-guide-arrow-fill {
+  fill: #dc143c;
+}
+html.light .size-guide-label-accent {
+  fill: #ff6b84;
+}
+html.light .size-guide-label-main {
+  fill: #FAF9F6;
+}
+html.light .size-guide-label-outer {
+  fill: #141416;
+}
+html.light .size-guide-row-active {
+  background-color: rgba(220, 20, 60, 0.08) !important;
+}
+html.light #splash-loader .bg-white\/10 {
+  background-color: rgba(10, 10, 11, 0.12) !important;
+}
+
 
 /* Zen subtle noise overlay */
 .bg-noise {
