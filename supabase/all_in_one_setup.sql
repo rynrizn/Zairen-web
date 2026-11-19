@@ -25,13 +25,13 @@ CREATE TABLE IF NOT EXISTS public.configuracion (
     seo_descripcion TEXT DEFAULT 'Indumentaria experimental streetwear fusionando minimalismo japonés, mecha cyberpunk y cortes oversized de alta confección.',
     seo_imagen_og TEXT DEFAULT '',
     redes_sociales JSONB NOT NULL DEFAULT '[
-        {"id": "instagram", "nombre": "Instagram", "url": "https://instagram.com/zairenlab", "activo": true},
+        {"id": "instagram", "nombre": "Instagram", "url": "https://www.instagram.com/zairen.lab", "activo": true},
         {"id": "tiktok", "nombre": "TikTok", "url": "", "activo": false},
         {"id": "facebook", "nombre": "Facebook", "url": "", "activo": false}
     ]'::jsonb,
     canales_contacto JSONB NOT NULL DEFAULT '{
         "whatsapp": {"activo": true, "telefono": "+59170000000"},
-        "instagram_dm": {"activo": false, "usuario": "@zairenlab"}
+        "instagram_dm": {"activo": false, "usuario": "@zairen.lab"}
     }'::jsonb,
     politicas_envio JSONB NOT NULL DEFAULT '{
         "envio_gratis_minimo": 250,

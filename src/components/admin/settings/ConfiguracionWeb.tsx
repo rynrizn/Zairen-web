@@ -35,7 +35,7 @@ export interface FooterSocialItem {
 
 export const DEFAULT_FOOTER_SOCIALS: FooterSocialItem[] = [
   { id: 'tiktok', nombre: 'TikTok', url: 'https://tiktok.com/@zairenlab', activo: true },
-  { id: 'instagram', nombre: 'Instagram', url: 'https://instagram.com/zairenlab', activo: true },
+  { id: 'instagram', nombre: 'Instagram', url: 'https://www.instagram.com/zairen.lab', activo: true },
   { id: 'whatsapp', nombre: 'WhatsApp', url: `https://wa.me/${siteConfig.whatsapp.number}`, activo: true },
   { id: 'facebook', nombre: 'Facebook', url: '', activo: false },
 ];

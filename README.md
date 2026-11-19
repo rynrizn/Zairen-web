@@ -61,7 +61,7 @@ PUBLIC_WHATSAPP_NUMBER=59174522654
 PUBLIC_WHATSAPP_DISPLAY=+591 74522654
 
 # Enlaces de Redes (Si dejas una vacía, desaparece de toda la web automáticamente)
-PUBLIC_INSTAGRAM_URL=https://instagram.com/zairenlab
+PUBLIC_INSTAGRAM_URL=https://www.instagram.com/zairen.lab
 PUBLIC_TIKTOK_URL=https://tiktok.com/@zairenlab
 PUBLIC_FACEBOOK_URL=
 ```

@@ -34,7 +34,7 @@ export const DEFAULT_CONTACT_CHANNELS: ContactChannel[] = [
     id: 'instagram',
     name: 'Instagram Oficial',
     type: 'instagram',
-    value: 'https://instagram.com/zairenlab',
+    value: 'https://www.instagram.com/zairen.lab',
     enabled: true,
     order: 1,
   },

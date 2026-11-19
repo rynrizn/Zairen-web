@@ -97,7 +97,7 @@ export const siteConfig: SiteConfig = {
     {
       id: 'instagram',
       name: 'Instagram',
-      url: import.meta.env.PUBLIC_INSTAGRAM_URL || 'https://instagram.com/zairenlab',
+      url: import.meta.env.PUBLIC_INSTAGRAM_URL || 'https://www.instagram.com/zairen.lab',
       enabled: true,
       icon: 'Instagram',
     },

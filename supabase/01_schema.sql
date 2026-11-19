@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS public.configuracion (
     -- Redes Sociales Dinámicas (JSONB: array de objetos con name, url, enabled, icon)
     -- Si solo se llena instagram, solo aparece instagram en la web.
     redes_sociales JSONB NOT NULL DEFAULT '[
-        {"id": "instagram", "nombre": "Instagram", "url": "https://instagram.com/zairenlab", "activo": true},
+        {"id": "instagram", "nombre": "Instagram", "url": "https://www.instagram.com/zairen.lab", "activo": true},
         {"id": "tiktok", "nombre": "TikTok", "url": "", "activo": false},
         {"id": "facebook", "nombre": "Facebook", "url": "", "activo": false}
     ]'::jsonb,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.configuracion (
     -- Canales de contacto adicionales
     canales_contacto JSONB NOT NULL DEFAULT '{
         "whatsapp": {"activo": true, "telefono": "+59170000000"},
-        "instagram_dm": {"activo": false, "usuario": "@zairenlab"}
+        "instagram_dm": {"activo": false, "usuario": "@zairen.lab"}
     }'::jsonb,
     
     -- Políticas de Despacho y Envío
